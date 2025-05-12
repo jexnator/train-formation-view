@@ -20,7 +20,7 @@ Purpose: The visualization helps passengers locate specific coaches, identify wh
 
 ## Features
 
-- **Search interface** for finding train formations by number, date, and operator
+- **Search interface** for finding train formations by number, date, and operator (EVU)
 - **Interactive visualization** of train compositions, showing:
   - Coach classes (1st/2nd class)
   - Special coach types (restaurant cars, sleeper carriages, family zones)
