@@ -31,7 +31,7 @@
     </div>
   </div>
   
-  <!-- Erfolgreiche Daten-Anzeige - nur anzeigen, wenn NICHT lädt -->
+  <!-- Successful data display - only shown when not loading -->
   <div *ngIf="trainFormation && !loading" class="train-visualization">
     <!-- Train header -->
     <div class="train-header">
@@ -147,7 +147,7 @@
               </div>
             </ng-container>
             
-            <!-- Sektorgrenzen als eigene absolute Elemente mit konsistenter Dicke -->
+            <!-- Sector boundaries as separate absolute elements with consistent width -->
             <ng-container *ngFor="let section of trainFormation.sections; let i = index; let isLast = last">
               <!-- Beginning boundary - exact same styling as others -->
               <div *ngIf="i === 0" class="sector-boundary boundary-line"
@@ -162,7 +162,7 @@
                    [style.left.px]="getTotalTrainWidth() - 1"></div>
             </ng-container>
             
-            <!-- Extra horizontale Linie mit exakter Breite -->
+            <!-- Horizontal line with exact width -->
             <div class="sector-horizontal-line" [style.width.px]="getTotalTrainWidth()"></div>
           </div>
         </div>
@@ -356,11 +356,9 @@
                     
                     <!-- No passage indicators -->
                     <div *ngIf="wagon.noAccessToPrevious && i > 0" class="warning">
-                      <sbb-icon svgIcon="kom:disabled-small"></sbb-icon> 
                       <span>{{ wagon.noAccessMessage }}</span>
                     </div>
                     <div *ngIf="wagon.noAccessToNext && i < getAllWagons().length - 1" class="warning">
-                      <sbb-icon svgIcon="kom:disabled-small"></sbb-icon> 
                       <span>{{ wagon.noAccessMessage }}</span>
                     </div>
                   </div>

@@ -17,6 +17,17 @@
     </defs>
   </svg>
 
+  <!-- Accessibility section - only shown if there are items -->
+  <div class="legend-section" *ngIf="legendAccessibility.length > 0">
+    <h3 class="sbb-headline3">Accessibility</h3>
+    <div class="legend-grid">
+      <div class="legend-item" *ngFor="let item of legendAccessibility">
+        <img *ngIf="item.svgUrl" [src]="item.svgUrl" alt="{{item.label}}" class="legend-svg-icon">
+        <span class="legend-label">{{ item.label }}</span>
+      </div>
+    </div>
+  </div>
+
   <!-- Wagons and Classes - only shown if there are items -->
   <div class="legend-section" *ngIf="legendWagonTypes.length > 0">
     <h3 class="sbb-headline3">Wagons, Classes and Sectors</h3>
@@ -67,17 +78,6 @@
         <!-- For items with SVG URLs like no-passage -->
         <img *ngIf="item.svgUrl && !item.isRange" [src]="item.svgUrl" alt="{{item.label}}" class="legend-svg-icon">
         
-        <span class="legend-label">{{ item.label }}</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- Accessibility section - only shown if there are items -->
-  <div class="legend-section" *ngIf="legendAccessibility.length > 0">
-    <h3 class="sbb-headline3">Accessibility</h3>
-    <div class="legend-grid">
-      <div class="legend-item" *ngFor="let item of legendAccessibility">
-        <img *ngIf="item.svgUrl" [src]="item.svgUrl" alt="{{item.label}}" class="legend-svg-icon">
         <span class="legend-label">{{ item.label }}</span>
       </div>
     </div>

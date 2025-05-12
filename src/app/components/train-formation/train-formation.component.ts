@@ -164,7 +164,7 @@ export class TrainFormationComponent implements OnInit, OnDestroy {
    * @returns Icon identifier string
    */
   getDirectionIcon(wagon: TrainWagon): string {
-    return 'kom:arrow-long-right-small';
+    return '';
   }
   
   /**
@@ -244,33 +244,7 @@ export class TrainFormationComponent implements OnInit, OnDestroy {
     
     return groups as {icon: string, label: string}[][];
   }
-
-  /**
-   * Get icon identifier for attribute code
-   * @param code Attribute code
-   * @returns Icon identifier string
-   */
-  getAttributeIcon(code: string): string {
-    const iconMap: { [key: string]: string } = {
-      'BHP': 'kom:wheelchair-small',
-      'BZ': 'kom:restaurants-small',
-      'FZ': 'kom:restaurants-small',
-      'KW': 'kom:wheelchair-small',
-      'NF': 'kom:wheelchair-small',
-      'VH': 'kom:wheelchair-small',
-      'VR': 'kom:wheelchair-small',
-      'CC': 'kom:restaurants-small',
-      'FA': 'kom:restaurants-small',
-      'WL': 'kom:bed-small',
-      'WR': 'kom:restaurants-small',
-      'W1': 'kom:wheelchair-small',
-      'W2': 'kom:wheelchair-small',
-      'D': 'kom:restaurants-small',
-      'K': 'kom:restaurants-small'
-    };
-    return iconMap[code] || 'kom:info-small';
-  }
-
+  
   /**
    * Calculate sector width with absolute precision
    * @param section Train section to calculate width for
@@ -715,7 +689,7 @@ export class TrainFormationComponent implements OnInit, OnDestroy {
       'LA': 'lugage.svg',
       'WR': 'restaurant.svg',
       'WLS': 'couchette.svg',
-      'KR': 'stroller.svg',
+      'KW': 'stroller.svg',
     };
     
     const pictogram = pictogramMap[attributeCode] || '';
@@ -732,7 +706,7 @@ export class TrainFormationComponent implements OnInit, OnDestroy {
   getWagonPictogramAttributes(wagon: TrainWagon): string[] {
     // Get attribute codes that should be shown as pictograms
     const displayableCodes = [
-      'BHP', 'VH', 'VR', 'BZ', 'FZ', 'LA', 'WR', 'WLS', 'KR'
+      'BHP', 'VH', 'VR', 'BZ', 'FZ', 'LA', 'WR', 'WLS', 'KW'
     ];
     
     // Don't show restaurant pictogram (WR) when wagon is unserviced

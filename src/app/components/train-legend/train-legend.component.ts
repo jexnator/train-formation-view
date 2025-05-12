@@ -303,7 +303,7 @@ export class TrainLegendComponent implements OnInit, OnDestroy {
       'LA': { label: 'Luggage Space', url: 'https://raw.githubusercontent.com/jexnator/train-view-svg-library/main/pictos/lugage.svg' },
       'WR': { label: 'Restaurant', url: 'https://raw.githubusercontent.com/jexnator/train-view-svg-library/main/pictos/restaurant.svg' },
       'WLS': { label: 'Couchette', url: 'https://raw.githubusercontent.com/jexnator/train-view-svg-library/main/pictos/couchette.svg' },
-      'KR': { label: 'Stroller Space', url: 'https://raw.githubusercontent.com/jexnator/train-view-svg-library/main/pictos/stroller.svg' },
+      'KW': { label: 'Stroller Space', url: 'https://raw.githubusercontent.com/jexnator/train-view-svg-library/main/pictos/stroller.svg' },
     };
     
     // Collect all unique attribute codes that are in the facilities map

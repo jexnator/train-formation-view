@@ -2818,105 +2818,69 @@ private extractBracketContent(str: string): string | null {
   private parseWagonAttributes(wagonPart: string): WagonAttribute[] {
     const attributes: WagonAttribute[] = [];
     const attributeMap: {[key: string]: {label: string, icon: string}} = {
-      'BHP': { label: 'Wheelchair Spaces', icon: 'kom:wheelchair-small' },
-      'BZ': { label: 'Business Zone', icon: 'kom:business-small' },
-      'FZ': { label: 'Family Zone', icon: 'kom:family-small' },
-      'KW': { label: 'Stroller Platform', icon: 'kom:baby-stroller-small' },
-      'NF': { label: 'Low Floor Entry', icon: 'kom:barrier-free-small' },
-      'VH': { label: 'Bike Hooks', icon: 'kom:bicycle-small' },
-      'VR': { label: 'Bike Reservation Required', icon: 'kom:bicycle-place-small' }
+      'BHP': { label: 'Wheelchair Spaces', icon: '' },
+      'BZ': { label: 'Business Zone', icon: '' },
+      'FZ': { label: 'Family Zone', icon: '' },
+      'KW': { label: 'Stroller Platform', icon: '' },
+      'LA': { label: 'Luggage Space', icon: '' },
+      'NF': { label: 'Low Floor Entry', icon: '' },
+      'VH': { label: 'Bike Hooks', icon: '' },
+      'VR': { label: 'Bike Reservation Required', icon: '' },
+      'WLS': { label: 'Couchette', icon: '' }
     };
     
-    const typeAttributeMap: {[key: string]: {label: string, icon: string, code: string}} = {
-        'locomotive': { label: 'Locomotive', icon: '', code: 'LK'}, // Icon handled by style
-        'restaurant': { label: 'Restaurant', icon: 'kom:restaurants-small', code: 'WR' }, // WR, W1, W2 map here
-        'sleeper': { label: 'Sleeper/Couchette', icon: 'kom:bed-small', code: 'WL_CC' }, // WL, CC map here
-        'family': { label: 'Family Car', icon: 'kom:family-small', code: 'FA' },
-        'luggage': { label: 'Luggage Van', icon: 'kom:suitcase-small', code: 'D' },
-        'no-class': { label: 'No Class Coach', icon: 'kom:circle-information-small', code: 'K' }
-    };
-
-    // Check for family car in multiple ways
-    // 1. Check for FA: prefix 
-    if (wagonPart.match(/FA:/)) {
-        attributes.push({ code: 'FA', label: 'Family Car', icon: 'kom:family-small' });
-    }
-    // 2. Check for FA): pattern (reversed train formation)
-    else if (wagonPart.match(/FA\):/)) {
-        attributes.push({ code: 'FA', label: 'Family Car', icon: 'kom:family-small' });
-    }
-    // 3. Check for standalone FA token or preprocessed FA:9 pattern
-    else if (wagonPart.match(/\bFA\b/) || wagonPart.match(/FA:\d+/)) {
-        attributes.push({ code: 'FA', label: 'Family Car', icon: 'kom:family-small' });
-    }
-
-    // Extract attributes from any #... section - handle all patterns
-    const attrPatterns = [
-        /#([A-Z;]+)/g,       // Standard #BHP;BZ;NF pattern
-        /;([A-Z]+)(?=[;#]|$)/g  // Semicolon separated like ;BZ;NF
-    ];
-    
-    // Collect all attribute codes from the token
-    const foundAttributes = new Set<string>();
-    
-    // Process the standard #ATTR;ATTR pattern
-    let attrMatches = wagonPart.match(/#([^);,]+)/g);
-    if (attrMatches) {
-        for (const match of attrMatches) {
-            const attributesString = match.substring(1); // Remove the # prefix
-            const attrs = attributesString.split(';');
-            
-            attrs.forEach(attrCode => {
-                const code = attrCode.trim();
-                if (code) {
-                    foundAttributes.add(code);
-                }
-            });
-        }
-    }
-    
-    // Process semicolon separated attributes without # (like in ;BZ;NF)
-    attrMatches = wagonPart.match(/;([A-Z]+)(?=[;#]|$)/g);
-    if (attrMatches) {
-        for (const match of attrMatches) {
-            const code = match.substring(1); // Remove the semicolon
-            if (code) {
-                foundAttributes.add(code);
-            }
-        }
-    }
-    
-    // Handle edge case with trailing semicolon in pattern like #BHP;
-    const trailingAttrMatch = wagonPart.match(/#([A-Z]+);(?=[,)]|$)/);
-    if (trailingAttrMatch && trailingAttrMatch[1]) {
-        foundAttributes.add(trailingAttrMatch[1]);
-    }
-    
-    // Add all found attributes to the result
-    for (const code of foundAttributes) {
+    // Look for a hashtag followed by attribute codes (VH, KW, BHP, etc.)
+    const attrMatch = wagonPart.match(/#([A-Za-z;]+)/);
+    if (attrMatch && attrMatch[1]) {
+      // Split by semicolon to get individual attribute codes
+      const attrCodes = attrMatch[1].split(';');
+      
+      for (const code of attrCodes) {
+        if (code === '') continue;
+        
         if (attributeMap[code]) {
-            attributes.push({ ...attributeMap[code], code });
+          // Use the predefined label
+          attributes.push({
+            code,
+            label: attributeMap[code].label,
+            icon: ''
+          });
         } else {
-            console.debug(`Unknown attribute code: ${code}`);
+          // For unknown codes, just use the code as the label
+          attributes.push({
+            code,
+            label: `Attribute ${code}`,
+            icon: ''
+          });
         }
+      }
     }
     
-    // Add attribute based on determined type (avoiding duplicates)
-    const wagonType = this.determineWagonType(wagonPart);
-    const typeAttr = typeAttributeMap[wagonType];
-    if (typeAttr && !attributes.some(a => a.code === typeAttr.code)) {
-        // Don't add locomotive attribute itself, just use typeLabel
-        if (wagonType !== 'locomotive') { 
-            attributes.push({ code: typeAttr.code, label: typeAttr.label, icon: typeAttr.icon });
-        }
+    // Special handling for family areas (FA) which sometimes appear without a hashtag
+    if (wagonPart.includes('FA') && !attributes.some(a => a.code === 'FA')) {
+      attributes.push({
+        code: 'FA',
+        label: 'Family Area',
+        icon: ''
+      });
     }
     
-    // Handle special combo types like W1/W2 explicitly if needed
-    if (wagonPart.includes('W1') || wagonPart.includes('W2')) {
-        const restaurantAttr = typeAttributeMap['restaurant'];
-        if (!attributes.some(a => a.code === restaurantAttr.code)) {
-            attributes.push({ ...restaurantAttr });
-        }
+    // Special handling for restaurant cars (WR) which sometimes appear without a hashtag
+    if (wagonPart.includes('WR') && !attributes.some(a => a.code === 'WR')) {
+      attributes.push({
+        code: 'WR',
+        label: 'Restaurant Car',
+        icon: ''
+      });
+    }
+    
+    // Special handling for couchette cars (WLS and CC) which sometimes appear without a hashtag
+    if ((wagonPart.includes('WLS') || wagonPart.includes('CC')) && !attributes.some(a => a.code === 'WLS')) {
+      attributes.push({
+        code: 'WLS',
+        label: 'Couchette',
+        icon: ''
+      });
     }
     
     return attributes;
