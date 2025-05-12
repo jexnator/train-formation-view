@@ -1,0 +1,402 @@
+<div class="train-formation-container" *ngIf="hasSearched">
+  <div class="title-container">
+    <h2 class="sbb-headline2">Train Formation</h2>
+    <div class="train-number-badge" *ngIf="trainFormation && !loading">
+      <div class="icon-container">
+        <sbb-icon svgIcon="train-extra-small"></sbb-icon>
+      </div>
+      {{ trainFormation.trainNumber }}
+    </div>
+  </div>
+  
+  <!-- Status container for loading indicators and error messages -->
+  <div class="status-container" *ngIf="loading || apiError || (!trainFormation && !loading && !apiError)">
+    <!-- Loading indicator -->
+    <div *ngIf="loading" class="loading-indicator">
+      <sbb-loading-indicator></sbb-loading-indicator>
+    </div>
+    
+    <!-- API error -->
+    <div *ngIf="apiError" class="error-message">
+      <sbb-alert type="warning" (dismissed)="dismissError()">
+        {{ apiError.message }}
+      </sbb-alert>
+    </div>
+    
+    <!-- No data (when no API error) -->
+    <div *ngIf="!trainFormation && !loading && !apiError" class="no-data-message">
+      <sbb-alert type="info">
+        No train formation data available. Please check your search parameters.
+      </sbb-alert>
+    </div>
+  </div>
+  
+  <!-- Erfolgreiche Daten-Anzeige - nur anzeigen, wenn NICHT lädt -->
+  <div *ngIf="trainFormation && !loading" class="train-visualization">
+    <!-- Train header -->
+    <div class="train-header">
+      <div class="train-info">
+        <div class="train-route" *ngIf="trainFormation.stops && trainFormation.stops.length > 0">
+          {{ trainFormation.stops[0].name }} → {{ trainFormation.stops[trainFormation.stops.length-1].name }}
+        </div>
+        <div class="train-date">
+          <sbb-icon class="date-icon" svgIcon="calendar-small"></sbb-icon>
+          <span>{{ formatDate(trainFormation.operationDate) }}</span>
+        </div>
+      </div>
+      <div class="train-meta">
+        <!-- Date moved to bottom of left side -->
+      </div>
+    </div>
+    
+    <!-- Custom stop selector tabs -->
+    <div class="stop-selector" *ngIf="trainFormation.stops && trainFormation.stops.length > 0">
+      <div class="stop-selector-tabs">
+        <div *ngFor="let stop of trainFormation.stops; let i = index" 
+             class="stop-tab" 
+             [class.active]="i === selectedStopIndex"
+             (click)="selectStop(i)">
+          {{ stop.name }}
+        </div>
+      </div>
+      
+      <div class="stop-details" *ngIf="trainFormation.stops[selectedStopIndex]">
+        <span *ngIf="trainFormation.stops[selectedStopIndex].arrivalTime" 
+             [class.hide-on-small-screen]="selectedStopIndex !== 0 && selectedStopIndex !== trainFormation.stops.length - 1">
+          <sbb-icon svgIcon="clock-extra-small"></sbb-icon> 
+          <strong>Arrival:</strong> {{ trainFormation.stops[selectedStopIndex].arrivalTime | date:'HH:mm' }}
+        </span>
+        <span *ngIf="trainFormation.stops[selectedStopIndex].departureTime">
+          <sbb-icon svgIcon="clock-extra-small"></sbb-icon> 
+          <strong>Departure:</strong> {{ trainFormation.stops[selectedStopIndex].departureTime | date:'HH:mm' }}
+        </span>
+        <span *ngIf="trainFormation.stops[selectedStopIndex].track">
+          <sbb-icon svgIcon="platform-small"></sbb-icon> 
+          <strong>Track:</strong> {{ trainFormation.stops[selectedStopIndex].track }}
+        </span>
+      </div>
+    </div>
+    
+    <!-- Train visualization -->
+    <div class="formation-display">
+      <!-- SVG Patterns for reuse -->
+      <svg height="0" width="0" style="position: absolute;">
+        <defs>
+          <pattern id="diagonalHatchClosed" patternUnits="userSpaceOnUse" width="10" height="10" patternTransform="rotate(45)">
+            <rect width="5" height="10" fill="white" />
+            <rect x="5" width="5" height="10" fill="rgba(255, 0, 0, 0.3)" />
+          </pattern>
+          <!-- Define clip paths for each wagon shape -->
+          <clipPath id="rectClip">
+            <rect x="3" y="3" width="94" height="44" rx="4" ry="4" />
+          </clipPath>
+          <clipPath id="leftSlopeClip">
+            <path d="M15,3
+                     C11,3 9,6 8,10
+                     L4,38
+                     C3,43 7,47 12,47
+                     L92,47
+                     C95,47 97,45 97,42
+                     L97,8
+                     C97,5 95,3 92,3
+                     Z" />
+          </clipPath>
+          <clipPath id="rightSlopeClip">
+            <path d="M8,3
+                     C5,3 3,5 3,8
+                     L3,42
+                     C3,45 5,47 8,47
+                     L88,47
+                     C93,47 97,43 96,38
+                     L92,10
+                     C91,6 89,3 85,3
+                     Z" />
+          </clipPath>
+          <clipPath id="bothSlopeClip">
+            <path d="M15,3
+                     C11,3 9,6 8,10
+                     L4,38
+                     C3,43 7,47 12,47
+                     L88,47
+                     C93,47 97,43 96,38
+                     L92,10
+                     C91,6 89,3 85,3
+                     Z" />
+          </clipPath>
+        </defs>
+      </svg>
+      
+      <!-- Complete layout with separated wagons and sectors -->
+      <div class="visualization-container">
+        <!-- Sector line as separate absolutely positioned element - only shown when sectors are available -->
+        <div class="sector-line-container" *ngIf="trainFormation.stops[selectedStopIndex].hasSectors">
+          <div class="sector-line" [style.width.px]="getTotalTrainWidth()">
+            <ng-container *ngFor="let section of trainFormation.sections; let i = index; let isLast = last; let isFirst = first">
+              <div class="sector-marker" 
+                  [ngClass]="getSectorClasses(section)" 
+                  [style.width.px]="getSectorWidth(section)">
+                <!-- Remove sector labels from here -->
+              </div>
+            </ng-container>
+            
+            <!-- Sector labels as separate absolutely positioned elements -->
+            <ng-container *ngFor="let section of trainFormation.sections; let i = index">
+              <div class="sector-label" 
+                   [style.left.px]="getSectorMidpoint(i)">
+                <img [src]="getSectorSvgUrl(section.sector)" alt="Sector {{section.sector}}" class="sector-icon">
+              </div>
+            </ng-container>
+            
+            <!-- Sektorgrenzen als eigene absolute Elemente mit konsistenter Dicke -->
+            <ng-container *ngFor="let section of trainFormation.sections; let i = index; let isLast = last">
+              <!-- Beginning boundary - exact same styling as others -->
+              <div *ngIf="i === 0" class="sector-boundary boundary-line"
+                   [style.left.px]="1"></div>
+              
+              <!-- Middle boundaries between sectors -->
+              <div *ngIf="i > 0" class="sector-boundary boundary-line" 
+                   [style.left.px]="getExactSectorBoundaryPosition(i)"></div>
+              
+              <!-- End boundary -->
+              <div *ngIf="isLast" class="sector-boundary boundary-line"
+                   [style.left.px]="getTotalTrainWidth() - 1"></div>
+            </ng-container>
+            
+            <!-- Extra horizontale Linie mit exakter Breite -->
+            <div class="sector-horizontal-line" [style.width.px]="getTotalTrainWidth()"></div>
+          </div>
+        </div>
+        
+        <!-- Wagons in separate container - independent of sectors -->
+        <div class="train-wagons-container">
+          <div class="train-wagons">
+            <!-- Flat structure - all wagons in one row, independent of sectors -->
+            <ng-container *ngFor="let wagon of getAllWagons(); let i = index; let isLast = last">
+              <!-- Wagon Container - Fixed Width -->
+              <div class="wagon-container" 
+                   [ngClass]="getWagonClasses(wagon)"
+                   [sbbTooltip]="wagonTooltip" 
+                   sbbTooltipDelay="500"
+                   sbbTooltipTouchGestures="auto">
+                <!-- Locomotive visualization -->
+                <svg *ngIf="wagon.type === 'locomotive'" class="locomotive-svg" viewBox="0 0 100 50" preserveAspectRatio="none">
+                  <path d="M15,2
+                           C10,2 8,5 7,10
+                           L3,38
+                           C2,44 6,48 12,48
+                           L88,48
+                           C94,48 98,44 97,38
+                           L93,10
+                           C92,5 90,2 85,2
+                           Z"></path>
+                  <text x="50" y="-5" text-anchor="middle" class="wagon-number">{{ wagon.number }}</text>
+                  <!-- Locomotives don't display class designations -->
+                </svg>
+                
+                <!-- Regular wagon visualization - with sloped edges when at start/end -->
+                <svg *ngIf="wagon.type !== 'locomotive'" class="wagon-svg" viewBox="0 0 100 50" preserveAspectRatio="none">
+                  <!-- Regular wagon (rectangular) -->
+                  <ng-container *ngIf="!needsSlopedLeftEdge(wagon, i) && !needsSlopedRightEdge(wagon, i)">
+                    <rect x="2" y="2" width="96" height="46" rx="5" ry="5"
+                        fill="white" stroke="black" stroke-width="2"></rect>
+                    <!-- Closed wagon pattern overlay -->
+                    <rect *ngIf="wagon.statusCodes && wagon.statusCodes.includes('Closed')" x="2" y="2" width="96" height="46" rx="5" ry="5"
+                        fill="url(#diagonalHatchClosed)" stroke="none" clip-path="url(#rectClip)"></rect>
+                  </ng-container>
+
+                  <!-- Wagon with sloped left edge -->
+                  <ng-container *ngIf="needsSlopedLeftEdge(wagon, i) && !needsSlopedRightEdge(wagon, i)">
+                    <path d="M15,2
+                             C10,2 8,5 7,10
+                             L3,38
+                             C2,44 6,48 12,48
+                             L93,48
+                             C96,48 98,46 98,43
+                             L98,7
+                             C98,4 96,2 93,2
+                             Z"
+                          fill="white" stroke="black" stroke-width="2"></path>
+                    <!-- Closed wagon pattern overlay -->
+                    <path *ngIf="wagon.statusCodes && wagon.statusCodes.includes('Closed')" d="M15,2
+                             C10,2 8,5 7,10
+                             L3,38
+                             C2,44 6,48 12,48
+                             L93,48
+                             C96,48 98,46 98,43
+                             L98,7
+                             C98,4 96,2 93,2
+                             Z"
+                          fill="url(#diagonalHatchClosed)" stroke="none" clip-path="url(#leftSlopeClip)"></path>
+                  </ng-container>
+
+                  <!-- Wagon with sloped right edge -->
+                  <ng-container *ngIf="!needsSlopedLeftEdge(wagon, i) && needsSlopedRightEdge(wagon, i)">
+                    <path d="M7,2
+                             C4,2 2,4 2,7
+                             L2,43
+                             C2,46 4,48 7,48
+                             L88,48
+                             C94,48 98,44 97,38
+                             L93,10
+                             C92,5 90,2 85,2
+                             Z"
+                          fill="white" stroke="black" stroke-width="2"></path>
+                    <!-- Closed wagon pattern overlay -->
+                    <path *ngIf="wagon.statusCodes && wagon.statusCodes.includes('Closed')" d="M7,2
+                             C4,2 2,4 2,7
+                             L2,43
+                             C2,46 4,48 7,48
+                             L88,48
+                             C94,48 98,44 97,38
+                             L93,10
+                             C92,5 90,2 85,2
+                             Z"
+                          fill="url(#diagonalHatchClosed)" stroke="none" clip-path="url(#rightSlopeClip)"></path>
+                  </ng-container>
+
+                  <!-- Wagon with both sloped edges (only wagon in train) -->
+                  <ng-container *ngIf="needsSlopedLeftEdge(wagon, i) && needsSlopedRightEdge(wagon, i)">
+                    <path d="M15,2
+                             C10,2 8,5 7,10
+                             L3,38
+                             C2,44 6,48 12,48
+                             L88,48
+                             C94,48 98,44 97,38
+                             L93,10
+                             C92,5 90,2 85,2
+                             Z"
+                          fill="white" stroke="black" stroke-width="2"></path>
+                    <!-- Closed wagon pattern overlay -->
+                    <path *ngIf="wagon.statusCodes && wagon.statusCodes.includes('Closed')" d="M15,2
+                             C10,2 8,5 7,10
+                             L3,38
+                             C2,44 6,48 12,48
+                             L88,48
+                             C94,48 98,44 97,38
+                             L93,10
+                             C92,5 90,2 85,2
+                             Z"
+                          fill="url(#diagonalHatchClosed)" stroke="none" clip-path="url(#bothSlopeClip)"></path>
+                  </ng-container>
+
+                  <text x="50" y="-5" text-anchor="middle" class="wagon-number">{{ wagon.number }}</text>
+                  
+                  <!-- Show "1/2" for mixed class wagons, otherwise show each class separately -->
+                  <ng-container *ngIf="wagon.classes.includes('1') && wagon.classes.includes('2')">
+                    <text x="20" y="30" text-anchor="start" class="wagon-class">1/2</text>
+                  </ng-container>
+                  <ng-container *ngIf="!(wagon.classes.includes('1') && wagon.classes.includes('2'))">
+                    <ng-container *ngFor="let cls of wagon.classes; let idx = index">
+                      <text x="20" y="30" text-anchor="start" class="wagon-class">{{ cls }}</text>
+                    </ng-container>
+                  </ng-container>
+                  
+                  <!-- Entry icon in the right side of the wagon -->
+                  <image *ngIf="wagon.type !== 'locomotive' && !(wagon.statusCodes && wagon.statusCodes.includes('Closed'))"
+                         [attr.href]="getEntryIconUrl(wagon)" 
+                         x="60" y="14" 
+                         width="30" height="30"
+                         preserveAspectRatio="xMidYMid meet"
+                         class="entry-icon" />
+                </svg>
+                
+                <!-- Wagon attribute pictograms badge -->
+                <div class="wagon-attributes-badge" *ngIf="hasWagonPictograms(wagon) && wagon.type !== 'locomotive'">
+                  <ng-container *ngFor="let attrCode of getWagonPictogramAttributes(wagon)">
+                    <img [src]="getAttributePictogramUrl(attrCode)" 
+                         [alt]="attrCode" 
+                         class="wagon-attribute-pictogram">
+                  </ng-container>
+                </div>
+                  
+                <!-- Tooltip template -->
+                <ng-template #wagonTooltip>
+                  <div class="wagon-tooltip">
+                    <h4>{{ wagon.typeLabel }}</h4>
+                    <div *ngIf="wagon.type !== 'locomotive' && wagon.number">
+                      <strong>Car Number:</strong> {{ wagon.number }}
+                    </div>
+                    <div *ngIf="wagon.classes.length > 0">
+                      <strong>Class:</strong> 
+                      <span *ngFor="let cls of wagon.classes; let last = last">
+                        {{ cls }}{{ !last ? '/' : '' }}
+                      </span> class
+                    </div>
+                    <div *ngIf="wagon.statusCodes && wagon.statusCodes.length > 0 && 
+                               !(wagon.statusCodes.length === 1 && wagon.statusCodes.includes('Open but unserviced'))">
+                      <strong>Status:</strong>
+                      <span *ngFor="let status of wagon.statusCodes; let last = last">
+                        <ng-container *ngIf="status !== 'Open but unserviced'">
+                          {{ status }}{{ !last ? ', ' : '' }}
+                        </ng-container>
+                      </span>
+                    </div>
+                    
+                    <!-- Accessibility section -->
+                    <div *ngIf="wagon.type !== 'locomotive'">
+                      <strong>Accessibility:</strong>
+                      <ul>
+                        <li>
+                          <img [src]="getEntryIconUrl(wagon)" class="tooltip-icon">
+                          <span>{{ hasLowFloorEntry(wagon) ? 'Low Floor Entry' : 'Entry with Steps' }}</span>
+                        </li>
+                      </ul>
+                    </div>
+                    
+                    <!-- Facilities with pictograms instead of SBB icons -->
+                    <div *ngIf="getWagonPictogramAttributes(wagon).length > 0">
+                      <strong>Facilities:</strong>
+                      <ul>
+                        <li *ngFor="let attrCode of getWagonPictogramAttributes(wagon)">
+                          <img [src]="getAttributePictogramUrl(attrCode)" class="tooltip-icon">
+                          <span>{{ getAttributeLabelByCode(wagon, attrCode) }}</span>
+                        </li>
+                      </ul>
+                    </div>
+                    
+                    <!-- No passage indicators -->
+                    <div *ngIf="wagon.noAccessToPrevious && i > 0" class="warning">
+                      <sbb-icon svgIcon="kom:disabled-small"></sbb-icon> 
+                      <span>{{ wagon.noAccessMessage }}</span>
+                    </div>
+                    <div *ngIf="wagon.noAccessToNext && i < getAllWagons().length - 1" class="warning">
+                      <sbb-icon svgIcon="kom:disabled-small"></sbb-icon> 
+                      <span>{{ wagon.noAccessMessage }}</span>
+                    </div>
+                  </div>
+                </ng-template>
+              </div>
+              
+              <!-- Connector between wagons - always identical -->
+              <div *ngIf="!isLast" 
+                  class="wagon-connector" 
+                  [ngClass]="getWagonConnectionClass(wagon, getNextWagon(i))">
+                <img *ngIf="wagon.noAccessToNext || (getNextWagon(i) && getNextWagon(i).noAccessToPrevious)" 
+                     [src]="getNoPassageSvgUrl()" 
+                     alt="No passage" 
+                     class="no-passage-icon">
+              </div>
+            </ng-container>
+          </div>
+        </div>
+        
+        <!-- Sector background highlights - as separate layer under the wagons - only shown when sectors are available -->
+        <div class="sector-highlights-container" *ngIf="trainFormation.stops[selectedStopIndex].hasSectors">
+          <ng-container *ngFor="let section of trainFormation.sections; let i = index; let last = last">
+            <div class="sector-highlight" 
+                 [ngClass]="getSectorClasses(section)"
+                 [style.width.px]="getSectorWidth(section)"
+                 [style.left.px]="getSectorPosition(section)">
+            </div>
+          </ng-container>
+          
+          <!-- Sector dividers as separate absolute elements -->
+          <ng-container *ngFor="let section of trainFormation.sections; let i = index;">
+            <div *ngIf="i > 0" class="sector-divider" 
+                 [style.left.px]="getExactSectorBoundaryPosition(i)"></div>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

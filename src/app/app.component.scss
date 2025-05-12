@@ -1,0 +1,34 @@
+/**
+ * @fileoverview Main application styling for SKI+ Train Formation Visualization
+ * Uses SBB Design System color variables for consistent theming
+ */
+
+/* Base body styling with SBB white background */
+body {
+  background-color: var(--sbb-color-white);
+  min-height: 100vh;
+}
+
+/* Main container with responsive padding */
+.train-view-container {
+  padding: 24px;
+  padding-top: calc(var(--sbb-header-lean-height) + 24px); /* Account for fixed header height */
+  padding-bottom: 94px;
+  max-width: 1198px;
+  margin: 0 auto;
+}
+
+/* Section containing train formation visualization and legend */
+.visualization-section {
+  display: flex;
+  flex-direction: column;
+  margin-top: 24px;
+  gap: 24px;
+
+  /* Responsive layout for larger screens */
+  @media (min-width: 992px) {
+    app-train-formation {
+      flex: 1;
+    }
+  }
+}

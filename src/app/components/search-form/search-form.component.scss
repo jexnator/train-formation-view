@@ -1,0 +1,207 @@
+/**
+ * @fileoverview Search form component styling for SKI+ Train Formation Visualization
+ * 
+ * This file contains:
+ * - Main container styling with SBB milk background
+ * - Responsive form layout with adaptive field placement
+ * - Custom styling for SBB form fields and buttons
+ * - Responsive breakpoints for various screen sizes
+ * 
+ * Note: Contains customized SBB Angular components through deep selectors.
+ * These modifications are made specifically for the SKI+ project.
+ */
+
+/* Main container with SBB milk background */
+.search-form-container {
+  padding: 24px;
+  padding-bottom: 11px;
+  background-color: var(--sbb-color-milk);
+  border-radius: 16px;
+}
+
+/* Headline spacing */
+.search-form-container h2.sbb-headline2 {
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+
+/* Parent form layout with vertical organization */
+.form-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Horizontal arrangement of fields and button */
+.form-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px; /* Consistent spacing between elements */
+  flex-wrap: wrap;
+  padding-bottom: 0px;
+}
+
+/* Form fields group */
+.form-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Button container */
+.button-container {
+  display: flex;
+  align-items: flex-start;
+  margin-top: 19px; /* Aligns with form fields in inline view */
+  padding-bottom: 8px;
+}
+
+/* Base styling for form fields */
+sbb-form-field {
+  flex: 1;
+  min-width: 277px;
+  position: relative;
+}
+
+/* Container for info icon in input */
+.input-icon-container {
+  position: absolute;
+  left: 145px;
+  top: 50%;
+  transform: translateY(-45%);
+  z-index: 2;
+  pointer-events: auto;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+}
+
+/* Info icon styling */
+.info-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  cursor: help;
+  color: var(--sbb-color-blue-43);
+  display: block;
+}
+
+/* SBB icon component customization */
+::ng-deep .info-icon .sbb-icon-fit-content,
+::ng-deep .info-icon svg {
+  width: 16px !important;
+  height: 16px !important;
+  display: block !important;
+  overflow: visible !important;
+}
+
+/* Tooltip styling customization */
+::ng-deep .sbb-tooltip {
+  font-size: 12px !important;
+  line-height: 1.2 !important;
+  color: var(--sbb-form-label-color) !important;
+}
+
+/* Button base styling */
+button {
+  min-width: 120px;
+  height: 36px;
+}
+
+/* SKI+ color customizations for SBB buttons */
+::ng-deep button.sbb-button {
+  background-color: var(--sbb-color-call-to-action) !important;
+  white-space: nowrap;
+}
+
+::ng-deep button.sbb-button:not(:disabled):not(.sbb-disabled):is(:hover, :focus) {
+  background-color: var(--sbb-color-call-to-action-hover) !important;
+}
+
+/* --- Responsive breakpoints --- */
+
+/* Large screens: Button wraps first */
+@media (max-width: 1200px) {
+  .search-form-container {
+    padding: 24px;
+    padding-bottom: 11px;
+  }
+  
+  .button-container {
+    width: 100%;
+    margin-top: 8px;
+    padding-bottom: 8px;
+  }
+  
+  .form-fields {
+    width: 100%;
+  }
+  
+  button {
+    margin-bottom: 0;
+  }
+}
+
+@media (max-width: 1199px) {
+  .form-row {
+    padding-bottom: 8px;
+  }
+}
+
+/* Medium screens: Third form field wraps */
+@media (max-width: 992px) {
+  .search-form-container {
+    padding: 24px;
+    padding-bottom: 11px;
+  }
+  
+  sbb-form-field:nth-child(3) {
+    width: 100%;
+  }
+  
+  .button-container {
+    padding-bottom: 8px;
+  }
+  
+  button {
+    margin-bottom: 0;
+  }
+
+  .form-row {
+    padding-bottom: 8px;
+  }
+}
+
+/* Small screens: All fields stack vertically */
+@media (max-width: 768px) {
+  .search-form-container {
+    padding: 24px;
+    padding-bottom: 11px;
+  }
+  
+  sbb-form-field:nth-child(2) {
+    width: 100%;
+  }
+  
+  sbb-form-field:nth-child(1) {
+    width: 100%;
+  }
+  
+  button {
+    width: 100%;
+    margin-bottom: 0;
+  }
+  
+  .button-container {
+    padding-bottom: 8px;
+  }
+
+  .form-row {
+    padding-bottom: 8px;
+  }
+}

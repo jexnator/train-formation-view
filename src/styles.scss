@@ -1,0 +1,159 @@
+/**
+ * @fileoverview Global styles for the SKI+ Train Formation Visualization application
+ * @license Copyright (c) 2025 SKI+ All rights reserved.
+ * 
+ * This file contains:
+ * - SBB Angular component base styles and typography imports
+ * - SKI+ Blue Theme overrides for SBB components
+ * - Custom color definitions for train visualization elements
+ * - Global element styles for consistent application appearance
+ * - Custom headline styles for application typography
+ * - SKI+ specific branding styles
+ * - SBB Alert component customizations for better integration with SKI+ design
+ * 
+ * Note: This application customizes SBB Angular components for use in the
+ * SKI+ Train Formation Visualization project.
+ */
+
+// Import SBB base typography first
+@use '@sbb-esta/angular/typography';
+@use '@sbb-esta/angular/fullfont';
+
+:root {
+  // --- SKI+ Blue Theme Overrides ---
+  --sbb-color-call-to-action: #2d327d;
+  --sbb-color-call-to-action-hover: #1c2055;
+  --sbb-color-red: #2d327d;
+  --sbb-color-red-125: #1c2055;
+  --sbb-color-red-150: #141842;
+  --sbb-focus-outline-color: #2d327d;
+  
+  // --- Custom Colors ---
+  --ski-color-locomotive: rgb(234, 234, 241); // Hellgrau für Lokomotiven
+
+  /* --- Fix: Prevent component scaling on large screens (4k+) in Standard theme --- */
+  &, // Ensure base scaling factor is 1 if not already set, applies to all variants initially.
+  &:where(:not(.sbb-lean)) { // Target only the standard theme where the scaling occurs
+    --sbb-scaling-factor: 1; // Default scaling factor
+  }
+}
+
+// --- Global Element Styles ---
+body, html {
+  background-color: var(--sbb-color-white);
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+// --- Custom Headline Styles ---
+.sbb-headline2 {
+  font-size: 24px;
+  font-weight: 600;
+  margin-top: 0px;
+  margin-bottom: 16px;
+  color: var(--sbb-color-charcoal);
+}
+
+.sbb-headline3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-top: 0px;
+  margin-bottom: 12px;
+  color: var(--sbb-color-charcoal);
+}
+
+// --- SKI+ Specific Styles ---
+.ski-plus-brand {
+  color: var(--sbb-color-blue);
+  font-weight: 700;
+}
+
+// --- SBB Alert Component Customizations ---
+// Override to ensure the alert box matches the application's design
+::ng-deep .sbb-alert:not(.train-formation-container .sbb-alert) {
+  border-radius: 4px; // Add rounded corners
+  padding: 16px; // Use consistent padding on all screen sizes
+  
+  // Make the background color lighter based on alert type
+  &[type="info"] {
+    background-color: var(--sbb-color-cloud); // Light gray for info alerts
+    color: var(--sbb-color-charcoal); // Darker text for better contrast
+    
+    // Ensure links within info alerts have proper contrast
+    :is(a, a:is(:hover, :focus)) {
+      color: var(--sbb-color-blue);
+    }
+    
+    // Ensure icon uses SKI+ blue
+    .sbb-alert-icon {
+      color: var(--sbb-color-blue);
+    }
+    
+    // Close button should match the text color
+    .sbb-alert-close-button {
+      color: var(--sbb-color-charcoal);
+    }
+    
+    .sbb-alert-close-button-icon {
+      border-color: var(--sbb-color-charcoal);
+    }
+  }
+  
+  &[type="warning"] {
+    background-color: var(--sbb-color-milk-warning); // Light yellow for warnings
+    color: var(--sbb-color-charcoal);
+    
+    // Ensure icon uses warning color
+    .sbb-alert-icon {
+      color: var(--sbb-color-autumn);
+    }
+    
+    // Close button should match the text color
+    .sbb-alert-close-button {
+      color: var(--sbb-color-charcoal);
+    }
+    
+    .sbb-alert-close-button-icon {
+      border-color: var(--sbb-color-charcoal);
+    }
+  }
+  
+  &[type="error"] {
+    background-color: var(--sbb-color-milk-error); // Light red for errors
+    color: var(--sbb-color-charcoal);
+    
+    // Ensure icon uses error color
+    .sbb-alert-icon {
+      color: var(--sbb-color-red);
+    }
+    
+    // Close button should match the text color
+    .sbb-alert-close-button {
+      color: var(--sbb-color-charcoal);
+    }
+    
+    .sbb-alert-close-button-icon {
+      border-color: var(--sbb-color-charcoal);
+    }
+  }
+}
+
+// Override content spacing for better alignment
+::ng-deep .sbb-alert-content {
+  margin: 0 12px;
+}
+
+// Ensure icons use proper color and sizing
+::ng-deep .sbb-alert-icon {
+  // Default to SBB blue for the alert icon
+  color: var(--sbb-color-blue);
+  flex: 0 0 var(--sbb-icon-size-default);
+}
+
+/* Global SVG rendering quality settings for maximum sharpness */
+svg, image, path, rect, circle, line, polyline, polygon, ellipse, text, use {
+  shape-rendering: geometricPrecision;
+  image-rendering: optimizeQuality;
+  text-rendering: optimizeLegibility;
+}

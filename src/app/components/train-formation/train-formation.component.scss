@@ -1,0 +1,927 @@
+/**
+ * @fileoverview Train formation visualization component styling for SKI+ application
+ * 
+ * This file contains:
+ * - Tooltip customizations for wagon information display
+ * - Train formation container with responsive layout
+ * - Train visualization with sector lines and boundaries
+ * - Wagon and locomotive SVG rendering styles
+ * - Status indicators and loading states
+ * - Touch interaction optimizations for mobile devices
+ * 
+ * Note: Contains customized SBB Angular components with precise positioning
+ * to maintain pixel-perfect alignment in the train visualization.
+ */
+
+/* --- SBB TOOLTIP CUSTOMIZATIONS --- */
+
+/* CDK-Overlay SBB-Tooltip positioning adjustment */
+::ng-deep .cdk-overlay-container {
+  .cdk-overlay-connected-position-bounding-box {
+    &[style*="top:"] .sbb-tooltip-panel-below {
+      transform: translateY(20px) !important;
+    }
+  }
+}
+
+/* Mobile-specific tooltip adjustments */
+@media (max-width: 576px) {
+  ::ng-deep .cdk-overlay-container {
+    .cdk-overlay-connected-position-bounding-box {
+      /* Position tooltips higher on small devices to avoid UI obstruction */
+      &[style*="top:"] .sbb-tooltip-panel-above {
+        transform: translateY(-32px) !important;
+      }
+    }
+  }
+}
+
+/* Enable native scrolling gestures on wagon elements */
+.wagon-container {
+  touch-action: pan-x pan-y;
+  cursor: pointer; /* Indicates interactive elements */
+}
+
+/* --- MAIN CONTAINER --- */
+
+.train-formation-container {
+  padding: 24px;
+  padding-bottom: 11px;
+  background-color: var(--sbb-color-milk);
+  border-radius: 16px;
+
+  @media (max-width: 768px) {
+    padding: 24px;
+    padding-bottom: 11px;
+  }
+}
+
+/* Title container with train number badge */
+.title-container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0px;
+}
+
+/* Train number badge styling */
+.train-number-badge {
+  margin-left: 8px;
+  padding: 4px 8px 4px 8px;
+  background-color: var(--sbb-color-white);
+  box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.05);
+  font-size: 24px;
+  font-weight: bold;
+  color: var(--sbb-color-blue);
+  border-radius: 18px;
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+  position: relative;
+  top: -7px;
+}
+
+/* Icon container styling */
+.icon-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--sbb-color-blue);
+  color: white;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  margin-right: 8px;
+}
+
+.icon-container sbb-icon {
+  font-size: 16px;
+  height: 20px;
+  width: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* --- STATUS CONTAINER --- */
+
+/* Fixed height container for loading and error states */
+.status-container {
+  min-height: 120px;
+  margin-bottom: 24px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--sbb-color-milk);
+  border-radius: 4px;
+}
+
+/* No data message styling */
+.no-data-message {
+  padding: 24px;
+  text-align: center;
+  color: var(--sbb-color-metal);
+  font-style: italic;
+  width: 100%;
+}
+
+/* Loading indicator styling */
+.loading-indicator {
+  padding: 24px;
+  text-align: center;
+  color: var(--sbb-color-blue);
+  font-weight: 600;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+/* Train visualization spacing */
+.train-visualization {
+  margin-top: 0; /* No additional spacing when status container is hidden */
+}
+
+/* --- TRAIN HEADER --- */
+
+.train-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+
+  @media (max-width: 576px) {
+    flex-direction: column;
+  }
+}
+
+.train-info {
+  flex: 1;
+  min-width: 200px;
+}
+
+.train-number {
+  font-size: 24px;
+  font-weight: bold;
+  color: var(--sbb-color-blue);
+  /* Preserved for reference but unused */
+}
+
+.train-route {
+  font-size: 16px;
+  color: var(--sbb-color-black);
+}
+
+.train-date {
+  font-size: 16px;
+  color: var(--sbb-color-metal);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: -2.5px;
+  margin-bottom: -2px;
+}
+
+.date-icon {
+  color: var(--sbb-color-blue);
+  font-size: 16px;
+}
+
+.train-meta {
+  text-align: right;
+  color: var(--sbb-color-metal);
+
+  @media (max-width: 576px) {
+    text-align: left;
+  }
+}
+
+/* --- STOP SELECTOR --- */
+
+.stop-selector {
+  margin-top: -14px;
+
+  @media (max-width: 576px) {
+    margin-top: -30px;
+  }
+}
+
+.stop-selector-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--sbb-color-cloud);
+  overflow-x: auto;
+  scrollbar-width: thin;
+  max-width: max-content;
+
+  &::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: transparent;
+    border-radius: 4px;
+  }
+}
+
+.stop-tab {
+  padding: 8px 16px;
+  cursor: pointer;
+  font-weight: 500;
+  border-bottom: 3px solid transparent;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  
+  &.active {
+    border-bottom-color: var(--sbb-color-blue);
+    color: var(--sbb-color-blue);
+  }
+  
+  &:hover:not(.active) {
+    border-bottom-color: var(--sbb-color-smoke);
+  }
+}
+
+.stop-details {
+  padding: 12px 8px;
+  display: flex;
+  gap: 8px;
+  color: var(--sbb-color-metal);
+  font-size: 14px;
+  flex-wrap: wrap;
+
+  span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-right: 8px;
+  }
+
+  sbb-icon {
+    color: var(--sbb-color-blue);
+  }
+  
+  @media (max-width: 576px) {
+    padding: 12px 8px;
+    row-gap: 4px;
+  }
+}
+
+/* --- GLOBAL RESET FOR CONSISTENT SPACING --- */
+* {
+  box-sizing: border-box;
+}
+
+/* --- TRAIN VISUALIZATION CONTAINER --- */
+.formation-display {
+  margin-top: -20px;
+  overflow-x: auto;
+  overflow-y: visible;
+  position: relative;
+  transform: translateZ(0);
+  -webkit-font-smoothing: antialiased;
+  padding: 0;
+  font-size: 0;
+}
+
+/* Consistent spacing for responsive layouts */
+@media (max-width: 768px) {
+  .formation-display {
+    margin-top: -20px; /* Maintain consistent spacing */
+  }
+  
+  .train-header {
+    margin-bottom: 24px; /* Consistent margin at all breakpoints */
+  }
+
+  .title-container {
+    margin-bottom: 0px; /* Maintain consistent spacing */
+  }
+}
+
+/* --- SECTOR LINE STYLING --- */
+
+/* Sector line with absolute positioning */
+.sector-line {
+  position: relative;
+  height: 40px;
+  margin-bottom: 16px;
+  display: flex;
+  width: fit-content; /* Ensures content-based width */
+}
+
+/* Remove old automatic line implementation */
+.sector-line:after {
+  display: none;
+}
+
+/* Sector marker with precise positioning */
+.sector-marker {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  height: 100%;
+  flex-shrink: 0; /* Prevents flex shrinking */
+}
+
+/* Sector labels centered on horizontal line */
+.sector-label {
+  position: absolute;
+  bottom: -9.6px; 
+  z-index: 15;
+  pointer-events: none;
+  transform: translateX(-50%);
+  
+  /* Sector icon styling */
+  .sector-icon {
+    width: 20px;
+    height: 20px;
+    display: block;
+  }
+}
+
+/* Simplified sector boundary with absolute positioning */
+.sector-boundary {
+  position: absolute;
+  bottom: -7px; /* Centers on horizontal line */
+  width: 2px; /* Consistent width */
+  height: 16px; /* Consistent height */
+  background-color: var(--sbb-color-blue);
+  z-index: 5; /* Above horizontal line */
+  transform: translateX(-50%); /* Perfect centering */
+  pointer-events: none; /* Don't interfere with mouse events */
+}
+
+.sector-boundary.left {
+  left: 0;
+}
+
+.sector-boundary.right {
+  right: 0;
+}
+
+/* Consistent styling for all boundary types */
+.sector-boundary.boundary-start,
+.sector-boundary.boundary-end,
+.sector-boundary.boundary-middle {
+  height: 16px;
+  bottom: -7px; /* Centers on horizontal line */
+}
+
+/* Remove old boundary implementations */
+.sector-marker:before,
+.sector-marker:after {
+  display: none;
+}
+
+/* Transparent styling for N/A sectors */
+.sector-n\/a {
+  background-color: transparent;
+}
+
+/* --- TRAIN WAGONS --- */
+.train-wagons {
+  display: flex;
+  padding: 0;
+  min-width: min-content;
+  margin-left: 1px; /* Shifts wagon row 1px right for alignment */
+  /* Ensure consistent spacing between wagons */
+  font-size: 0;
+  line-height: 0;
+  letter-spacing: 0;
+  white-space: nowrap;
+  /* Flat structure for all wagons */
+  flex-flow: row nowrap;
+  /* Browser consistency safeguards */
+  -webkit-font-smoothing: antialiased;
+  transform: translateZ(0);
+  position: relative;
+  overflow-y: visible;
+}
+
+/* --- WAGON CONTAINER --- */
+.wagon-container {
+  display: block;
+  margin: 0;
+  padding: 16px 0 0 0; /* Top padding for wagon number */
+  position: relative;
+  width: 100px; /* Fixed width - critical for spacing */
+  height: 50px; /* Fixed height - critical for alignment */
+  /* Prevent resizing */
+  flex: 0 0 100px;
+  /* Text styling to prevent layout influence */
+  font-size: 0;
+  letter-spacing: 0;
+  word-spacing: 0;
+  /* Rendering optimizations */
+  transform: translateZ(0);
+  -webkit-font-smoothing: antialiased;
+
+  /* Touch interaction improvements */
+  touch-action: pan-x pan-y !important;
+  cursor: pointer;
+
+  /* Reserved wagon indicator */
+  &.wagon-reserved::after {
+    content: '';
+    position: absolute;
+    top: 16px; /* Adjusted for top padding */
+    left: 0;
+    width: 100%;
+    height: calc(100% - 16px); /* Adjusted height excluding top padding */
+    border: 2px dashed var(--sbb-color-cloud);
+    z-index: 1;
+    pointer-events: none;
+    box-sizing: border-box;
+  }
+
+  /* Remove blue dot for unserviced wagons */
+  &.wagon-unserviced::after {
+    display: none;
+  }
+}
+
+/* --- WAGON CONNECTOR --- */
+.wagon-connector {
+  width: 10px; /* Fixed width - critical for spacing */
+  height: 50px;
+  display: block;
+  position: relative;
+  margin: 16px 0 0 0; /* Top margin to align with wagon containers */
+  padding: 0;
+  flex: 0 0 10px;
+  
+  /* No-passage icon styling */
+  .no-passage-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 10px;  /* Size fits between wagons */
+    height: 10px;
+    z-index: 10;
+  }
+  
+  /* Maintain backward compatibility while using SVG */
+  &.no-access::after {
+    display: none; /* Hide old implementation */
+  }
+}
+
+/* Backward compatibility for no-access styling */
+.wagon-connector.no-access::after {
+  display: none;
+}
+
+/* Remove deprecated indicator class */
+.no-access-indicator {
+  display: none !important;
+}
+
+/* --- WAGON CLASS INDICATORS --- */
+.wagon-classes {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  gap: 8px;
+
+.class-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+    font-size: 16px;
+  }
+  
+  sbb-icon {
+    font-size: 24px;
+    color: var(--sbb-color-black);
+  }
+}
+
+/* Direction indicator */
+.direction-indicator {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  font-size: 14px;
+  color: var(--sbb-color-granite);
+}
+
+/* --- WAGON ATTRIBUTES --- */
+.wagon-attributes {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+  min-height: 24px;
+}
+
+.attribute-group {
+  display: flex;
+  gap: 4px;
+}
+
+.attribute {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  sbb-icon {
+    font-size: 16px;
+    color: var(--sbb-color-black);
+  }
+}
+
+/* --- TOOLTIP STYLING --- */
+::ng-deep .wagon-tooltip {
+  max-width: 250px;
+
+  h4 {
+    margin-top: 0;
+    margin-bottom: 8px;
+    font-size: 16px;
+    color: var(--sbb-color-blue);
+  }
+
+  ul {
+    margin: 4px 0;
+    padding-left: 8px;
+    list-style: none;
+
+    li {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+  }
+
+  .tooltip-icon {
+    width: 20px;
+    height: 20px;
+    display: block;
+    shape-rendering: geometricPrecision;
+  }
+
+  .warning {
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--sbb-color-red);
+
+    sbb-icon {
+      color: var(--sbb-color-red);
+    }
+  }
+}
+
+/* --- LEGEND STYLES --- */
+.formation-legend {
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid var(--sbb-color-cloud);
+
+  .legend-section {
+    margin-bottom: 16px;
+  }
+
+  .legend-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 8px 12px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+  }
+}
+
+/* Legend SVG elements */
+.legend-locomotive-svg {
+  width: 60px;
+  height: 30px;
+  overflow: visible;
+}
+
+.legend-wagon-svg {
+  width: 60px;
+  height: 30px;
+  overflow: visible;
+}
+
+.legend-class {
+  font-size: 14px;
+  font-weight: bold;
+  fill: var(--sbb-color-black);
+  font-family: sans-serif;
+}
+
+.legend-label {
+  color: var(--sbb-color-charcoal);
+}
+
+/* Legend connector styling */
+.legend-connector {
+  width: 24px;
+  height: 4px;
+  background-color: var(--sbb-color-red);
+}
+
+/* --- VISUALIZATION CONTAINER --- */
+.visualization-container {
+  position: relative;
+  width: fit-content;
+  min-width: 100%;
+  padding-left: 0;
+  overflow-y: visible;
+}
+
+@media (max-width: 768px) {
+  .visualization-container {
+    padding-left: 0; /* Consistent padding across breakpoints */
+  }
+}
+
+/* --- SECTOR LINE CONTAINER --- */
+.sector-line-container {
+  position: relative;
+  width: 100%;
+  height: 50px;
+  z-index: 10;
+  margin-bottom: 12px;
+  padding-top: 8px;
+  padding-left: 0; /* Consistent with visualization container */
+}
+
+@media (max-width: 768px) {
+  .sector-line-container {
+    padding-left: 0; /* Consistent padding across breakpoints */
+  }
+}
+
+/* Horizontal sector line */
+.sector-horizontal-line {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: var(--sbb-color-metal); /* Matches Departure text color */
+  z-index: 4; /* Below sector boundary lines (z-index: 5) */
+}
+
+/* --- TRAIN WAGONS CONTAINER --- */
+.train-wagons-container {
+  position: relative;
+  width: 100%;
+  margin-top: 20px; /* Space above wagons */
+  z-index: 20;
+  overflow-x: auto;
+  overflow-y: visible; /* Prevent vertical content clipping */
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  padding-left: 0; /* Consistent padding */
+  padding-bottom: 48px; /* Ensures badges remain within scroll area */
+
+  /* Touch scrolling optimizations */
+  touch-action: pan-x pan-y !important;
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+
+  /* Rendering optimizations */
+  transform: translateZ(0);
+  -webkit-font-smoothing: antialiased;
+
+  &::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: transparent;
+    border-radius: 4px;
+  }
+}
+
+/* Prevent vertical clipping of content */
+.train-wagons {
+  position: relative;
+  overflow-y: visible;
+}
+
+@media (max-width: 768px) {
+  .train-wagons-container {
+    padding-left: 0; /* Consistent padding across breakpoints */
+  }
+}
+
+/* --- SECTOR HIGHLIGHTS --- */
+.sector-highlights-container {
+  position: absolute;
+  top: 54px; /* Adjusted for sector line height */
+  left: 0;
+  width: 100%;
+  height: calc(100% - 54px); /* Adjusted height */
+  z-index: 5; /* Below wagons and sector line */
+  pointer-events: none; /* Pass-through clicks */
+}
+
+/* Sector divider with gradient styling */
+.sector-divider {
+  position: absolute;
+  top: 15%;
+  height: 70%;
+  width: 1px;
+  background: linear-gradient(to bottom,
+      transparent,
+      rgba(var(--sbb-color-blue-rgb), 0.15),
+      transparent);
+  z-index: 6;
+  transform: translateX(-50%); /* Perfect centering */
+  pointer-events: none; /* Don't interfere with mouse events */
+}
+
+/* Boundary line styling */
+.boundary-line {
+  position: absolute;
+  bottom: -7px; /* Centers on horizontal line */
+  width: 2px; /* Consistent width */
+  height: 16px; /* Consistent height */
+  background-color: var(--sbb-color-blue);
+  z-index: 5;
+  transform: translateX(-50%); /* Perfect alignment */
+  pointer-events: none;
+}
+
+/* Consistent sector boundary styling */
+.sector-boundary {
+  position: absolute;
+  bottom: -7px; /* Centers on horizontal line */
+  width: 2px; /* Consistent width */
+  height: 16px;
+  background-color: var(--sbb-color-blue);
+  z-index: 5;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+/* Force consistency for all boundary types */
+.sector-boundary.boundary-start,
+.sector-boundary.boundary-end,
+.sector-boundary.boundary-middle,
+.sector-boundary.start-boundary,
+.sector-boundary.end-boundary {
+  width: 2px; /* Consistent width */
+  height: 16px;
+  bottom: -7px; /* Centers on horizontal line */
+}
+
+/* --- TEXT ELEMENTS --- */
+.wagon-number {
+  font-size: 12px;
+  fill: var(--sbb-color-metal);
+  font-family: sans-serif;
+}
+
+.wagon-class {
+  font-size: 16px;
+  font-weight: bold;
+  fill: var(--sbb-color-blue);
+  font-family: sans-serif;
+}
+
+/* --- SVG ELEMENTS --- */
+.locomotive-svg,
+.wagon-svg {
+  width: 100px; /* Exact match with container */
+  height: 50px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow: visible;
+  display: block;
+  box-sizing: border-box;
+  shape-rendering: geometricPrecision; /* Maximum SVG quality */
+}
+
+/* High-quality rendering for all SVG elements */
+.train-visualization svg,
+.train-visualization image,
+.train-visualization path,
+.train-visualization rect,
+.train-visualization text,
+.wagon-attribute-pictogram,
+.sector-icon,
+.no-passage-icon {
+  shape-rendering: geometricPrecision;
+  image-rendering: optimizeQuality;
+}
+
+/* Locomotive text styling */
+.locomotive-svg .wagon-class {
+  fill: white; /* White text for better readability on blue background */
+  font-weight: bold;
+}
+
+/* Locomotive styling */
+.locomotive-svg path {
+  fill: var(--ski-color-locomotive); /* SKI+ locomotive color */
+  stroke: black; /* Solid black border */
+  stroke-width: 2px;
+}
+
+/* Legend locomotive styling */
+.legend-locomotive-svg path {
+  fill: var(--ski-color-locomotive); /* SKI+ locomotive color */
+  stroke: black; /* Solid black border */
+  stroke-width: 1.5px;
+}
+
+/* --- ERROR DISPLAY --- */
+.error-message {
+  width: 100%;
+  
+  .technical-details {
+    margin-top: 4px;
+    color: var(--sbb-color-granite);
+    font-style: italic;
+  }
+}
+
+/* Customized SBB Alert styles with increased specificity */
+.train-formation-container ::ng-deep sbb-alert .sbb-alert,
+.train-formation-container ::ng-deep .sbb-alert,
+.train-formation-container ::ng-deep .error-message .sbb-alert {
+  border-radius: 4px !important;
+  background-color: var(--sbb-color-milk) !important;
+  color: var(--sbb-color-black) !important;
+  
+  .sbb-alert-content {
+    color: var(--sbb-color-black) !important;
+  }
+  
+  .sbb-alert-close-button {
+    color: var(--sbb-color-black) !important;
+    
+    .sbb-alert-close-button-icon {
+      border-color: var(--sbb-color-black) !important;
+    }
+  }
+  
+  :is(a, a:is(:hover, :focus)) {
+    color: var(--sbb-color-black) !important;
+  }
+}
+
+/* Entry icon styling */
+.entry-icon {
+  shape-rendering: geometricPrecision;
+  z-index: 2;
+}
+
+/* --- WAGON ATTRIBUTE BADGES --- */
+.wagon-attributes-badge {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: -53px; /* Positioned lower for badge placement */
+  background-color: var(--sbb-color-white);
+  border-radius: 16px;
+  padding: 4px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  z-index: 25;
+  box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.05);
+  height: 28px;
+}
+
+.wagon-attribute-pictogram {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
+/* Responsive display utility */
+.hide-on-small-screen {
+  @media (max-width: 576px) {
+    display: none !important;
+  }
+}

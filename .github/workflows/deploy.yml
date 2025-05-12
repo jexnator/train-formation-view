@@ -1,0 +1,49 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Replace API Key from Secrets
+        run: |
+          sed -i "s/REPLACE_DURING_DEPLOYMENT/${{ secrets.OPENTRANSPORTDATA_API_KEY }}/g" src/environments/environment.prod.ts
+
+      - name: Build
+        run: npm run build -- --base-href=/train-formation-view/
+
+      - name: Find Build Directory
+        run: find dist -type f -name "index.html" | sort
+
+      - name: Prepare for deployment
+        run: |
+          # Seit Angular 19 ist die Ausgabestruktur anders
+          DIST_DIR=$(find dist -type d -name "browser" | head -n 1)
+          if [ -z "$DIST_DIR" ]; then
+            DIST_DIR="dist/train-view"
+          fi
+          echo "Using build directory: $DIST_DIR"
+          touch $DIST_DIR/.nojekyll
+          cp $DIST_DIR/index.html $DIST_DIR/404.html
+
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: dist/train-view/browser
+          branch: gh-pages

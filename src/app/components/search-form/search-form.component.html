@@ -1,0 +1,40 @@
+<div class="search-form-container">
+  <h2 class="sbb-headline2">Search for a train</h2>
+  
+  <form [formGroup]="searchForm" (ngSubmit)="onSearch()">
+    <div class="form-layout">
+      <div class="form-row">
+        <!-- Form Fields -->
+        <div class="form-fields">
+          <sbb-form-field label="EVU (Railway Undertaking)">
+            <sbb-select formControlName="evu">
+              <sbb-option *ngFor="let evu of evuOptions" [value]="evu.value">
+                {{ evu.label }}
+              </sbb-option>
+            </sbb-select>
+          </sbb-form-field>
+          
+          <sbb-form-field label="Operation Date">
+            <sbb-datepicker>
+              <input sbbDateInput sbbInput [min]="minDate" [max]="maxDate" formControlName="operationDate">
+            </sbb-datepicker>
+            <div class="input-icon-container">
+              <sbb-icon svgIcon="kom:circle-information-small" class="info-icon" sbbTooltip="Only data for today and 3 days ahead is available" sbbTooltipPosition="above"></sbb-icon>
+            </div>
+          </sbb-form-field>
+          
+          <sbb-form-field label="Train Number">
+            <input sbbInput formControlName="trainNumber" placeholder="e.g. 2167">
+          </sbb-form-field>
+        </div>
+        
+        <!-- Button -->
+        <div class="button-container">
+          <button sbb-button type="submit" [disabled]="searchForm.invalid || loading">
+            {{ loading ? 'Loading...' : 'Search' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>

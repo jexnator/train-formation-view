@@ -1,0 +1,56 @@
+/**
+ * Header component styling
+ * Contains customizations to SBB Angular header-lean component for SKI+ project
+ * 
+ * Note on SBB Components: This file includes various overrides of SBB Angular components
+ * through deep selectors. These modifications are made with permission for the SKI+ project
+ * while respecting the SBB license terms indicated in the LICENSE file.
+ */
+
+/* Logo styles removed as requested by SKI+ */
+
+/* Custom header title with SKI+ prefix */
+:host ::ng-deep .sbb-header-lean-label {
+  font-size: 20px;
+}
+
+:host ::ng-deep .sbb-header-lean-label::before {
+  content: "SKI+ ";
+  font-weight: bold;
+  color: var(--sbb-color-blue);
+  font-family: var(--sbb-font-bold);
+  border-right: 1px solid var(--sbb-color-iron);
+  padding-right: 5px;
+  margin-right: 10px;
+}
+
+/* Override of header background color for custom theme */
+:host ::ng-deep .sbb-header-lean {
+  border-bottom: 2.5px solid var(--sbb-color-blue);
+  background-color: var(--sbb-color-milk);
+}
+
+/* Hide SBB logo as requested */
+:host ::ng-deep .sbb-header-lean-logo {
+  display: none !important;
+}
+
+/* Hide hamburger menu in mobile view - not needed for this application */
+:host ::ng-deep .sbb-header-lean-open-menu {
+  display: none !important;
+}
+
+/* Completely hide sidebar (even during page loading) */
+:host ::ng-deep .sbb-header-lean-side-menu-container {
+  display: none !important;
+}
+
+/* Hide sidebar backdrop */
+:host ::ng-deep .sbb-header-lean-side-menu-backdrop {
+  display: none !important;
+}
+
+/* Optional: Compensate for the missing logo/menu space */
+:host ::ng-deep .sbb-header-lean-container-end {
+  margin-right: 0 !important;
+}
