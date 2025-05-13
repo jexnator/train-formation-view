@@ -2826,7 +2826,7 @@ private extractBracketContent(str: string): string | null {
       'NF': { label: 'Low Floor Entry', icon: '' },
       'VH': { label: 'Bike Hooks', icon: '' },
       'VR': { label: 'Bike Reservation Required', icon: '' },
-      'WLS': { label: 'Couchette', icon: '' }
+      'WL': { label: 'Couchette', icon: '' }
     };
     
     // Look for a hashtag followed by attribute codes (VH, KW, BHP, etc.)
@@ -2874,10 +2874,10 @@ private extractBracketContent(str: string): string | null {
       });
     }
     
-    // Special handling for couchette cars (WLS and CC) which sometimes appear without a hashtag
-    if ((wagonPart.includes('WLS') || wagonPart.includes('CC')) && !attributes.some(a => a.code === 'WLS')) {
+    // Special handling for couchette cars (WL and CC) which sometimes appear without a hashtag
+    if ((wagonPart.includes('WL') || wagonPart.includes('CC')) && !attributes.some(a => a.code === 'WL')) {
       attributes.push({
-        code: 'WLS',
+        code: 'WL',
         label: 'Couchette',
         icon: ''
       });

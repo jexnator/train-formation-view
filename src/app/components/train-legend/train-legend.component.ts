@@ -302,7 +302,7 @@ export class TrainLegendComponent implements OnInit, OnDestroy {
       'FZ': { label: 'Family Zone', url: 'https://raw.githubusercontent.com/jexnator/train-view-svg-library/main/pictos/family-zone.svg' },
       'LA': { label: 'Luggage Space', url: 'https://raw.githubusercontent.com/jexnator/train-view-svg-library/main/pictos/lugage.svg' },
       'WR': { label: 'Restaurant', url: 'https://raw.githubusercontent.com/jexnator/train-view-svg-library/main/pictos/restaurant.svg' },
-      'WLS': { label: 'Couchette', url: 'https://raw.githubusercontent.com/jexnator/train-view-svg-library/main/pictos/couchette.svg' },
+      'WL': { label: 'Couchette', url: 'https://raw.githubusercontent.com/jexnator/train-view-svg-library/main/pictos/couchette.svg' },
       'KW': { label: 'Stroller Space', url: 'https://raw.githubusercontent.com/jexnator/train-view-svg-library/main/pictos/stroller.svg' },
     };
     

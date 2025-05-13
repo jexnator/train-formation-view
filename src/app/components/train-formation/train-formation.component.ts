@@ -688,7 +688,7 @@ export class TrainFormationComponent implements OnInit, OnDestroy {
       'FZ': 'family-zone.svg',
       'LA': 'lugage.svg',
       'WR': 'restaurant.svg',
-      'WLS': 'couchette.svg',
+      'WL': 'couchette.svg',
       'KW': 'stroller.svg',
     };
     
@@ -706,7 +706,7 @@ export class TrainFormationComponent implements OnInit, OnDestroy {
   getWagonPictogramAttributes(wagon: TrainWagon): string[] {
     // Get attribute codes that should be shown as pictograms
     const displayableCodes = [
-      'BHP', 'VH', 'VR', 'BZ', 'FZ', 'LA', 'WR', 'WLS', 'KW'
+      'BHP', 'VH', 'VR', 'BZ', 'FZ', 'LA', 'WR', 'WL', 'KW'
     ];
     
     // Don't show restaurant pictogram (WR) when wagon is unserviced
