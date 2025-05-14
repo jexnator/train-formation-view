@@ -12,6 +12,7 @@ import { formatDate } from '@angular/common';
 import { FormationService } from '../../services/formation.service';
 import { SearchParams } from '../../models/formation.model';
 import { Subscription } from 'rxjs';
+import { finalize } from 'rxjs/operators';
 
 /**
  * @fileoverview Search form component for SKI+ Train Formation Visualization
@@ -155,12 +156,23 @@ export class SearchFormComponent implements OnInit, OnDestroy {
       };
       
       // Call the formation service to fetch data
-      this.formationService.getFormation(params).subscribe({
+      this.loading = true;
+      this.formationService.getFormation(params)
+        .pipe(
+          finalize(() => {
+            this.loading = false;
+          })
+        )
+        .subscribe({
         next: (response) => {
-          console.log('Formation data received:', response);
+            // Handle successful response
+            this.hasError = false;
+            this.trainFormationReady = true;
         },
         error: (error) => {
-          console.error('Error fetching formation data:', error);
+            // Handle error
+            this.hasError = true;
+            this.trainFormationReady = false;
         }
       });
     }

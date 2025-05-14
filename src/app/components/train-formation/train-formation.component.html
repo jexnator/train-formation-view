@@ -52,12 +52,14 @@
     <!-- Custom stop selector tabs -->
     <div class="stop-selector" *ngIf="trainFormation.stops && trainFormation.stops.length > 0">
       <div class="stop-selector-tabs">
-        <div *ngFor="let stop of trainFormation.stops; let i = index" 
-             class="stop-tab" 
-             [class.active]="i === selectedStopIndex"
-             (click)="selectStop(i)">
-          {{ stop.name }}
-        </div>
+        <ng-container *ngFor="let stop of trainFormation.stops; let i = index">
+          <div class="stop-tab" 
+               [class.active]="i === selectedStopIndex"
+               (click)="selectStop(i)"
+               *ngIf="stop.name !== null">
+            {{ stop.name }}
+          </div>
+        </ng-container>
       </div>
       
       <div class="stop-details" *ngIf="trainFormation.stops[selectedStopIndex]">
@@ -169,7 +171,7 @@
         
         <!-- Wagons in separate container - independent of sectors -->
         <div class="train-wagons-container">
-          <div class="train-wagons">
+      <div class="train-wagons">
             <!-- Flat structure - all wagons in one row, independent of sectors -->
             <ng-container *ngFor="let wagon of getAllWagons(); let i = index; let isLast = last">
               <!-- Wagon Container - Fixed Width -->
@@ -312,55 +314,63 @@
                 <!-- Tooltip template -->
                 <ng-template #wagonTooltip>
                   <div class="wagon-tooltip">
-                    <h4>{{ wagon.typeLabel }}</h4>
-                    <div *ngIf="wagon.type !== 'locomotive' && wagon.number">
-                      <strong>Car Number:</strong> {{ wagon.number }}
-                    </div>
-                    <div *ngIf="wagon.classes.length > 0">
-                      <strong>Class:</strong> 
-                      <span *ngFor="let cls of wagon.classes; let last = last">
-                        {{ cls }}{{ !last ? '/' : '' }}
-                      </span> class
-                    </div>
-                    <div *ngIf="wagon.statusCodes && wagon.statusCodes.length > 0 && 
-                               !(wagon.statusCodes.length === 1 && wagon.statusCodes.includes('Open but unserviced'))">
-                      <strong>Status:</strong>
-                      <span *ngFor="let status of wagon.statusCodes; let last = last">
-                        <ng-container *ngIf="status !== 'Open but unserviced'">
-                          {{ status }}{{ !last ? ', ' : '' }}
-                        </ng-container>
-                      </span>
-                    </div>
+                    <!-- Simplified tooltip for locomotives -->
+                    <ng-container *ngIf="wagon.type === 'locomotive'">
+                      <h4>Locomotive</h4>
+                    </ng-container>
                     
-                    <!-- Accessibility section -->
-                    <div *ngIf="wagon.type !== 'locomotive'">
-                      <strong>Accessibility:</strong>
-                      <ul>
-                        <li>
-                          <img [src]="getEntryIconUrl(wagon)" class="tooltip-icon">
-                          <span>{{ hasLowFloorEntry(wagon) ? 'Low Floor Entry' : 'Entry with Steps' }}</span>
-                        </li>
-                      </ul>
-                    </div>
-                    
-                    <!-- Facilities with pictograms instead of SBB icons -->
-                    <div *ngIf="getWagonPictogramAttributes(wagon).length > 0">
-                      <strong>Facilities:</strong>
-                      <ul>
-                        <li *ngFor="let attrCode of getWagonPictogramAttributes(wagon)">
-                          <img [src]="getAttributePictogramUrl(attrCode)" class="tooltip-icon">
-                          <span>{{ getAttributeLabelByCode(wagon, attrCode) }}</span>
-                        </li>
-                      </ul>
-                    </div>
-                    
-                    <!-- No passage indicators -->
-                    <div *ngIf="wagon.noAccessToPrevious && i > 0" class="warning">
-                      <span>{{ wagon.noAccessMessage }}</span>
-                    </div>
-                    <div *ngIf="wagon.noAccessToNext && i < getAllWagons().length - 1" class="warning">
-                      <span>{{ wagon.noAccessMessage }}</span>
-                    </div>
+                    <!-- Full tooltip for all other wagon types -->
+                    <ng-container *ngIf="wagon.type !== 'locomotive'">
+                      <h4>{{ wagon.typeLabel }}</h4>
+                      <div *ngIf="wagon.number">
+                        <strong>Car Number:</strong> {{ wagon.number }}
+                      </div>
+                      <div *ngIf="wagon.classes.length > 0">
+                        <strong>Class:</strong> 
+                        <span *ngFor="let cls of wagon.classes; let last = last">
+                          {{ cls }}{{ !last ? '/' : '' }}
+                        </span> class
+                      </div>
+                      <div *ngIf="wagon.statusCodes && wagon.statusCodes.length > 0 && 
+                                 !(wagon.statusCodes.length === 1 && wagon.statusCodes.includes('Open but unserviced'))">
+                        <strong>Status:</strong>
+                        <span *ngFor="let status of wagon.statusCodes; let last = last">
+                          <ng-container *ngIf="status !== 'Open but unserviced'">
+                            {{ status }}{{ !last ? ', ' : '' }}
+                          </ng-container>
+                        </span>
+                      </div>
+                      
+                      <!-- Accessibility section -->
+                      <div>
+                        <strong>Accessibility:</strong>
+                        <ul>
+                          <li>
+                            <img [src]="getEntryIconUrl(wagon)" class="tooltip-icon">
+                            <span>{{ hasLowFloorEntry(wagon) ? 'Low Floor Entry' : 'Entry with Steps' }}</span>
+                          </li>
+                        </ul>
+                      </div>
+                      
+                      <!-- Facilities with pictograms instead of SBB icons -->
+                      <div *ngIf="getWagonPictogramAttributes(wagon).length > 0">
+                        <strong>Facilities:</strong>
+                        <ul>
+                          <li *ngFor="let attrCode of getWagonPictogramAttributes(wagon)">
+                            <img [src]="getAttributePictogramUrl(attrCode)" class="tooltip-icon">
+                            <span>{{ getAttributeLabelByCode(wagon, attrCode) }}</span>
+                          </li>
+                        </ul>
+                      </div>
+                      
+                      <!-- No passage indicators -->
+                      <div *ngIf="wagon.noAccessToPrevious && i > 0" class="warning">
+                        <span>{{ wagon.noAccessMessage }}</span>
+                      </div>
+                      <div *ngIf="wagon.noAccessToNext && i < getAllWagons().length - 1" class="warning">
+                        <span>{{ wagon.noAccessMessage }}</span>
+                      </div>
+                    </ng-container>
                   </div>
                 </ng-template>
               </div>

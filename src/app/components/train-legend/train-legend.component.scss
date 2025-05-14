@@ -142,15 +142,17 @@
   color: var(--sbb-color-charcoal);
 }
 
-/* Accessibility icon sizing */
+/* Accessibility icon sizing - made more robust with multiple selectors */
+.legend-item img[alt="Low Floor Access"], 
 .legend-item img[alt="Low Floor Entry"],
 .legend-item img[alt="Entry with Steps"] {
   width: 28px;
   height: 28px;
+  object-fit: contain; /* Ensure the image maintains its aspect ratio */
 }
 
 /* Special sizing for no-passage icon */
-.legend-item img[alt="No passage between cars"] {
+.legend-item img[alt="No passage between wagons"] {
   width: 18px;
   height: 18px;
 }

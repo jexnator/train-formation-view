@@ -73,7 +73,7 @@ export class TrainFormationComponent implements OnInit, OnDestroy {
    * for formation data, selected stop, error states, and loading status
    */
   ngOnInit(): void {
-    // Subscribe to formation data changes
+    // Subscribe to train formation updates
     this.subscriptions.push(
       this.formationService.currentFormation$.subscribe(formation => {
         this.trainFormation = formation;
@@ -86,6 +86,12 @@ export class TrainFormationComponent implements OnInit, OnDestroy {
           }
         } else {
           this.hasSearched = true;
+          
+          // Print the current formation string to console for debugging
+          this.printFormationToConsole();
+          
+          // Expose a global function to update the formation for testing
+          this.exposeFormationUpdater();
         }
       })
     );
@@ -244,7 +250,7 @@ export class TrainFormationComponent implements OnInit, OnDestroy {
     
     return groups as {icon: string, label: string}[][];
   }
-  
+
   /**
    * Calculate sector width with absolute precision
    * @param section Train section to calculate width for
@@ -671,7 +677,16 @@ export class TrainFormationComponent implements OnInit, OnDestroy {
    * @returns true if the wagon has low floor entry
    */
   hasLowFloorEntry(wagon: TrainWagon): boolean {
-    return wagon.attributes.some(attr => ['NF', 'KW'].includes(attr.code));
+    // Check only for NF attribute explicitly - KW (Stroller Platform) isn't a low floor entry
+    const hasAttribute = wagon.attributes.some(attr => attr.code === 'NF');
+    
+    // For sectored and non-sectored stops, if VH+NF is in the properties, ensure we detect it properly
+    const hasNFInGroup = wagon.attributes.some(attr => attr.code === 'VH') &&
+                         (wagon.attributes.some(attr => attr.code === 'NF') || 
+                          wagon.number.includes('#VH;NF') ||
+                          wagon.number.includes('#NF;VH'));
+    
+    return hasAttribute || hasNFInGroup;
   }
 
   /**
@@ -686,16 +701,18 @@ export class TrainFormationComponent implements OnInit, OnDestroy {
       'VR': 'bike-hooks-reservation.svg',
       'BZ': 'business.svg',
       'FZ': 'family-zone.svg',
+      'FA': 'family-zone.svg',
       'LA': 'lugage.svg',
       'WR': 'restaurant.svg',
-      'WL': 'couchette.svg',
+      'CC': 'couchette.svg',
+      'WL': 'sleep.svg',
       'KW': 'stroller.svg',
     };
     
     const pictogram = pictogramMap[attributeCode] || '';
     if (!pictogram) return '';
     
-    return `https://raw.githubusercontent.com/jexnator/train-view-svg-library/main/pictos/${pictogram}`;
+    return `https://raw.githubusercontent.com/jexnator/train-view-svg-library/refs/heads/main/pictos/${pictogram}`;
   }
 
   /**
@@ -706,7 +723,7 @@ export class TrainFormationComponent implements OnInit, OnDestroy {
   getWagonPictogramAttributes(wagon: TrainWagon): string[] {
     // Get attribute codes that should be shown as pictograms
     const displayableCodes = [
-      'BHP', 'VH', 'VR', 'BZ', 'FZ', 'LA', 'WR', 'WL', 'KW'
+      'BHP', 'VH', 'VR', 'BZ', 'FZ', 'FA', 'LA', 'WR', 'WL', 'CC', 'KW'
     ];
     
     // Don't show restaurant pictogram (WR) when wagon is unserviced
@@ -740,5 +757,70 @@ export class TrainFormationComponent implements OnInit, OnDestroy {
   getAttributeLabelByCode(wagon: TrainWagon, attrCode: string): string {
     const attribute = wagon.attributes.find(attr => attr.code === attrCode);
     return attribute ? attribute.label : '';
+  }
+
+  /**
+   * Print the current formation string to the console for debugging
+   */
+  private printFormationToConsole(): void {
+    if (!this.trainFormation || !this.formationService['lastApiResponse']) {
+      console.warn('No formation data available to print');
+      return;
+    }
+    
+    const currentStopIndex = this.formationService['currentStopIndexSubject'].value;
+    const apiResponse = this.formationService['lastApiResponse'];
+    
+    if (currentStopIndex >= 0 && currentStopIndex < apiResponse.formationsAtScheduledStops.length) {
+      const formationString = apiResponse.formationsAtScheduledStops[currentStopIndex].formationShort.formationShortString;
+      
+      console.log('%c[TRAIN FORMATION STRING]', 'color: #0066CC; font-weight: bold; font-size: 14px;');
+      console.log(formationString);
+      console.log('%cTo update the formation, use: updateFormation("your-modified-string-here")', 'color: #666; font-style: italic;');
+    }
+  }
+  
+  /**
+   * Expose a global function to update the formation string for testing
+   */
+  private exposeFormationUpdater(): void {
+    // Make the function available in the global window object
+    (window as any).updateFormation = (newFormationString: string) => {
+      if (!newFormationString || typeof newFormationString !== 'string') {
+        console.error('Please provide a valid formation string');
+        return;
+      }
+      
+      try {
+        // Get the current API response
+        const apiResponse = this.formationService['lastApiResponse'];
+        if (!apiResponse) {
+          console.error('No API response available to modify');
+          return;
+        }
+        
+        // Get the current stop index
+        const currentStopIndex = this.formationService['currentStopIndexSubject'].value;
+        
+        // Create a deep copy of the API response to avoid modifying the original
+        const modifiedResponse = JSON.parse(JSON.stringify(apiResponse));
+        
+        // Update the formation string in the copied response
+        modifiedResponse.formationsAtScheduledStops[currentStopIndex].formationShort.formationShortString = newFormationString;
+        
+        // Use the service's internal methods to process the updated formation
+        console.log('%cUpdating formation with new string...', 'color: #009900; font-weight: bold;');
+        this.formationService['lastApiResponse'] = modifiedResponse;
+        this.formationService['processFormationData'](modifiedResponse, currentStopIndex);
+        
+        console.log('%cFormation updated successfully!', 'color: #009900; font-weight: bold;');
+        return true;
+      } catch (error) {
+        console.error('Error updating formation:', error);
+        return false;
+      }
+    };
+    
+    console.log('%cFormation updater function is now available. Use: updateFormation("your-modified-string-here")', 'color: #0066CC; font-style: italic;');
   }
 }

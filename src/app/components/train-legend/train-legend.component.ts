@@ -133,7 +133,7 @@ export class TrainLegendComponent implements OnInit, OnDestroy {
    * @returns URL to the no-passage SVG
    */
   getNoPassageSvgUrl(): string {
-    return 'https://raw.githubusercontent.com/jexnator/train-view-svg-library/main/icons/no-passage.svg';
+    return 'https://raw.githubusercontent.com/jexnator/train-view-svg-library/refs/heads/main/icons/no-passage.svg';
   }
 
   /**
@@ -141,7 +141,7 @@ export class TrainLegendComponent implements OnInit, OnDestroy {
    * @returns URL to the low floor entry SVG
    */
   getLowFloorEntryUrl(): string {
-    return 'https://raw.githubusercontent.com/jexnator/train-view-svg-library/main/icons/low-floor-entry.svg';
+    return 'https://raw.githubusercontent.com/jexnator/train-view-svg-library/refs/heads/main/icons/low-floor-entry.svg';
   }
 
   /**
@@ -149,7 +149,7 @@ export class TrainLegendComponent implements OnInit, OnDestroy {
    * @returns URL to the entry with steps SVG
    */
   getEntryWithStepsUrl(): string {
-    return 'https://raw.githubusercontent.com/jexnator/train-view-svg-library/main/icons/entry-with-steps.svg';
+    return 'https://raw.githubusercontent.com/jexnator/train-view-svg-library/refs/heads/main/icons/entry-with-steps.svg';
   }
   
   /**
@@ -166,7 +166,7 @@ export class TrainLegendComponent implements OnInit, OnDestroy {
     // Convert to lowercase to match filename convention
     const sectorLetter = sector.toLowerCase();
     
-    return `https://raw.githubusercontent.com/jexnator/train-view-svg-library/main/pictos/sector-${sectorLetter}.svg`;
+    return `https://raw.githubusercontent.com/jexnator/train-view-svg-library/refs/heads/main/pictos/sector-${sectorLetter}.svg`;
   }
   
   /**
@@ -205,11 +205,12 @@ export class TrainLegendComponent implements OnInit, OnDestroy {
       this.legendWagonTypes.push({ label: '1st/2nd Class', style: 'mixed' });
     }
     
-    // Add sector range if sectors are available at current stop
-    this.addSectorRangeToLegend();
+    // No longer add sector range to wagon types
+    // this.addSectorRangeToLegend();
     
     // Add no-passage indicator if present
-    if (allWagons.some(wagon => wagon.noAccessToPrevious || wagon.noAccessToNext)) {
+    if (allWagons.some(wagon => 
+        (wagon.noAccessToPrevious || wagon.noAccessToNext) && wagon.type !== 'locomotive')) {
       this.legendWagonTypes.push({ 
         label: 'No passage between cars', 
         svgUrl: this.getNoPassageSvgUrl() 
@@ -218,9 +219,89 @@ export class TrainLegendComponent implements OnInit, OnDestroy {
   }
   
   /**
-   * Adds sector range item to legend if sectors are available at current stop
+   * Updates accessibility legend items based on what's present in the formation
+   * @param allWagons Array of all wagons to check for accessibility features
    */
-  private addSectorRangeToLegend(): void {
+  private updateAccessibility(allWagons: TrainWagon[]): void {
+    this.legendAccessibility = [];
+    
+    // Add low floor entry if present
+    if (allWagons.some(wagon => wagon.attributes.some(attr => ['NF', 'KW'].includes(attr.code)))) {
+      this.legendAccessibility.push({ 
+        label: 'Low Floor Access', 
+        svgUrl: this.getLowFloorEntryUrl() 
+      });
+    }
+    
+    // Add entry with steps for non-locomotive wagons without low floor entry
+    if (allWagons.some(wagon => 
+      wagon.type !== 'locomotive' && 
+      !wagon.attributes.some(attr => ['NF', 'KW'].includes(attr.code))
+    )) {
+      this.legendAccessibility.push({ 
+        label: 'Entry with Steps', 
+        svgUrl: this.getEntryWithStepsUrl() 
+      });
+    }
+  }
+  
+  /**
+   * Updates facility legend items based on what's present in the formation
+   * @param allWagons Array of all wagons to check for facilities
+   */
+  private updateFacilities(allWagons: TrainWagon[]): void {
+    this.legendFacilities = [];
+    
+    // First, add platform sectors if available
+    this.addPlatformSectorsToFacilities();
+    
+    // Map of attribute codes to their pictogram URLs and labels
+    const facilitiesMap: { [key: string]: { label: string, url: string } } = {
+      'BHP': { label: 'Wheelchair Spaces', url: 'https://raw.githubusercontent.com/jexnator/train-view-svg-library/refs/heads/main/pictos/wheelchair.svg' },
+      'VH': { label: 'Bike Hooks', url: 'https://raw.githubusercontent.com/jexnator/train-view-svg-library/refs/heads/main/pictos/bike-hooks.svg' },
+      'VR': { label: 'Bike Hooks Reservation Required', url: 'https://raw.githubusercontent.com/jexnator/train-view-svg-library/refs/heads/main/pictos/bike-hooks-reservation.svg' },
+      'BZ': { label: 'Business Zone', url: 'https://raw.githubusercontent.com/jexnator/train-view-svg-library/refs/heads/main/pictos/business.svg' },
+      'FZ': { label: 'Family Zone', url: 'https://raw.githubusercontent.com/jexnator/train-view-svg-library/refs/heads/main/pictos/family-zone.svg' },
+      'FA': { label: 'Family Zone', url: 'https://raw.githubusercontent.com/jexnator/train-view-svg-library/refs/heads/main/pictos/family-zone.svg' },
+      'LA': { label: 'Luggage Space', url: 'https://raw.githubusercontent.com/jexnator/train-view-svg-library/refs/heads/main/pictos/lugage.svg' },
+      'WR': { label: 'Restaurant', url: 'https://raw.githubusercontent.com/jexnator/train-view-svg-library/refs/heads/main/pictos/restaurant.svg' },
+      'WL': { label: 'Sleeping compartments', url: 'https://raw.githubusercontent.com/jexnator/train-view-svg-library/refs/heads/main/pictos/sleep.svg' },
+      'CC': { label: 'Couchette Compartments', url: 'https://raw.githubusercontent.com/jexnator/train-view-svg-library/refs/heads/main/pictos/couchette.svg' },
+      'KW': { label: 'Stroller Platform', url: 'https://raw.githubusercontent.com/jexnator/train-view-svg-library/refs/heads/main/pictos/stroller.svg' },
+    };
+    
+    // Collect all unique attribute codes that are in the facilities map
+    const presentFacilities = new Set<string>();
+    
+    // Check for each facility, excluding restaurant in unserviced cars
+    allWagons.forEach(wagon => {
+      wagon.attributes.forEach(attr => {
+        if (facilitiesMap[attr.code]) {
+          // Skip restaurant attributes for unserviced wagons
+          if (attr.code === 'WR' && 
+              wagon.statusCodes && 
+              wagon.statusCodes.includes('Open but unserviced')) {
+            return;
+          }
+          presentFacilities.add(attr.code);
+        }
+      });
+    });
+    
+    // Add each present facility to the legend
+    Array.from(presentFacilities).forEach(code => {
+      const facility = facilitiesMap[code];
+      this.legendFacilities.push({
+        label: facility.label,
+        svgUrl: facility.url
+      });
+    });
+  }
+
+  /**
+   * Adds platform sectors to the facilities section if available at current stop
+   */
+  private addPlatformSectorsToFacilities(): void {
     if (!this.trainFormation || 
         !this.trainFormation.stops || 
         this.trainFormation.stops.length === 0) {
@@ -250,87 +331,12 @@ export class TrainLegendComponent implements OnInit, OnDestroy {
     
     // Add sector range if valid sectors exist
     if (firstSector && lastSector) {
-      this.legendWagonTypes.push({
+      this.legendFacilities.push({
         label: 'Platform sectors',
         svgUrl: this.getSectorSvgUrl(firstSector),
         endSvgUrl: firstSector !== lastSector ? this.getSectorSvgUrl(lastSector) : undefined,
         isRange: true
       });
     }
-  }
-  
-  /**
-   * Updates accessibility legend items based on what's present in the formation
-   * @param allWagons Array of all wagons to check for accessibility features
-   */
-  private updateAccessibility(allWagons: TrainWagon[]): void {
-    this.legendAccessibility = [];
-    
-    // Add low floor entry if present
-    if (allWagons.some(wagon => wagon.attributes.some(attr => ['NF', 'KW'].includes(attr.code)))) {
-      this.legendAccessibility.push({ 
-        label: 'Low Floor Entry', 
-        svgUrl: this.getLowFloorEntryUrl() 
-      });
-    }
-    
-    // Add entry with steps for non-locomotive wagons without low floor entry
-    if (allWagons.some(wagon => 
-      wagon.type !== 'locomotive' && 
-      !wagon.attributes.some(attr => ['NF', 'KW'].includes(attr.code))
-    )) {
-      this.legendAccessibility.push({ 
-        label: 'Entry with Steps', 
-        svgUrl: this.getEntryWithStepsUrl() 
-      });
-    }
-  }
-  
-  /**
-   * Updates facility legend items based on what's present in the formation
-   * @param allWagons Array of all wagons to check for facilities
-   */
-  private updateFacilities(allWagons: TrainWagon[]): void {
-    this.legendFacilities = [];
-    
-    // Map of attribute codes to their pictogram URLs and labels
-    const facilitiesMap: { [key: string]: { label: string, url: string } } = {
-      'BHP': { label: 'Wheelchair Spaces', url: 'https://raw.githubusercontent.com/jexnator/train-view-svg-library/main/pictos/wheelchair.svg' },
-      'VH': { label: 'Bike Hooks', url: 'https://raw.githubusercontent.com/jexnator/train-view-svg-library/main/pictos/bike-hooks.svg' },
-      'VR': { label: 'Bike Reservation Required', url: 'https://raw.githubusercontent.com/jexnator/train-view-svg-library/main/pictos/bike-hooks-reservation.svg' },
-      'BZ': { label: 'Business Zone', url: 'https://raw.githubusercontent.com/jexnator/train-view-svg-library/main/pictos/business.svg' },
-      'FZ': { label: 'Family Zone', url: 'https://raw.githubusercontent.com/jexnator/train-view-svg-library/main/pictos/family-zone.svg' },
-      'LA': { label: 'Luggage Space', url: 'https://raw.githubusercontent.com/jexnator/train-view-svg-library/main/pictos/lugage.svg' },
-      'WR': { label: 'Restaurant', url: 'https://raw.githubusercontent.com/jexnator/train-view-svg-library/main/pictos/restaurant.svg' },
-      'WL': { label: 'Couchette', url: 'https://raw.githubusercontent.com/jexnator/train-view-svg-library/main/pictos/couchette.svg' },
-      'KW': { label: 'Stroller Space', url: 'https://raw.githubusercontent.com/jexnator/train-view-svg-library/main/pictos/stroller.svg' },
-    };
-    
-    // Collect all unique attribute codes that are in the facilities map
-    const presentFacilities = new Set<string>();
-    
-    // Check for each facility, excluding restaurant in unserviced cars
-    allWagons.forEach(wagon => {
-      wagon.attributes.forEach(attr => {
-        if (facilitiesMap[attr.code]) {
-          // Skip restaurant attributes for unserviced wagons
-          if (attr.code === 'WR' && 
-              wagon.statusCodes && 
-              wagon.statusCodes.includes('Open but unserviced')) {
-            return;
-          }
-          presentFacilities.add(attr.code);
-        }
-      });
-    });
-    
-    // Add each present facility to the legend
-    Array.from(presentFacilities).forEach(code => {
-      const facility = facilitiesMap[code];
-      this.legendFacilities.push({
-        label: facility.label,
-        svgUrl: facility.url
-      });
-    });
   }
 } 

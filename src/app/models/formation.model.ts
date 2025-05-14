@@ -23,7 +23,7 @@ export interface SearchParams {
   evu: string;
   
   /** 
-   * Date of operation in YYYY-MM-DD format
+   * Date of operation in YYYY-MM-DD format 
    * Can be either a string or Date object that will be formatted
    */
   operationDate: string;
