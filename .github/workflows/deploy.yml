@@ -32,18 +32,19 @@ jobs:
         run: find dist -type f -name "index.html" | sort
 
       - name: Prepare for deployment
+        id: prepare
         run: |
-          # Seit Angular 19 ist die Ausgabestruktur anders
           DIST_DIR=$(find dist -type d -name "browser" | head -n 1)
           if [ -z "$DIST_DIR" ]; then
             DIST_DIR="dist/train-view"
           fi
           echo "Using build directory: $DIST_DIR"
+          echo "dist_dir=$DIST_DIR" >> $GITHUB_OUTPUT
           touch $DIST_DIR/.nojekyll
           cp $DIST_DIR/index.html $DIST_DIR/404.html
 
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: dist/train-view/browser
+          folder: ${{ steps.prepare.outputs.dist_dir }}
           branch: gh-pages
