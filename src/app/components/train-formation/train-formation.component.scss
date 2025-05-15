@@ -331,10 +331,20 @@
 /* Sector labels centered on horizontal line */
 .sector-label {
   position: absolute;
-  bottom: -9.6px; 
+  bottom: -13px; /* Adjusted to account for the white box */
   z-index: 15;
   pointer-events: none;
   transform: translateX(-50%);
+  
+  /* Apply white rounded box styling identical to wagon-attributes-badge */
+  background-color: var(--sbb-color-white);
+  border-radius: 16px;
+  padding: 4px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.05);
+  height: 28px;
   
   /* Sector icon styling */
   .sector-icon {

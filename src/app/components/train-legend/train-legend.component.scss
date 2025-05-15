@@ -14,7 +14,6 @@
   padding-bottom: 8px;
   background-color: var(--sbb-color-milk);
   border-radius: 16px;
-  opacity: 0.95; /* Subtle reduction in visual prominence */
 
   @media (max-width: 768px) {
     padding: 24px;
@@ -30,25 +29,18 @@
 
   /* Legend section spacing */
   .legend-section {
-    margin-bottom: 16px;
+    margin-bottom: 10px;
   }
 
   .legend-section + .legend-section {
-    margin-top: 16px;
+    margin-top: 10px;
   }
 
   /* Responsive grid layout for legend items */
   .legend-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 8px 16px;
-    
-    /* Ensure consistent column widths as the viewport changes */
-    @media (min-width: 668px) {
-      display: flex;
-      flex-wrap: wrap;
-      margin: -6px;
-    }
+    gap: 4px 16px;
   }
 
   /* Individual legend item */
@@ -58,11 +50,12 @@
     gap: 8px;
     font-size: 14px;
     min-width: 0;
+    margin-bottom: 0;
+    padding: 2px 6px;
     
     /* Ensure consistent widths on larger screens */
     @media (min-width: 668px) {
       width: 240px;
-      padding: 4px 6px;
       flex-grow: 0;
       flex-shrink: 0;
     }
@@ -80,7 +73,7 @@
   margin-bottom: 10px;
   font-size: 18px;
   font-weight: normal;
-  color: var(--sbb-color-charcoal);
+  color: var(--sbb-color-metal);
 }
 
 /* SVG elements for train cars in legend */
@@ -113,6 +106,7 @@
   color: var(--sbb-color-charcoal);
   white-space: nowrap; /* Keep labels on a single line */
   overflow: visible;
+  line-height: 1.2;
 }
 
 /* Icon for SVG elements */
@@ -123,15 +117,56 @@
   shape-rendering: geometricPrecision;
 }
 
-/* Sector range display */
-.sector-range {
+/* White rounded box styling for Sectors and Facilities pictograms */
+.pictogram-box {
+  /* Apply white rounded box styling identical to wagon-attributes-badge */
+  background-color: var(--sbb-color-white);
+  border-radius: 16px;
+  padding: 4px 8px;
   display: flex;
   align-items: center;
-  gap: 6px; /* Default gap for desktop */
+  justify-content: center;
+  box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.05);
+  height: 28px;
   
-  /* Tighter spacing on mobile */
-  @media (max-width: 667px) {
-    gap: 1.7px; /* Precise alignment with wagon width */
+  .legend-svg-icon {
+    width: 20px;
+    height: 20px;
+    display: block;
+  }
+}
+
+/* Reset previous custom styling for sector facility icons */
+.legend-section:last-child .legend-item img.legend-svg-icon:not(.sector-range img) {
+  background-color: transparent;
+  border-radius: 0;
+  padding: 0;
+  box-shadow: none;
+  height: 20px;
+  width: 20px;
+}
+
+/* Special styling for sector range to handle multiple icons in one container */
+.legend-section:last-child .legend-item .sector-range {
+  /* Apply white rounded box styling identical to wagon-attributes-badge */
+  background-color: var(--sbb-color-white);
+  border-radius: 16px;
+  padding: 4px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.05);
+  height: 28px;
+  margin: 0;
+  gap: 4px;
+  
+  /* Keep the icons size consistent within the box */
+  img.legend-svg-icon {
+    background: none;
+    box-shadow: none;
+    padding: 0;
+    height: 20px;
+    width: 20px;
   }
 }
 
@@ -140,6 +175,20 @@
   font-size: 16px;
   font-weight: normal;
   color: var(--sbb-color-charcoal);
+  margin: 0;
+}
+
+/* Exceptions for icons that shouldn't have the white box styling */
+.legend-item img[alt="Low Floor Access"], 
+.legend-item img[alt="Low Floor Entry"],
+.legend-item img[alt="Entry with Steps"],
+.legend-item img[alt="No passage between wagons"] {
+  background-color: transparent !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  height: auto !important;
+  width: auto !important;
 }
 
 /* Accessibility icon sizing - made more robust with multiple selectors */
@@ -185,20 +234,14 @@ svg .closed-pattern::after {
   );
 }
 
-/* No-passage connector indicator */
-.legend-connector {
-  width: 24px;
-  height: 4px;
-  background-color: var(--sbb-color-red, #EB0000);
-}
-
 /* Very small screen adjustments */
 @media (max-width: 400px) {
   .legend-grid {
-    grid-template-columns: 1fr; /* Single column layout */
+    grid-template-columns: 1fr;
   }
   
   .legend-label {
-    white-space: normal; /* Allow text wrapping */
+    white-space: normal;
+    line-height: 1.2;
   }
-} 
+}

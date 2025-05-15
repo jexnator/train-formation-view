@@ -30,7 +30,7 @@
 
   <!-- Wagons and Classes - only shown if there are items -->
   <div class="legend-section" *ngIf="legendWagonTypes.length > 0">
-    <h3 class="sbb-headline3">Wagon and Classes</h3>
+    <h3 class="sbb-headline3">Wagons and Classes</h3>
     <div class="legend-grid">
       <div class="legend-item" *ngFor="let item of legendWagonTypes">
         <!-- SVG for locomotive in legend -->
@@ -89,7 +89,9 @@
         </ng-container>
         
         <!-- For items with SVG URLs that are not ranges -->
-        <img *ngIf="item.svgUrl && !item.isRange" [src]="item.svgUrl" alt="{{item.label}}" class="legend-svg-icon">
+        <div *ngIf="item.svgUrl && !item.isRange" class="pictogram-box">
+          <img [src]="item.svgUrl" alt="{{item.label}}" class="legend-svg-icon">
+        </div>
         
         <span class="legend-label">{{ item.label }}</span>
       </div>
