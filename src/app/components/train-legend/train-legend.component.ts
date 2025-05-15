@@ -202,7 +202,7 @@ export class TrainLegendComponent implements OnInit, OnDestroy {
     
     // Add class indicators
     if (allWagons.some(wagon => wagon.classes && wagon.classes.length > 0)) {
-      this.legendWagonTypes.push({ label: '1st/2nd Class', style: 'mixed' });
+      this.legendWagonTypes.push({ label: '1st/2nd Class Coach', style: 'mixed' });
     }
     
     // No longer add sector range to wagon types

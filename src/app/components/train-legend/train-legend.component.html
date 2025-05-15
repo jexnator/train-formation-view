@@ -67,7 +67,9 @@
         </svg>
         
         <!-- For items with SVG URLs like no-passage -->
-        <img *ngIf="item.svgUrl && !item.isRange" [src]="item.svgUrl" alt="{{item.label}}" class="legend-svg-icon">
+        <div *ngIf="item.svgUrl && !item.isRange" class="pictogram-box">
+          <img [src]="item.svgUrl" alt="{{item.label}}" class="legend-svg-icon">
+        </div>
         
         <span class="legend-label">{{ item.label }}</span>
       </div>

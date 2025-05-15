@@ -37,7 +37,7 @@
     <div class="train-header">
       <div class="train-info">
         <div class="train-route" *ngIf="trainFormation.stops && trainFormation.stops.length > 0">
-          {{ trainFormation.stops[0].name }} → {{ trainFormation.stops[trainFormation.stops.length-1].name }}
+          {{ getFirstValidStopName() }} → {{ getLastValidStopName() }}
         </div>
         <div class="train-date">
           <sbb-icon class="date-icon" svgIcon="calendar-small"></sbb-icon>

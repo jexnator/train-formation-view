@@ -722,13 +722,13 @@ export class FormationService {
         // First wagon in a parenthesis group should have no access to previous wagon
         if (i === 0 && noAccessAcrossGroups && hasGroupParenthesis && hasGroupParenthesis[0].startsWith('(')) {
           parsedWagon.noAccessToPrevious = true;
-          parsedWagon.noAccessMessage = 'No passage to the neighbouring vehicle possible on this side of the vehicle';
+          parsedWagon.noAccessMessage = 'No passage to the neighbouring coach possible';
         }
         
         // Last wagon in a parenthesis group should have no access to next wagon 
         if (i === tokens.length - 1 && noAccessAcrossGroups && hasGroupParenthesis && hasGroupParenthesis[0].endsWith(')')) {
           parsedWagon.noAccessToNext = true;
-          parsedWagon.noAccessMessage = 'No passage to the neighbouring vehicle possible on this side of the vehicle';
+          parsedWagon.noAccessMessage = 'No passage to the neighbouring coach possible';
         }
         
         // Additional wagons added to the section
@@ -1132,10 +1132,10 @@ export class FormationService {
         // Set noAccessMessages for better UX
         section.wagons.forEach(wagon => {
           if (wagon.noAccessToPrevious) {
-            wagon.noAccessMessage = 'No passage to previous wagon';
+            wagon.noAccessMessage = 'No passage to previous coach';
           }
           if (wagon.noAccessToNext) {
-            wagon.noAccessMessage = 'No passage to next wagon';
+            wagon.noAccessMessage = 'No passage to next coach';
           }
         });
       }
@@ -1176,10 +1176,10 @@ export class FormationService {
           
           // Set descriptive messages if not already set (except for locomotives)
           if (!previousWagon.noAccessMessage) {
-            previousWagon.noAccessMessage = 'No passage to next wagon';
+            previousWagon.noAccessMessage = 'No passage to next coach';
           }
           if (!wagon.noAccessMessage) {
-            wagon.noAccessMessage = 'No passage to previous wagon';
+            wagon.noAccessMessage = 'No passage to previous coach';
           }
         } else if (isCurrentLocomotive || isPreviousLocomotive) {
           // Clear no-passage indicators and messages for locomotives

@@ -200,8 +200,8 @@
   object-fit: contain; /* Ensure the image maintains its aspect ratio */
 }
 
-/* Special sizing for no-passage icon */
-.legend-item img[alt="No passage between wagons"] {
+/* Special sizing for no-passage icon inside pictogram box */
+.pictogram-box img[alt="No passage between wagons"] {
   width: 18px;
   height: 18px;
 }

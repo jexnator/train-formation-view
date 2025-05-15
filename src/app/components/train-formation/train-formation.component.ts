@@ -823,4 +823,40 @@ export class TrainFormationComponent implements OnInit, OnDestroy {
     
     console.log('%cFormation updater function is now available. Use: updateFormation("your-modified-string-here")', 'color: #0066CC; font-style: italic;');
   }
+
+  /**
+   * Gets the first valid stop name from the train formation
+   * @returns The first valid stop name or empty string if none found
+   */
+  getFirstValidStopName(): string {
+    if (!this.trainFormation?.stops || this.trainFormation.stops.length === 0) {
+      return '';
+    }
+    
+    for (const stop of this.trainFormation.stops) {
+      if (stop.name !== null) {
+        return stop.name;
+      }
+    }
+    
+    return '';
+  }
+  
+  /**
+   * Gets the last valid stop name from the train formation
+   * @returns The last valid stop name or empty string if none found
+   */
+  getLastValidStopName(): string {
+    if (!this.trainFormation?.stops || this.trainFormation.stops.length === 0) {
+      return '';
+    }
+    
+    for (let i = this.trainFormation.stops.length - 1; i >= 0; i--) {
+      if (this.trainFormation.stops[i].name !== null) {
+        return this.trainFormation.stops[i].name;
+      }
+    }
+    
+    return '';
+  }
 }
