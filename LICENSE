@@ -1,28 +1,6 @@
-License for Train Formation View
+MIT License
 
-Project: Train-View
-Author: Xavier Jeiziner (as part of the Bachelor thesis for SKI+ at the Swiss Distance-Learning University of Applied Sciences FFHS, PiBS Informatik)
-
-Owner:
-
-SKI+
-https://opentransportdata.swiss/de/about-us/
-
-Fachstelle Open-Data
-Wylerstrasse 123
-3000 Bern-65
-opendata@sbb.ch
-
-The Train-View project source code is licensed under the MIT License.
-The full license text is provided below.
-
-This project utilizes third-party dependencies, primarily the SBB Angular Components, which are licensed separately. Their respective licenses are also included below as required by their terms.
-
----
-
-Train-View Project License (MIT)
-
-Copyright (c) SKI+ 2025 | Xavier Jeiziner (Axians Amanox AG)
+Copyright (c) 2025 SKI+ | Xavier Jeiziner (Axians Amanox AG)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -44,27 +22,33 @@ SOFTWARE.
 
 ---
 
-Dependency Licenses
+Project: Train Formation View (Train-View)
+Author: Xavier Jeiziner (as part of the Bachelor thesis for SKI+ at the Swiss Distance-Learning University of Applied Sciences FFHS, PiBS Informatik)
 
-Train-View uses the SBB Angular Components library provided by Schweizerische Bundesbahnen SBB. This library is licensed under the Apache License 2.0. It also incorporates code derived from the Angular Components project (github.com/angular/components), which is licensed under the MIT License.
+Owner:
+SKI+
+https://opentransportdata.swiss/de/about-us/
 
-The following are the licenses and copyright notices for these dependencies:
+Fachstelle Open-Data
+Wylerstrasse 123
+3000 Bern-65
+opendata@sbb.ch
 
-Apache License, Version 2.0 (for SBB Angular Components)
+---
 
+THIRD-PARTY DEPENDENCIES
+
+This project utilizes third-party dependencies, primarily the SBB Angular Components,
+which are licensed separately as follows:
+
+---
+
+SBB Angular Components License
 Copyright 2024 Schweizerische Bundesbahnen SBB
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+                                 Apache License
+                           Version 2.0, January 2004
+                        http://www.apache.org/licenses/
 
 TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
 
@@ -245,8 +229,6 @@ MIT License (for code parts derived from angular/components)
 
 The following license applies to the code parts taken from the
 https://github.com/angular/components repository:
-
-The MIT License
 
 Copyright (c) 2024 Google LLC.
 
