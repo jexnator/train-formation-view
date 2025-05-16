@@ -226,6 +226,18 @@ export interface TrainWagon {
   
   /** Status codes from the formation string (e.g. Closed, Reserved) */
   statusCodes?: string[];
+
+  /** Occupancy information for first class if available */
+  firstClassOccupancy?: {
+    icon: string;
+    label: string;
+  };
+
+  /** Occupancy information for second class if available */
+  secondClassOccupancy?: {
+    icon: string;
+    label: string;
+  };
 }
 
 /**

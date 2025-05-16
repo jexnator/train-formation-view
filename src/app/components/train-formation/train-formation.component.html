@@ -293,6 +293,25 @@
                     </ng-container>
                   </ng-container>
                   
+                  <!-- Occupancy icons in the middle of the wagon -->
+                  <ng-container *ngIf="wagon.type !== 'locomotive' && !(wagon.statusCodes && wagon.statusCodes.includes('Closed'))">
+                    <!-- First class occupancy -->
+                    <image *ngIf="wagon.firstClassOccupancy"
+                           [attr.href]="getOccupancyIconUrl(wagon.firstClassOccupancy.icon)" 
+                           x="40" y="14" 
+                           width="20" height="20"
+                           preserveAspectRatio="xMidYMid meet"
+                           class="occupancy-icon" />
+                    
+                    <!-- Second class occupancy -->
+                    <image *ngIf="wagon.secondClassOccupancy"
+                           [attr.href]="getOccupancyIconUrl(wagon.secondClassOccupancy.icon)" 
+                           x="40" y="14" 
+                           width="20" height="20"
+                           preserveAspectRatio="xMidYMid meet"
+                           class="occupancy-icon" />
+                  </ng-container>
+                  
                   <!-- Entry icon in the right side of the wagon -->
                   <image *ngIf="wagon.type !== 'locomotive' && !(wagon.statusCodes && wagon.statusCodes.includes('Closed'))"
                          [attr.href]="getEntryIconUrl(wagon)" 
@@ -339,6 +358,21 @@
                             {{ status }}{{ !last ? ', ' : '' }}
                           </ng-container>
                         </span>
+                      </div>
+                      
+                      <!-- Occupancy information -->
+                      <div *ngIf="wagon.firstClassOccupancy || wagon.secondClassOccupancy">
+                        <strong>Occupancy:</strong>
+                        <ul>
+                          <li *ngIf="wagon.firstClassOccupancy">
+                            <img [src]="getOccupancyIconUrl(wagon.firstClassOccupancy.icon)" class="tooltip-icon">
+                            <span>{{ wagon.firstClassOccupancy.label }}</span>
+                          </li>
+                          <li *ngIf="wagon.secondClassOccupancy">
+                            <img [src]="getOccupancyIconUrl(wagon.secondClassOccupancy.icon)" class="tooltip-icon">
+                            <span>{{ wagon.secondClassOccupancy.label }}</span>
+                          </li>
+                        </ul>
                       </div>
                       
                       <!-- Accessibility section -->

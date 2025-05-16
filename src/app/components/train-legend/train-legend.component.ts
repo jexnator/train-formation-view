@@ -4,6 +4,7 @@ import { SbbIconModule } from '@sbb-esta/angular/icon';
 import { FormationService } from '../../services/formation.service';
 import { TrainWagon, TrainVisualization } from '../../models/formation.model';
 import { Subscription } from 'rxjs';
+import { OCCUPANCY_VISUALIZATION } from '../../models/occupancy.model';
 
 /**
  * @fileoverview Legend component for SKI+ Train Formation Visualization
@@ -67,6 +68,9 @@ export class TrainLegendComponent implements OnInit, OnDestroy {
   /** Legend items for onboard facilities and amenities */
   legendFacilities: LegendAttribute[] = [];
   
+  /** Legend items for occupancy levels */
+  legendOccupancy: LegendAttribute[] = [];
+  
   /** Currently selected stop index in the journey */
   private currentStopIndex: number = 0;
   
@@ -112,6 +116,7 @@ export class TrainLegendComponent implements OnInit, OnDestroy {
       this.legendWagonTypes = [];
       this.legendAccessibility = [];
       this.legendFacilities = [];
+      this.legendOccupancy = [];
       return;
     }
     
@@ -126,6 +131,9 @@ export class TrainLegendComponent implements OnInit, OnDestroy {
     
     // Update onboard facilities based on current formation
     this.updateFacilities(allWagons);
+
+    // Update occupancy information based on current formation
+    this.updateOccupancy(allWagons);
   }
   
   /**
@@ -338,5 +346,39 @@ export class TrainLegendComponent implements OnInit, OnDestroy {
         isRange: true
       });
     }
+  }
+
+  /**
+   * Updates occupancy legend items based on what's present in the formation
+   * @param allWagons Array of all wagons to check for occupancy information
+   */
+  private updateOccupancy(allWagons: TrainWagon[]): void {
+    this.legendOccupancy = [];
+
+    // Collect all unique occupancy levels present in the formation
+    const presentOccupancyLevels = new Set<string>();
+
+    allWagons.forEach(wagon => {
+      if (wagon.firstClassOccupancy) {
+        presentOccupancyLevels.add(wagon.firstClassOccupancy.icon);
+      }
+      if (wagon.secondClassOccupancy) {
+        presentOccupancyLevels.add(wagon.secondClassOccupancy.icon);
+      }
+    });
+
+    if (presentOccupancyLevels.size === 0) {
+      return;
+    }
+
+    // Add only the occupancy levels that are present in the formation
+    Object.values(OCCUPANCY_VISUALIZATION).forEach(occupancy => {
+      if (presentOccupancyLevels.has(occupancy.icon)) {
+        this.legendOccupancy.push({
+          label: occupancy.label,
+          svgUrl: `https://raw.githubusercontent.com/jexnator/train-view-svg-library/refs/heads/main/icons/${occupancy.icon}.svg`
+        });
+      }
+    });
   }
 } 
