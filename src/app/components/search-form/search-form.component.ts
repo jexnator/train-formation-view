@@ -101,7 +101,7 @@ export class SearchFormComponent implements OnInit, OnDestroy {
     this.searchForm = this.fb.group({
       evu: ['SBBP', Validators.required],
       operationDate: [todayFormatted, [Validators.required]],
-      trainNumber: ['833', [Validators.required, Validators.pattern('[0-9]*')]]
+      trainNumber: ['2167', [Validators.required, Validators.pattern('[0-9]*')]]
     });
     
     // Subscribe to loading status for button state management

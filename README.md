@@ -49,7 +49,7 @@ The application will be available at `http://localhost:4200`.
 
 ## Usage
 
-1. Enter a train number (e.g., "833", "2167", "66")
+1. Enter a train number (e.g., "829", "2167", "66")
 2. Select the railway operator (SBB, BLS, etc.)
 3. Choose an operation date
 4. Click "Search" to fetch and display the train formation
