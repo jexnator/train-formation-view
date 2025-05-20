@@ -5,7 +5,7 @@ on:
     branches: [main]
   schedule:
     # Run every day at 00:00 UTC
-    - cron: "0 0 * * *"
+    - cron: "0 1 * * *"
 
 permissions:
   contents: write
@@ -37,6 +37,9 @@ jobs:
           # Unzip to temp directory
           unzip -q occupancy.zip -d temp_occupancy
 
+          # Clean up old data first
+          rm -rf data/occupancy/*
+
           # Process only today and next 3 days
           for i in {0..3}; do
             date=$(date -d "+$i days" +%Y-%m-%d)
@@ -55,8 +58,11 @@ jobs:
             fi
           done
 
-          # Cleanup
+          # Cleanup temporary files
           rm -rf temp_occupancy occupancy.zip
+
+          # Remove any occupancy data older than 3 days
+          find data/occupancy -type d -name "202*" -mtime +3 -exec rm -rf {} +
 
       - name: Commit and push if changed
         run: |
@@ -68,6 +74,7 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     if: github.event_name == 'push'
+    needs: fetch-occupancy-data
     steps:
       - uses: actions/checkout@v3
 
@@ -86,9 +93,6 @@ jobs:
       - name: Build
         run: npm run build -- --base-href=/train-formation-view/
 
-      - name: Find Build Directory
-        run: find dist -type f -name "index.html" | sort
-
       - name: Prepare for deployment
         run: |
           DIST_DIR=$(find dist -type d -name "browser" | head -n 1)
@@ -99,10 +103,15 @@ jobs:
           touch $DIST_DIR/.nojekyll
           cp $DIST_DIR/index.html $DIST_DIR/404.html
 
+          # Ensure data directory exists
+          mkdir -p $DIST_DIR/data
+
           # Copy occupancy data from gh-pages branch
           git fetch origin gh-pages
-          git checkout origin/gh-pages -- data/occupancy
-          cp -r data $DIST_DIR/
+          git checkout origin/gh-pages -- data/occupancy || echo "No occupancy data found yet"
+          if [ -d "data" ]; then
+            cp -r data/* $DIST_DIR/data/
+          fi
 
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4

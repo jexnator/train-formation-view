@@ -5,11 +5,14 @@
  * - Loading pre-processed occupancy data from GitHub Pages
  * - Providing occupancy information for the visualization
  * - Managing cache and data updates
+ * 
+ * The service handles missing data gracefully and provides occupancy information
+ * only when it's available, without generating errors for missing data.
  */
 
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject, of, throwError } from 'rxjs';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Observable, BehaviorSubject, of } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 import { formatDate } from '@angular/common';
 import { 
@@ -64,7 +67,7 @@ export class OccupancyService {
    * @param operatorId Operator ID (e.g. "11" for SBB or "SBBP")
    * @param trainNumber Train number
    * @param date Operation date
-   * @returns Observable with occupancy data
+   * @returns Observable with occupancy data or null if not available
    */
   getTrainOccupancy(
     operatorId: string,
@@ -74,7 +77,7 @@ export class OccupancyService {
     // Map operator code to numeric ID
     const numericOperatorId = OPERATOR_MAPPING[operatorId];
     if (!numericOperatorId) {
-      console.warn('Unsupported operator:', operatorId);
+      console.debug('Occupancy data not available for operator:', operatorId);
       return of(null);
     }
 
@@ -82,7 +85,7 @@ export class OccupancyService {
     
     // Validate date range
     if (!this.isDateValid(formattedDate)) {
-      console.warn('Date out of range for occupancy data:', formattedDate);
+      console.debug('Occupancy data not available for date:', formattedDate);
       return of(null);
     }
 
@@ -109,8 +112,13 @@ export class OccupancyService {
         });
         return this.findTrainOccupancy(data, trainNumber);
       }),
-      catchError(error => {
-        console.error('Error fetching occupancy data:', error);
+      catchError((error: HttpErrorResponse) => {
+        // Handle 404 silently - this just means no occupancy data is available
+        if (error.status === 404) {
+          console.debug('No occupancy data available for:', { operatorId, date: formattedDate });
+        } else {
+          console.warn('Error fetching occupancy data:', error);
+        }
         return of(null);
       }),
       tap(() => this.loadingSubject.next(false))
@@ -133,22 +141,28 @@ export class OccupancyService {
   ) {
     if (!trainOccupancy) return null;
 
-    // Find matching section
-    const section = trainOccupancy.sections.find(s => 
-      s.departureStationName === fromStation && 
-      s.destinationStationName === toStation
-    );
+    try {
+      // Find matching section
+      const section = trainOccupancy.sections.find(s => 
+        s.departureStationName === fromStation && 
+        s.destinationStationName === toStation
+      );
 
-    if (!section) return null;
+      if (!section) return null;
 
-    // Find occupancy for the specified class
-    const occupancy = section.expectedDepartureOccupancies.find(o => 
-      o.fareClass === fareClass
-    );
+      // Find occupancy for the specified class
+      const occupancy = section.expectedDepartureOccupancies.find(o => 
+        o.fareClass === fareClass
+      );
 
-    if (!occupancy) return null;
+      if (!occupancy) return null;
 
-    return OCCUPANCY_VISUALIZATION[occupancy.occupancyLevel];
+      return OCCUPANCY_VISUALIZATION[occupancy.occupancyLevel];
+    } catch (error) {
+      // Handle any unexpected data structure issues silently
+      console.debug('Error processing occupancy data:', error);
+      return null;
+    }
   }
 
   /**
@@ -204,11 +218,16 @@ export class OccupancyService {
     data: OperatorOccupancy,
     trainNumber: string
   ): TrainOccupancy | null {
-    // Normalize train number for comparison
-    const normalizedSearchNumber = this.normalizeTrainNumber(trainNumber);
-    return data.trains.find(train => 
-      this.normalizeTrainNumber(train.trainNumber) === normalizedSearchNumber
-    ) || null;
+    try {
+      // Normalize train number for comparison
+      const normalizedSearchNumber = this.normalizeTrainNumber(trainNumber);
+      return data.trains.find(train => 
+        this.normalizeTrainNumber(train.trainNumber) === normalizedSearchNumber
+      ) || null;
+    } catch (error) {
+      console.debug('Error finding train occupancy:', error);
+      return null;
+    }
   }
 
   /**
@@ -217,10 +236,15 @@ export class OccupancyService {
    * @returns Normalized train number
    */
   private normalizeTrainNumber(trainNumber: string): string {
-    // Remove any non-numeric prefix (e.g., "IC", "IR", "S")
-    const numericPart = trainNumber.replace(/^[A-Za-z\s]+/, '');
-    
-    // Remove leading zeros and convert to string
-    return parseInt(numericPart, 10).toString();
+    try {
+      // Remove any non-numeric prefix (e.g., "IC", "IR", "S")
+      const numericPart = trainNumber.replace(/^[A-Za-z\s]+/, '');
+      
+      // Remove leading zeros and convert to string
+      return parseInt(numericPart, 10).toString();
+    } catch (error) {
+      console.debug('Error normalizing train number:', error);
+      return trainNumber; // Return original if normalization fails
+    }
   }
 } 
