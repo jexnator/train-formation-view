@@ -285,11 +285,11 @@
                   
                   <!-- Show "1/2" for mixed class wagons, otherwise show each class separately -->
                   <ng-container *ngIf="wagon.classes.includes('1') && wagon.classes.includes('2')">
-                    <text x="20" y="30" text-anchor="start" class="wagon-class">1/2</text>
+                    <text x="20" y="30" text-anchor="middle" class="wagon-class">1/2</text>
                   </ng-container>
-                  <ng-container *ngIf="!(wagon.classes.includes('1') && wagon.classes.includes('2'))">
+                                      <ng-container *ngIf="!(wagon.classes.includes('1') && wagon.classes.includes('2'))">
                     <ng-container *ngFor="let cls of wagon.classes; let idx = index">
-                      <text x="20" y="30" text-anchor="start" class="wagon-class">{{ cls }}</text>
+                      <text x="20" y="30" text-anchor="middle" class="wagon-class">{{ cls }}</text>
                     </ng-container>
                   </ng-container>
                   
@@ -298,7 +298,7 @@
                     <!-- First class occupancy -->
                     <image *ngIf="wagon.firstClassOccupancy"
                            [attr.href]="getOccupancyIconUrl(wagon.firstClassOccupancy.icon)" 
-                           x="40" y="14" 
+                           x="36" y="14" 
                            width="20" height="20"
                            preserveAspectRatio="xMidYMid meet"
                            class="occupancy-icon" />
@@ -306,7 +306,7 @@
                     <!-- Second class occupancy -->
                     <image *ngIf="wagon.secondClassOccupancy"
                            [attr.href]="getOccupancyIconUrl(wagon.secondClassOccupancy.icon)" 
-                           x="40" y="14" 
+                           x="36" y="14" 
                            width="20" height="20"
                            preserveAspectRatio="xMidYMid meet"
                            class="occupancy-icon" />
@@ -315,7 +315,7 @@
                   <!-- Entry icon in the right side of the wagon -->
                   <image *ngIf="wagon.type !== 'locomotive' && !(wagon.statusCodes && wagon.statusCodes.includes('Closed'))"
                          [attr.href]="getEntryIconUrl(wagon)" 
-                         x="60" y="14" 
+                         x="61" y="14" 
                          width="30" height="30"
                          preserveAspectRatio="xMidYMid meet"
                          class="entry-icon" />

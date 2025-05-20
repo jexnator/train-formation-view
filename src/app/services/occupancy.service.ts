@@ -2,17 +2,15 @@
  * @fileoverview Train Occupancy Service SKI+ Train Occupancy Visualization
  * 
  * This service is responsible for:
- * - Downloading and managing occupancy forecast ZIP files
- * - Parsing occupancy data for specific trains and operators
+ * - Loading pre-processed occupancy data from GitHub Pages
  * - Providing occupancy information for the visualization
  * - Managing cache and data updates
  */
 
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject, of, throwError, from } from 'rxjs';
-import { catchError, map, tap, switchMap } from 'rxjs/operators';
-import JSZip from 'jszip';
+import { Observable, BehaviorSubject, of, throwError } from 'rxjs';
+import { catchError, map, tap } from 'rxjs/operators';
 import { formatDate } from '@angular/common';
 import { 
   OperatorOccupancy, 
@@ -52,7 +50,6 @@ const OPERATOR_MAPPING: { [key: string]: string } = {
   providedIn: 'root'
 })
 export class OccupancyService {
-  private readonly ZIP_URL = 'https://data.opentransportdata.swiss/dataset/occupancy-forecast-json-dataset/permalink';
   private readonly CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
   private readonly MAX_FORECAST_DAYS = 3;
   
@@ -81,9 +78,6 @@ export class OccupancyService {
       return of(null);
     }
 
-    // Normalize train number (remove any prefix like "IC" or "IR" and leading zeros)
-    const normalizedTrainNumber = this.normalizeTrainNumber(trainNumber);
-
     const formattedDate = typeof date === 'string' ? date : formatDate(date, 'yyyy-MM-dd', 'en-US');
     
     // Validate date range
@@ -97,14 +91,24 @@ export class OccupancyService {
     const cachedData = this.cache.get(cacheKey);
     
     if (cachedData && this.isCacheValid(cachedData.timestamp)) {
-      return of(this.findTrainOccupancy(cachedData.data, normalizedTrainNumber));
+      return of(this.findTrainOccupancy(cachedData.data, trainNumber));
     }
 
     // Load data if not in cache
     this.loadingSubject.next(true);
     
-    return this.fetchOccupancyData(numericOperatorId, formattedDate).pipe(
-      map(data => this.findTrainOccupancy(data, normalizedTrainNumber)),
+    // Construct the URL for the pre-processed data
+    const dataUrl = `/train-formation-view/data/occupancy/${formattedDate}/operator-${numericOperatorId}.json`;
+    
+    return this.http.get<OperatorOccupancy>(dataUrl).pipe(
+      map(data => {
+        // Cache the data
+        this.cache.set(cacheKey, {
+          data,
+          timestamp: Date.now()
+        });
+        return this.findTrainOccupancy(data, trainNumber);
+      }),
       catchError(error => {
         console.error('Error fetching occupancy data:', error);
         return of(null);
@@ -191,46 +195,6 @@ export class OccupancyService {
   }
 
   /**
-   * Fetches occupancy data from the ZIP file
-   * @param operatorId Operator ID
-   * @param date Operation date
-   * @returns Observable with operator occupancy data
-   */
-  private fetchOccupancyData(
-    operatorId: string,
-    date: string
-  ): Observable<OperatorOccupancy> {
-    return this.http.get(this.ZIP_URL, { responseType: 'arraybuffer' }).pipe(
-      switchMap(data => from(new JSZip().loadAsync(data))),
-      switchMap(zipContent => {
-        const filePath = `${date}/operator-${operatorId}.json`;
-        const file = zipContent.file(filePath);
-        
-        if (!file) {
-          throw new Error(`Occupancy data not found for operator ${operatorId} on ${date}`);
-        }
-        
-        return from(file.async('string'));
-      }),
-      map(jsonContent => {
-        const occupancyData: OperatorOccupancy = JSON.parse(jsonContent);
-        
-        // Cache the data
-        this.cache.set(this.getCacheKey(operatorId, date), {
-          data: occupancyData,
-          timestamp: Date.now()
-        });
-        
-        return occupancyData;
-      }),
-      catchError(error => {
-        console.error('Error processing occupancy data:', error);
-        return throwError(() => error);
-      })
-    );
-  }
-
-  /**
    * Finds occupancy data for a specific train
    * @param data Operator occupancy data
    * @param trainNumber Train number to find
@@ -240,7 +204,11 @@ export class OccupancyService {
     data: OperatorOccupancy,
     trainNumber: string
   ): TrainOccupancy | null {
-    return data.trains.find(train => train.trainNumber === trainNumber) || null;
+    // Normalize train number for comparison
+    const normalizedSearchNumber = this.normalizeTrainNumber(trainNumber);
+    return data.trains.find(train => 
+      this.normalizeTrainNumber(train.trainNumber) === normalizedSearchNumber
+    ) || null;
   }
 
   /**

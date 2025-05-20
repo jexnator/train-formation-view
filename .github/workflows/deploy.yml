@@ -3,13 +3,71 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+  schedule:
+    # Run every day at 00:00 UTC
+    - cron: "0 0 * * *"
 
 permissions:
   contents: write
 
 jobs:
+  fetch-occupancy-data:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: gh-pages
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Create data directory
+        run: mkdir -p data/occupancy
+
+      - name: Download and process occupancy data
+        run: |
+          # Download the ZIP file
+          curl -L "https://data.opentransportdata.swiss/dataset/occupancy-forecast-json-dataset/permalink" -o occupancy.zip
+
+          # Create a temporary directory
+          mkdir -p temp_occupancy
+
+          # Unzip to temp directory
+          unzip -q occupancy.zip -d temp_occupancy
+
+          # Process only today and next 3 days
+          for i in {0..3}; do
+            date=$(date -d "+$i days" +%Y-%m-%d)
+            
+            # Check if directory exists
+            if [ -d "temp_occupancy/$date" ]; then
+              # Create operator directory
+              mkdir -p "data/occupancy/$date"
+              
+              # Copy and minify JSON files
+              for operator in 11 33 65 82; do
+                if [ -f "temp_occupancy/$date/operator-$operator.json" ]; then
+                  jq -c '.' "temp_occupancy/$date/operator-$operator.json" > "data/occupancy/$date/operator-$operator.json"
+                fi
+              done
+            fi
+          done
+
+          # Cleanup
+          rm -rf temp_occupancy occupancy.zip
+
+      - name: Commit and push if changed
+        run: |
+          git config --global user.name 'GitHub Actions Bot'
+          git config --global user.email 'actions@github.com'
+          git add data/occupancy
+          git diff --staged --quiet || (git commit -m "Update occupancy data" && git push)
+
   build-and-deploy:
     runs-on: ubuntu-latest
+    if: github.event_name == 'push'
     steps:
       - uses: actions/checkout@v3
 
@@ -40,6 +98,11 @@ jobs:
           echo "Using build directory: $DIST_DIR"
           touch $DIST_DIR/.nojekyll
           cp $DIST_DIR/index.html $DIST_DIR/404.html
+
+          # Copy occupancy data from gh-pages branch
+          git fetch origin gh-pages
+          git checkout origin/gh-pages -- data/occupancy
+          cp -r data $DIST_DIR/
 
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
