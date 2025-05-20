@@ -4,7 +4,7 @@
 
 An Angular based frontend to visualize train formations in the Swiss public transport system. Based on [Open Transport Data's Formation Service API](https://opentransportdata.swiss/en/cookbook/formationsdaten/), this frontend displays wagon arrangements, class information, and onboard services for Swiss trains.
 
-The frontend is an exploratory prototype intended to demonstrate a possible use case for the [Formation data - full API endpoint](https://api.opentransportdata.swiss/formations_full)
+The frontend is an exploratory prototype intended to demonstrate a possible use case for the [formation data - full API endpoint](https://api.opentransportdata.swiss/formations_full) and uses the [train-view-svg-library](https://github.com/jexnator/train-view-svg-library), which is licensed separately under CC BY 4.0.
 
 Purpose: The visualization helps passengers locate specific coaches, identify where low-floor entry points are available, and understand the overall formation of trains at different stops along a route.
 

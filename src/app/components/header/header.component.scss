@@ -54,3 +54,31 @@
 :host ::ng-deep .sbb-header-lean-container-end {
   margin-right: 0 !important;
 }
+
+// Theme toggle button styles
+sbb-header-icon-actions {
+  button[sbb-frameless-button] {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    transition: transform 0.2s ease;
+
+    &:hover {
+      transform: scale(1.1);
+    }
+
+    sbb-icon {
+      width: 30px;
+      height: 30px;
+    }
+  }
+}
+
+// Existing styles to hide logo and hamburger menu
+:host ::ng-deep {
+  .sbb-header-lean-menu-trigger,
+  .sbb-header-lean-brand {
+    display: none !important;
+  }
+}

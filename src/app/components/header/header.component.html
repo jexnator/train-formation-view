@@ -1,3 +1,10 @@
 <sbb-header-lean label="Train Formation Visualization">
-  <!-- Das Logo und Hamburger-Menü werden per CSS ausgeblendet -->
+  <!-- The sbb logo and hamburger menu are hidden via CSS -->
+  <sbb-header-icon-actions>
+    <button sbb-frameless-button
+            [sbbTooltip]="(darkMode$ | async) ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
+            (click)="toggleDarkMode()">
+      <sbb-icon [svgIcon]="(darkMode$ | async) ? 'sunshine-small' : 'moon-small'"></sbb-icon>
+    </button>
+  </sbb-header-icon-actions>
 </sbb-header-lean>
