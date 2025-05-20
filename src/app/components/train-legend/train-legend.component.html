@@ -76,6 +76,19 @@
     </div>
   </div>
 
+  <!-- Occupancy section - only shown if there are items -->
+  <div class="legend-section" *ngIf="legendOccupancy.length > 0">
+    <h3 class="sbb-headline3">Occupancy</h3>
+    <div class="legend-grid">
+      <div class="legend-item" *ngFor="let item of legendOccupancy">
+        <div class="pictogram-box">
+          <img [src]="item.svgUrl" alt="{{item.label}}" class="legend-svg-icon">
+        </div>
+        <span class="legend-label">{{ item.label }}</span>
+      </div>
+    </div>
+  </div>
+
   <!-- Facilities section - only shown if there are items -->
   <div class="legend-section" *ngIf="legendFacilities.length > 0">
     <h3 class="sbb-headline3">Sectors and Facilities</h3>

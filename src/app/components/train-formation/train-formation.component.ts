@@ -859,4 +859,13 @@ export class TrainFormationComponent implements OnInit, OnDestroy {
     
     return '';
   }
+
+  /**
+   * Get the SVG URL for an occupancy icon
+   * @param iconName The icon name (e.g. 'low-occupancy')
+   * @returns URL to the appropriate occupancy SVG on GitHub
+   */
+  getOccupancyIconUrl(iconName: string): string {
+    return `https://raw.githubusercontent.com/jexnator/train-view-svg-library/refs/heads/main/icons/${iconName}.svg`;
+  }
 }

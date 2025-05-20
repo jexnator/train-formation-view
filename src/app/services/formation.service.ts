@@ -11,11 +11,13 @@
 
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams, HttpErrorResponse } from '@angular/common/http';
-import { Observable, BehaviorSubject, throwError } from 'rxjs';
-import { catchError, tap, finalize } from 'rxjs/operators';
+import { Observable, BehaviorSubject, throwError, combineLatest } from 'rxjs';
+import { catchError, tap, finalize, map, switchMap } from 'rxjs/operators';
 import { ApiResponse, SearchParams, TrainVisualization, TrainWagon, TrainSection, WagonAttribute } from '../models/formation.model';
 import { formatDate } from '@angular/common';
 import { environment } from '../../environments/environment';
+import { OccupancyService } from './occupancy.service';
+import { FareClass } from '../models/occupancy.model';
 
 /**
  * Interface for API error information
@@ -87,7 +89,10 @@ export class FormationService {
   // Cache for the last API response
   private lastApiResponse: ApiResponse | null = null;
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private occupancyService: OccupancyService
+  ) {}
 
   /**
    * Fetches train formation data from the API
@@ -120,7 +125,21 @@ export class FormationService {
     }).pipe(
       tap(response => {
         this.lastApiResponse = response;
-        this.processFormationData(response);
+      }),
+      switchMap(response => {
+        // Get occupancy data if available
+        return combineLatest([
+          this.occupancyService.getTrainOccupancy(
+            response.trainMetaInformation.toCode,
+            response.trainMetaInformation.trainNumber.toString(),
+            operationDate
+          ),
+          Promise.resolve(response)
+        ]);
+      }),
+      map(([occupancyData, response]) => {
+        this.processFormationData(response, occupancyData);
+        return response;
       }),
       catchError((error: HttpErrorResponse) => {
         this.handleApiError(error, params);
@@ -159,7 +178,16 @@ export class FormationService {
     }
     
     this.currentStopIndexSubject.next(index);
-    this.processFormationData(this.lastApiResponse, index);
+
+    // Get occupancy data again for the new stop
+    const operationDate = this.lastApiResponse.journeyMetaInformation.operationDate;
+    const trainNumber = this.lastApiResponse.trainMetaInformation.trainNumber.toString();
+    const operatorId = this.lastApiResponse.trainMetaInformation.toCode;
+
+    this.occupancyService.getTrainOccupancy(operatorId, trainNumber, operationDate)
+      .subscribe(occupancyData => {
+        this.processFormationData(this.lastApiResponse!, occupancyData, index);
+      });
   }
 
   /**
@@ -172,9 +200,10 @@ export class FormationService {
   /**
    * Processes API response into visualization data structure
    * @param response API response data
+   * @param occupancyData Optional occupancy data
    * @param stopIndex Optional index of stop to process (defaults to 0)
    */
-  private processFormationData(response: ApiResponse, stopIndex: number = 0): void {
+  private processFormationData(response: ApiResponse, occupancyData: any = null, stopIndex: number = 0): void {
     if (!response || !response.formationsAtScheduledStops || 
         response.formationsAtScheduledStops.length === 0) {
       this.currentFormationSubject.next(null);
@@ -199,24 +228,67 @@ export class FormationService {
       };
     });
 
-    // Find the first stop with a non-null name (only show stops within Switzerland with proper formation data)
+    // Find the first stop with a non-null name
     let firstValidStopIndex = stopIndex;
-    if (stopIndex === 0) { // Only search for a valid stop if we're at the initial view
+    if (stopIndex === 0) {
       const validStopIndex = stops.findIndex(stop => stop.name !== null);
       if (validStopIndex >= 0) {
         firstValidStopIndex = validStopIndex;
       }
     }
 
-    // Set current stop index to a valid one
+    // Set current stop index
     this.currentStopIndexSubject.next(firstValidStopIndex);
     
     // Get current stop formation data
     const currentFormationStop = response.formationsAtScheduledStops[firstValidStopIndex];
     const formationString = currentFormationStop.formationShort.formationShortString;
     
-    // Parse formation string - sectors will be handled appropriately in the parser
+    // Parse formation string
     const sections = this.parseFormationString(formationString);
+
+    // Add occupancy data if available
+    if (occupancyData) {
+      const currentStop = stops[firstValidStopIndex];
+      const nextStop = stops[firstValidStopIndex + 1];
+
+      if (currentStop && nextStop) {
+        sections.forEach(section => {
+          section.wagons.forEach(wagon => {
+            // Add occupancy data for each class
+            if (wagon.classes.includes('1')) {
+              const firstClassOccupancy = this.occupancyService.getOccupancyVisualization(
+                occupancyData,
+                FareClass.FIRST,
+                currentStop.name,
+                nextStop.name
+              );
+              if (firstClassOccupancy) {
+                wagon.firstClassOccupancy = {
+                  icon: firstClassOccupancy.icon,
+                  label: firstClassOccupancy.label
+                };
+              }
+            }
+
+            if (wagon.classes.includes('2')) {
+              const secondClassOccupancy = this.occupancyService.getOccupancyVisualization(
+                occupancyData,
+                FareClass.SECOND,
+                currentStop.name,
+                nextStop.name
+              );
+              if (secondClassOccupancy) {
+                wagon.secondClassOccupancy = {
+                  icon: secondClassOccupancy.icon,
+                  label: secondClassOccupancy.label
+                };
+              }
+            }
+          });
+        });
+      }
+    }
 
     // Build the visualization data structure
     const trainVisualization: TrainVisualization = {
