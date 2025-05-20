@@ -16,8 +16,8 @@ export class ThemeService {
   private readonly DARK_MODE_KEY = 'darkMode';
   private readonly DARK_READER_CONFIG = {
     brightness: 100,
-    contrast: 90,
-    sepia: 10
+    contrast: 100,
+    sepia: 0
   };
 
   constructor() {
