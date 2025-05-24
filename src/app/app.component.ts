@@ -126,9 +126,6 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
 
     const viewportHeight = window.innerHeight;
     
-    // Use performance.now() for precise timing if needed
-    // const start = performance.now();
-    
     // Calculate heights of all components
     const headerHeight = header?.getBoundingClientRect().height || 0;
     const searchFormHeight = searchForm?.getBoundingClientRect().height || 0;
@@ -147,6 +144,9 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
     // Calculate the optimal spacing, accounting for fixed header
     let requiredSpace = Math.max(0, viewportHeight - totalContentHeight + FIXED_HEADER_HEIGHT);
     
+    // Add 10px buffer to prevent scroll issues
+    requiredSpace += 10;
+    
     // Limit the maximum spacing to prevent excessive whitespace
     const maxSpacing = viewportHeight * 0.3;
     requiredSpace = Math.min(requiredSpace, maxSpacing);
@@ -157,8 +157,6 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
     } else {
       this.bottomSpacingHeight = '0px';
     }
-    
-    // console.log('Spacing calculation took:', performance.now() - start, 'ms');
   }
   
   /**
