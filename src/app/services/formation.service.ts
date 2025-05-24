@@ -301,6 +301,26 @@ export class FormationService {
           );
         }
       }
+
+      // Get occupancy data for this stop
+      let occupancyInfo = null;
+      if (occupancyData?.sections?.length) {
+        // First try to find the section where this stop is the destination
+        const sectionToDestination = occupancyData.sections.find(
+          (s: any) => s.destinationStationId === stop.stopPoint.uic.toString()
+        );
+        
+        // If not found (e.g. for first stop), look for section where this stop is departure
+        const sectionFromDeparture = occupancyData.sections.find(
+          (s: any) => s.departureStationId === stop.stopPoint.uic.toString()
+        );
+
+        // Use the found section's occupancy data
+        const relevantSection = sectionToDestination || sectionFromDeparture;
+        if (relevantSection?.expectedDepartureOccupancies) {
+          occupancyInfo = relevantSection.expectedDepartureOccupancies;
+        }
+      }
       
       return {
         name: stop.stopPoint.name,
@@ -309,7 +329,8 @@ export class FormationService {
         departureTime: stop.stopTime.departureTime,
         track: stop.track,
         hasSectors: formationString?.includes('@') || /\\@[A-Z]/.test(formationString),
-        travelDirection
+        travelDirection,
+        occupancyInfo  // Pass the occupancy info to be processed later
       };
     });
 
