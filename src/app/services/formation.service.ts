@@ -26,7 +26,7 @@ import {
 import { formatDate } from '@angular/common';
 import { environment } from '../../environments/environment';
 import { OccupancyService } from './occupancy.service';
-import { FareClass } from '../models/occupancy.model';
+import { FareClass, OccupancySection } from '../models/occupancy.model';
 
 /**
  * Interface for API error information
@@ -301,26 +301,6 @@ export class FormationService {
           );
         }
       }
-
-      // Get occupancy data for this stop
-      let occupancyInfo = null;
-      if (occupancyData?.sections?.length) {
-        // First try to find the section where this stop is the destination
-        const sectionToDestination = occupancyData.sections.find(
-          (s: any) => s.destinationStationId === stop.stopPoint.uic.toString()
-        );
-        
-        // If not found (e.g. for first stop), look for section where this stop is departure
-        const sectionFromDeparture = occupancyData.sections.find(
-          (s: any) => s.departureStationId === stop.stopPoint.uic.toString()
-        );
-
-        // Use the found section's occupancy data
-        const relevantSection = sectionToDestination || sectionFromDeparture;
-        if (relevantSection?.expectedDepartureOccupancies) {
-          occupancyInfo = relevantSection.expectedDepartureOccupancies;
-        }
-      }
       
       return {
         name: stop.stopPoint.name,
@@ -329,8 +309,7 @@ export class FormationService {
         departureTime: stop.stopTime.departureTime,
         track: stop.track,
         hasSectors: formationString?.includes('@') || /\\@[A-Z]/.test(formationString),
-        travelDirection,
-        occupancyInfo  // Pass the occupancy info to be processed later
+        travelDirection
       };
     });
 
@@ -354,11 +333,15 @@ export class FormationService {
     const sections = this.parseFormationString(formationString);
 
     // Add occupancy data if available
-    if (occupancyData) {
+    if (occupancyData?.sections) {
       const currentStop = stops[firstValidStopIndex];
-      const nextStop = stops[firstValidStopIndex + 1];
+      
+      // Only process occupancy if this stop is a departure station in the occupancy data
+      const occupancySection = occupancyData.sections.find(
+        (section: OccupancySection) => section.departureStationName === currentStop.name
+      );
 
-      if (currentStop && nextStop) {
+      if (occupancySection && currentStop) {
         sections.forEach(section => {
           section.wagons.forEach(wagon => {
             // Add occupancy data for each class
@@ -367,7 +350,7 @@ export class FormationService {
                 occupancyData,
                 FareClass.FIRST,
                 currentStop.name,
-                nextStop.name
+                occupancySection.destinationStationName
               );
               if (firstClassOccupancy) {
                 wagon.firstClassOccupancy = {
@@ -382,7 +365,7 @@ export class FormationService {
                 occupancyData,
                 FareClass.SECOND,
                 currentStop.name,
-                nextStop.name
+                occupancySection.destinationStationName
               );
               if (secondClassOccupancy) {
                 wagon.secondClassOccupancy = {
