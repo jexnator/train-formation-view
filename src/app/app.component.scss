@@ -15,11 +15,32 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+
+  /* Initial state - footer at bottom */
+  &:not(.has-formation) {
+    justify-content: space-between;
+    
+    .content {
+      flex: 0 0 auto;
+    }
+    
+    .dynamic-spacing {
+      display: none;
+    }
+  }
+
+  /* After search state - allow dynamic spacing */
+  &.has-formation {
+    justify-content: flex-start;
+    
+    .content {
+      flex: 1 0 auto;
+    }
+  }
 }
 
-/* Main content area that grows to fill available space */
+/* Main content area */
 .content {
-  flex: 1 0 auto;
   display: flex;
   flex-direction: column;
 }
@@ -27,7 +48,7 @@ body {
 /* Main container with responsive padding */
 .train-view-container {
   padding: 24px;
-  padding-top: calc(var(--sbb-header-lean-height) + 24px); /* Account for fixed header height */
+  padding-top: calc(var(--sbb-header-lean-height) + 24px);
   max-width: 1198px;
   margin: 0 auto;
   width: 100%;
@@ -49,13 +70,19 @@ body {
   }
 }
 
+/* Dynamic spacing element styling */
+.dynamic-spacing {
+  width: 100%;
+  transition: height 0.3s ease-out;
+  pointer-events: none; /* Ensures the spacing doesn't interfere with interactions */
+}
+
 /* Footer styling */
 .footer {
   flex-shrink: 0;
   text-align: center;
   padding: 24px;
-  background-color: var(--sbb-color-white);
-  margin-top: -25px;
+  margin-top: 0px;
   
   p {
     margin: 0;

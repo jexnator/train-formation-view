@@ -180,25 +180,43 @@ export class SearchFormComponent implements OnInit, OnDestroy {
   
   /**
    * Scrolls to the train formation component after successful search
-   * Uses fixed offset to ensure proper positioning with the header
+   * Uses viewport-aware offset to ensure precise positioning with the dynamic spacing
    */
   private scrollToTrainFormation() {
-    // Delay the scroll slightly to ensure DOM updates are complete
+    // Delay the scroll slightly to ensure DOM updates are complete and dynamic spacing is calculated
     setTimeout(() => {
       requestAnimationFrame(() => {
         const trainFormation = document.querySelector('app-train-formation');
         if (!trainFormation) return;
 
-        // Use fixed offset for reliable positioning with fixed header
-        const offsetFromTop = -78;
-        const elementPosition = trainFormation.getBoundingClientRect().top;
-        const offsetPosition = window.pageYOffset + elementPosition + offsetFromTop;
-        
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: 'smooth'
-        });
+        // Get the search form position for reference
+        const searchForm = document.querySelector('app-search-form');
+        const headerHeight = 78; // Fixed header height
+
+        if (searchForm) {
+          // Calculate exact position where we want to scroll
+          const formationTop = trainFormation.getBoundingClientRect().top;
+          const scrollPosition = window.pageYOffset + formationTop - headerHeight;
+
+          // Force scroll to exact position
+          window.scrollTo({
+            top: scrollPosition,
+            behavior: 'smooth'
+          });
+
+          // Double-check scroll position after animation
+          setTimeout(() => {
+            const finalFormationTop = trainFormation.getBoundingClientRect().top;
+            if (Math.abs(finalFormationTop - headerHeight) > 2) { // Allow 2px tolerance
+              // Adjust if not exactly at desired position
+              window.scrollTo({
+                top: window.pageYOffset + (finalFormationTop - headerHeight),
+                behavior: 'auto' // Instant correction
+              });
+            }
+          }, 1000); // After scroll animation completes
+        }
       });
-    }, 100); // Small delay to ensure DOM is ready
+    }, 150); // Increased delay to ensure dynamic spacing is ready
   }
 }
