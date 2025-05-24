@@ -10,15 +10,9 @@
 
 /* Main legend container */
 .formation-legend {
-  padding: 24px;
-  padding-bottom: 8px;
+  padding: 24px 24px 8px;
   background-color: var(--sbb-color-milk);
   border-radius: 16px;
-
-  @media (max-width: 768px) {
-    padding: 24px;
-    padding-bottom: 8px;
-  }
 
   /* Title container */
   .title-container {
@@ -119,7 +113,6 @@
 
 /* White rounded box styling for Sectors and Facilities pictograms */
 .pictogram-box {
-  /* Apply white rounded box styling identical to wagon-attributes-badge */
   background-color: var(--sbb-color-white);
   border-radius: 16px;
   padding: 4px 8px;
@@ -148,7 +141,6 @@
 
 /* Special styling for sector range to handle multiple icons in one container */
 .legend-section:last-child .legend-item .sector-range {
-  /* Apply white rounded box styling identical to wagon-attributes-badge */
   background-color: var(--sbb-color-white);
   border-radius: 16px;
   padding: 4px 8px;
@@ -212,26 +204,6 @@
   stroke: black;
   stroke-width: 1.5;
   mask: url(#diagonalHatch);
-}
-
-svg .closed-pattern {
-  position: relative;
-}
-
-svg .closed-pattern::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: repeating-linear-gradient(
-    45deg,
-    rgba(255, 0, 0, 0.1),
-    rgba(255, 0, 0, 0.1) 5px,
-    rgba(255, 0, 0, 0.2) 5px,
-    rgba(255, 0, 0, 0.2) 10px
-  );
 }
 
 /* Very small screen adjustments */

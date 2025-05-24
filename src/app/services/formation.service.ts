@@ -281,39 +281,47 @@ export class FormationService {
       return;
     }
 
-    // Map all stops in the journey
-    const stops = response.formationsAtScheduledStops.map(formationStop => {
-      const stop = formationStop.scheduledStop;
-      const formationString = formationStop.formationShort.formationShortString;
-      
-      // Determine travel direction if we have formation data
-      let travelDirection: TravelDirection = 'unknown';
-      
-      if (response.formations?.[0]?.formationVehicles?.length) {
-        const firstVehicle = response.formations[0].formationVehicles[0];
-        const vehicleDataForThisStop = firstVehicle.formationVehicleAtScheduledStops
-          .find(vs => vs.stopPoint.uic === stop.stopPoint.uic);
+    // Map and filter stops - only include stops with formation data
+    const stops = response.formationsAtScheduledStops
+      .filter(formationStop => formationStop.formationShort.formationShortString?.trim())
+      .map(formationStop => {
+        const stop = formationStop.scheduledStop;
+        const formationString = formationStop.formationShort.formationShortString;
+        
+        // Determine travel direction if we have formation data
+        let travelDirection: TravelDirection = 'unknown';
+        
+        if (response.formations?.[0]?.formationVehicles?.length) {
+          const firstVehicle = response.formations[0].formationVehicles[0];
+          const vehicleDataForThisStop = firstVehicle.formationVehicleAtScheduledStops
+            .find(vs => vs.stopPoint.uic === stop.stopPoint.uic);
 
-        if (vehicleDataForThisStop) {
-          travelDirection = this.determineTravelDirection(
-            formationString,
-            vehicleDataForThisStop
-          );
+          if (vehicleDataForThisStop) {
+            travelDirection = this.determineTravelDirection(
+              formationString,
+              vehicleDataForThisStop
+            );
+          }
         }
-      }
-      
-      return {
-        name: stop.stopPoint.name,
-        uic: stop.stopPoint.uic,
-        arrivalTime: stop.stopTime.arrivalTime,
-        departureTime: stop.stopTime.departureTime,
-        track: stop.track,
-        hasSectors: formationString?.includes('@') || /\\@[A-Z]/.test(formationString),
-        travelDirection
-      };
-    });
+        
+        return {
+          name: stop.stopPoint.name,
+          uic: stop.stopPoint.uic,
+          arrivalTime: stop.stopTime.arrivalTime,
+          departureTime: stop.stopTime.departureTime,
+          track: stop.track,
+          hasSectors: formationString?.includes('@') || /\\@[A-Z]/.test(formationString),
+          travelDirection
+        };
+      });
 
-    // Find the first stop with a non-null name
+    // If no valid stops remain, return null
+    if (!stops.length) {
+      this.currentFormationSubject.next(null);
+      return;
+    }
+
+    // Find the first valid stop index in filtered stops
     let firstValidStopIndex = stopIndex;
     if (stopIndex === 0) {
       const validStopIndex = stops.findIndex(stop => stop.name !== null);
@@ -322,11 +330,23 @@ export class FormationService {
       }
     }
 
+    // Adjust stopIndex if it's out of bounds after filtering
+    if (firstValidStopIndex >= stops.length) {
+      firstValidStopIndex = 0;
+    }
+
     // Set current stop index
     this.currentStopIndexSubject.next(firstValidStopIndex);
     
-    // Get current stop formation data
-    const currentFormationStop = response.formationsAtScheduledStops[firstValidStopIndex];
+    // Get current stop formation data - safe after filtering
+    const currentFormationStop = response.formationsAtScheduledStops
+      .find(fs => fs.scheduledStop.stopPoint.uic === stops[firstValidStopIndex].uic);
+    
+    if (!currentFormationStop) {
+      this.currentFormationSubject.next(null);
+      return;
+    }
+
     const formationString = currentFormationStop.formationShort.formationShortString;
     
     // Parse formation string
@@ -830,13 +850,14 @@ export class FormationService {
     let noAccessToNext = false;
     
     // Check for group-level attributes (e.g. [(...)]#NF)
-    const groupAttributesMatch = groupContent.match(/\)[:#](\d+)(?:#([A-Z;]+))?$/);
-    const groupAttributes: WagonAttribute[] = [];
+    // These attributes should only apply to the last wagon in the group
+    const groupAttributesMatch = groupContent.match(/(?:\)|\])(?:[:#]\d+)?(?:#([A-Z;]+))?$/);
+    let groupAttributes: WagonAttribute[] = [];
     
-    if (groupAttributesMatch && groupAttributesMatch[2]) {
-      const offerList = groupAttributesMatch[2].split(';');
+    if (groupAttributesMatch && groupAttributesMatch[1]) {
+      const offerList = groupAttributesMatch[1].split(';');
       
-      // Process group-level attributes (will be added to each wagon)
+      // Process group-level attributes
       for (const offer of offerList) {
         const attr = this.getAttributeObject(offer);
         if (attr) {
@@ -872,10 +893,17 @@ export class FormationService {
       // Process vehicle tokens
       const parsedWagon = this.parseVehicleToken(token.value, currentSector, position++);
       if (parsedWagon) {
-        // Apply group attributes to individual wagon
-        for (const attr of groupAttributes) {
-          if (!parsedWagon.attributes.some(a => a.code === attr.code)) {
-            parsedWagon.attributes.push(attr);
+        // Only apply group attributes to the last real wagon in the group
+        const isLastRealWagon = tokens
+          .slice(i + 1)
+          .every(t => t.type !== TokenType.VEHICLE);
+        
+        if (isLastRealWagon && groupAttributes.length > 0) {
+          // Add group attributes to the last wagon's attributes
+          for (const attr of groupAttributes) {
+            if (!parsedWagon.attributes.some(a => a.code === attr.code)) {
+              parsedWagon.attributes.push(attr);
+            }
           }
         }
         
@@ -1119,8 +1147,13 @@ export class FormationService {
       return classes;
     }
 
-    // Remove parentheses at the beginning of token for proper class detection
+    // Remove status characters for class detection
     let cleanToken = token;
+    if (cleanToken.match(/^[-=>%]+/)) {
+      cleanToken = cleanToken.replace(/^[-=>%]+/, '');
+    }
+
+    // Remove parentheses at the beginning of token for proper class detection
     if (cleanToken.startsWith('(')) {
       cleanToken = cleanToken.substring(1);
     }
@@ -1128,9 +1161,9 @@ export class FormationService {
       cleanToken = cleanToken.substring(0, cleanToken.length - 1);
     }
 
-    // Handle the format N:M where N is class and M is number
-    // This needs to be checked first to avoid misinterpreting class indicators
-    const classNumberMatch = cleanToken.match(/(?:^|[,@]|\()([12]):(\d+)/);
+    // Handle the format N:M where N is class and M is ordinal number
+    // This needs to be checked first to avoid misinterpreting ordinal numbers as class indicators
+    const classNumberMatch = cleanToken.match(/^([12])(?::|\):|,:|@:)(\d+)/);
     if (classNumberMatch) {
       classes.push(classNumberMatch[1] as '1' | '2');
       return classes;
@@ -1150,21 +1183,21 @@ export class FormationService {
       return classes;
     }
 
-    // First class cases - check for markers after common delimiters
-    if (cleanToken.startsWith('1') || 
-        cleanToken.startsWith('12') || 
-        /[,:]1[:#,]/.test(cleanToken) ||
-        /\(1[:#,]/.test(cleanToken) ||
-        /@1[:#,]/.test(cleanToken)) {
+    // First class cases - check for markers at start or after delimiters
+    // Now also handles class indicators before brackets/parentheses
+    if (cleanToken.match(/^1(?:[:#,@\)\]]|$)/) || 
+        cleanToken.match(/^12(?:[:#,@\)\]]|$)/) || 
+        cleanToken.match(/[,@]1(?:[:#,@\)\]]|$)/) ||
+        cleanToken.match(/\(1(?:[:#,@\)\]]|$)/)) {
       classes.push('1');
     }
     
-    // Second class cases - check for markers after common delimiters
-    if (cleanToken.startsWith('2') || 
-        cleanToken.startsWith('12') || 
-        /[,:]2[:#,]/.test(cleanToken) ||
-        /\(2[:#,]/.test(cleanToken) ||
-        /@2[:#,]/.test(cleanToken)) {
+    // Second class cases - check for markers at start or after delimiters
+    // Now also handles class indicators before brackets/parentheses
+    if (cleanToken.match(/^2(?:[:#,@\)\]]|$)/) || 
+        cleanToken.match(/^12(?:[:#,@\)\]]|$)/) || 
+        cleanToken.match(/[,@]2(?:[:#,@\)\]]|$)/) ||
+        cleanToken.match(/\(2(?:[:#,@\)\]]|$)/)) {
       classes.push('2');
     }
 

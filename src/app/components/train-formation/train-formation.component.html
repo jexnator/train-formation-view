@@ -73,11 +73,13 @@
           <strong>Travel Direction</strong>
         </span>
         <span *ngIf="trainFormation.stops[selectedStopIndex].arrivalTime" 
-             [class.hide-on-small-screen]="selectedStopIndex !== 0 && selectedStopIndex !== trainFormation.stops.length - 1">
+             [class.hide-on-small-screen]="trainFormation.stops[selectedStopIndex].departureTime !== null"
+             class="arrival-time">
           <sbb-icon svgIcon="clock-extra-small"></sbb-icon> 
           <strong>Arrival:</strong> {{ trainFormation.stops[selectedStopIndex].arrivalTime | date:'HH:mm' }}
         </span>
-        <span *ngIf="trainFormation.stops[selectedStopIndex].departureTime">
+        <span *ngIf="trainFormation.stops[selectedStopIndex].departureTime" 
+             class="departure-time">
           <sbb-icon svgIcon="clock-extra-small"></sbb-icon> 
           <strong>Departure:</strong> {{ trainFormation.stops[selectedStopIndex].departureTime | date:'HH:mm' }}
         </span>
@@ -135,51 +137,52 @@
       
       <!-- Complete layout with separated wagons and sectors -->
       <div class="visualization-container">
-        <!-- Sector line as separate absolutely positioned element - only shown when sectors are available -->
-        <div class="sector-line-container" *ngIf="trainFormation.stops[selectedStopIndex].hasSectors">
+        <!-- Sector line container - always present but only visible with sectors -->
+        <div class="sector-line-container" [class.hidden]="!trainFormation.stops[selectedStopIndex].hasSectors">
           <div class="sector-line" [style.width.px]="getTotalTrainWidth()">
-            <ng-container *ngFor="let section of trainFormation.sections; let i = index; let isLast = last; let isFirst = first">
-              <div class="sector-marker" 
-                  [ngClass]="getSectorClasses(section)" 
-                  [style.width.px]="getSectorWidth(section)">
-                <!-- Remove sector labels from here -->
-              </div>
-            </ng-container>
-            
-            <!-- Sector labels as separate absolutely positioned elements -->
-            <ng-container *ngFor="let section of trainFormation.sections; let i = index">
-              <div class="sector-label" 
-                   [style.left.px]="getSectorMidpoint(i)">
-                <img [src]="getSectorSvgUrl(section.sector)" alt="Sector {{section.sector}}" class="sector-icon">
-              </div>
-            </ng-container>
-            
-            <!-- Sector boundaries as separate absolute elements with consistent width -->
-            <ng-container *ngFor="let section of trainFormation.sections; let i = index; let isLast = last">
-              <!-- Beginning boundary - exact same styling as others -->
-              <div *ngIf="i === 0" class="sector-boundary boundary-line"
-                   [style.left.px]="1"></div>
+            <ng-container *ngIf="trainFormation.stops[selectedStopIndex].hasSectors">
+              <ng-container *ngFor="let section of trainFormation.sections; let i = index; let isLast = last; let isFirst = first">
+                <div class="sector-marker" 
+                    [ngClass]="getSectorClasses(section)" 
+                    [style.width.px]="getSectorWidth(section)">
+                </div>
+              </ng-container>
               
-              <!-- Middle boundaries between sectors -->
-              <div *ngIf="i > 0" class="sector-boundary boundary-line" 
-                   [style.left.px]="getExactSectorBoundaryPosition(i)"></div>
+              <!-- Sector labels as separate absolutely positioned elements -->
+              <ng-container *ngFor="let section of trainFormation.sections; let i = index">
+                <div class="sector-label" 
+                     [style.left.px]="getSectorMidpoint(i)">
+                  <img [src]="getSectorSvgUrl(section.sector)" alt="Sector {{section.sector}}" class="sector-icon">
+                </div>
+              </ng-container>
               
-              <!-- End boundary -->
-              <div *ngIf="isLast" class="sector-boundary boundary-line"
-                   [style.left.px]="getTotalTrainWidth() - 1"></div>
+              <!-- Sector boundaries as separate absolute elements with consistent width -->
+              <ng-container *ngFor="let section of trainFormation.sections; let i = index; let isLast = last">
+                <!-- Beginning boundary -->
+                <div *ngIf="i === 0" class="sector-boundary boundary-line"
+                     [style.left.px]="1"></div>
+                
+                <!-- Middle boundaries between sectors -->
+                <div *ngIf="i > 0" class="sector-boundary boundary-line" 
+                     [style.left.px]="getExactSectorBoundaryPosition(i)"></div>
+                
+                <!-- End boundary -->
+                <div *ngIf="isLast" class="sector-boundary boundary-line"
+                     [style.left.px]="getTotalTrainWidth() - 1"></div>
+              </ng-container>
+              
+              <!-- Horizontal line with exact width -->
+              <div class="sector-horizontal-line" [style.width.px]="getTotalTrainWidth()"></div>
             </ng-container>
-            
-            <!-- Horizontal line with exact width -->
-            <div class="sector-horizontal-line" [style.width.px]="getTotalTrainWidth()"></div>
           </div>
         </div>
         
         <!-- Wagons in separate container - independent of sectors -->
         <div class="train-wagons-container">
-      <div class="train-wagons">
-            <!-- Flat structure - all wagons in one row, independent of sectors -->
+          <div class="train-wagons">
+            <!-- Flat structure - all wagons in one row -->
             <ng-container *ngFor="let wagon of getAllWagons(); let i = index; let isLast = last">
-              <!-- Wagon Container - Fixed Width -->
+              <!-- Wagon Container -->
               <div class="wagon-container" 
                    [ngClass]="getWagonClasses(wagon)"
                    [sbbTooltip]="wagonTooltip" 
@@ -197,10 +200,9 @@
                            C92,5 90,2 85,2
                            Z"></path>
                   <text x="50" y="-5" text-anchor="middle" class="wagon-number">{{ wagon.number }}</text>
-                  <!-- Locomotives don't display class designations -->
                 </svg>
                 
-                <!-- Regular wagon visualization - with sloped edges when at start/end -->
+                <!-- Regular wagon visualization -->
                 <svg *ngIf="wagon.type !== 'locomotive'" class="wagon-svg" viewBox="0 0 100 50" preserveAspectRatio="none">
                   <!-- Regular wagon (rectangular) -->
                   <ng-container *ngIf="!needsSlopedLeftEdge(wagon, i) && !needsSlopedRightEdge(wagon, i)">
@@ -292,7 +294,7 @@
                   <ng-container *ngIf="wagon.classes.includes('1') && wagon.classes.includes('2')">
                     <text x="20" y="30" text-anchor="middle" class="wagon-class">1/2</text>
                   </ng-container>
-                                      <ng-container *ngIf="!(wagon.classes.includes('1') && wagon.classes.includes('2'))">
+                  <ng-container *ngIf="!(wagon.classes.includes('1') && wagon.classes.includes('2'))">
                     <ng-container *ngFor="let cls of wagon.classes; let idx = index">
                       <text x="20" y="30" text-anchor="middle" class="wagon-class">{{ cls }}</text>
                     </ng-container>
@@ -414,7 +416,7 @@
                 </ng-template>
               </div>
               
-              <!-- Connector between wagons - always identical -->
+              <!-- Connector between wagons -->
               <div *ngIf="!isLast" 
                   class="wagon-connector" 
                   [ngClass]="getWagonConnectionClass(wagon, getNextWagon(i))">
@@ -427,7 +429,7 @@
           </div>
         </div>
         
-        <!-- Sector background highlights - as separate layer under the wagons - only shown when sectors are available -->
+        <!-- Sector background highlights -->
         <div class="sector-highlights-container" *ngIf="trainFormation.stops[selectedStopIndex].hasSectors">
           <ng-container *ngFor="let section of trainFormation.sections; let i = index; let last = last">
             <div class="sector-highlight" 
@@ -437,7 +439,7 @@
             </div>
           </ng-container>
           
-          <!-- Sector dividers as separate absolute elements -->
+          <!-- Sector dividers -->
           <ng-container *ngFor="let section of trainFormation.sections; let i = index;">
             <div *ngIf="i > 0" class="sector-divider" 
                  [style.left.px]="getExactSectorBoundaryPosition(i)"></div>

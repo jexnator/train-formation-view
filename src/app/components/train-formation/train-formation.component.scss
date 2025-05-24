@@ -160,13 +160,6 @@
   min-width: 200px;
 }
 
-.train-number {
-  font-size: 24px;
-  font-weight: bold;
-  color: var(--sbb-color-blue);
-  /* Preserved for reference but unused */
-}
-
 .train-route {
   font-size: 16px;
   color: var(--sbb-color-black);
@@ -212,6 +205,7 @@
   overflow-x: auto;
   scrollbar-width: thin;
   max-width: max-content;
+  margin-bottom: 0; /* Ensure consistent spacing to details below */
 
   &::-webkit-scrollbar {
     height: 4px;
@@ -252,16 +246,23 @@
   color: var(--sbb-color-metal);
   font-size: 14px;
   flex-wrap: wrap;
+  min-height: 48px; /* Ensure consistent height regardless of content */
 
   span {
     display: flex;
     align-items: center;
     gap: 4px;
     margin-right: 8px;
+    height: 24px; /* Fixed height for all info items */
   }
 
   sbb-icon {
     color: var(--sbb-color-blue);
+    width: 20px; /* Fixed width for all icons */
+    height: 20px; /* Fixed height for all icons */
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   
   @media (max-width: 576px) {
@@ -313,11 +314,6 @@
   width: fit-content; /* Ensures content-based width */
 }
 
-/* Remove old automatic line implementation */
-.sector-line:after {
-  display: none;
-}
-
 /* Sector marker with precise positioning */
 .sector-marker {
   position: relative;
@@ -366,28 +362,6 @@
   pointer-events: none; /* Don't interfere with mouse events */
 }
 
-.sector-boundary.left {
-  left: 0;
-}
-
-.sector-boundary.right {
-  right: 0;
-}
-
-/* Consistent styling for all boundary types */
-.sector-boundary.boundary-start,
-.sector-boundary.boundary-end,
-.sector-boundary.boundary-middle {
-  height: 16px;
-  bottom: -7px; /* Centers on horizontal line */
-}
-
-/* Remove old boundary implementations */
-.sector-marker:before,
-.sector-marker:after {
-  display: none;
-}
-
 /* Transparent styling for N/A sectors */
 .sector-n\/a {
   background-color: transparent;
@@ -398,7 +372,7 @@
   display: flex;
   padding: 0;
   min-width: min-content;
-  margin-left: 1px; /* Shifts wagon row 1px right for alignment */
+  margin-left: 1px; /* Consistent 1px margin for alignment with sector lines */
   /* Ensure consistent spacing between wagons */
   font-size: 0;
   line-height: 0;
@@ -434,25 +408,6 @@
   /* Touch interaction improvements */
   touch-action: pan-x pan-y !important;
   cursor: pointer;
-
-  /* Reserved wagon indicator */
-  &.wagon-reserved::after {
-    content: '';
-    position: absolute;
-    top: 16px; /* Adjusted for top padding */
-    left: 0;
-    width: 100%;
-    height: calc(100% - 16px); /* Adjusted height excluding top padding */
-    border: 2px dashed var(--sbb-color-cloud);
-    z-index: 1;
-    pointer-events: none;
-    box-sizing: border-box;
-  }
-
-  /* Remove blue dot for unserviced wagons */
-  &.wagon-unserviced::after {
-    display: none;
-  }
 }
 
 /* --- WAGON CONNECTOR --- */
@@ -475,21 +430,6 @@
     height: 10px;
     z-index: 10;
   }
-  
-  /* Maintain backward compatibility while using SVG */
-  &.no-access::after {
-    display: none; /* Hide old implementation */
-  }
-}
-
-/* Backward compatibility for no-access styling */
-.wagon-connector.no-access::after {
-  display: none;
-}
-
-/* Remove deprecated indicator class */
-.no-access-indicator {
-  display: none !important;
 }
 
 /* --- WAGON CLASS INDICATORS --- */
@@ -644,13 +584,6 @@
   color: var(--sbb-color-charcoal);
 }
 
-/* Legend connector styling */
-.legend-connector {
-  width: 24px;
-  height: 4px;
-  background-color: var(--sbb-color-red);
-}
-
 /* --- VISUALIZATION CONTAINER --- */
 .visualization-container {
   position: relative;
@@ -658,12 +591,8 @@
   min-width: 100%;
   padding-left: 0;
   overflow-y: visible;
-}
-
-@media (max-width: 768px) {
-  .visualization-container {
-    padding-left: 0; /* Consistent padding across breakpoints */
-  }
+  /* Ensure consistent left margin regardless of sectors */
+  margin-left: 0;
 }
 
 /* --- SECTOR LINE CONTAINER --- */
@@ -675,11 +604,12 @@
   margin-bottom: 12px;
   padding-top: 8px;
   padding-left: 0; /* Consistent with visualization container */
-}
 
-@media (max-width: 768px) {
-  .sector-line-container {
-    padding-left: 0; /* Consistent padding across breakpoints */
+  &.hidden {
+    height: 0; /* Collapse height when hidden */
+    margin-bottom: 0; /* Remove bottom margin when hidden */
+    padding-top: 0; /* Remove top padding when hidden */
+    overflow: hidden; /* Ensure no content bleeds out */
   }
 }
 
@@ -706,6 +636,8 @@
   scrollbar-color: transparent transparent;
   padding-left: 0; /* Consistent padding */
   padding-bottom: 48px; /* Ensures badges remain within scroll area */
+  /* Ensure consistent left margin regardless of sectors */
+  margin-left: 0;
 
   /* Touch scrolling optimizations */
   touch-action: pan-x pan-y !important;
@@ -726,18 +658,6 @@
   &::-webkit-scrollbar-thumb {
     background-color: transparent;
     border-radius: 4px;
-  }
-}
-
-/* Prevent vertical clipping of content */
-.train-wagons {
-  position: relative;
-  overflow-y: visible;
-}
-
-@media (max-width: 768px) {
-  .train-wagons-container {
-    padding-left: 0; /* Consistent padding across breakpoints */
   }
 }
 
@@ -777,29 +697,6 @@
   z-index: 5;
   transform: translateX(-50%); /* Perfect alignment */
   pointer-events: none;
-}
-
-/* Consistent sector boundary styling */
-.sector-boundary {
-  position: absolute;
-  bottom: -7px; /* Centers on horizontal line */
-  width: 2px; /* Consistent width */
-  height: 16px;
-  background-color: var(--sbb-color-blue);
-  z-index: 5;
-  transform: translateX(-50%);
-  pointer-events: none;
-}
-
-/* Force consistency for all boundary types */
-.sector-boundary.boundary-start,
-.sector-boundary.boundary-end,
-.sector-boundary.boundary-middle,
-.sector-boundary.start-boundary,
-.sector-boundary.end-boundary {
-  width: 2px; /* Consistent width */
-  height: 16px;
-  bottom: -7px; /* Centers on horizontal line */
 }
 
 /* --- TEXT ELEMENTS --- */
@@ -930,14 +827,25 @@
 }
 
 /* Responsive display utility */
-.hide-on-small-screen {
-  @media (max-width: 576px) {
-    display: none !important;
-  }
-}
-
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 610px) {
   .hide-on-small-screen {
     display: none !important;
+  }
+
+  .stop-details {
+    span {
+      display: flex;
+      align-items: center;
+    }
+
+    // Hide arrival time by default on small screens
+    .arrival-time.hide-on-small-screen {
+      display: none !important;
+    }
+
+    // Show arrival time when it's the only time available (end station)
+    .arrival-time:not(.hide-on-small-screen) {
+      display: flex !important;
+    }
   }
 }

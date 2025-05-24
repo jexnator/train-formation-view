@@ -30,32 +30,23 @@
   background-color: var(--sbb-color-milk);
 }
 
-/* Hide SBB logo as requested */
-:host ::ng-deep .sbb-header-lean-logo {
-  display: none !important;
+/* Hide unused SBB components */
+:host ::ng-deep {
+  .sbb-header-lean-logo,
+  .sbb-header-lean-open-menu,
+  .sbb-header-lean-side-menu-container,
+  .sbb-header-lean-side-menu-backdrop,
+  .sbb-header-lean-menu-trigger,
+  .sbb-header-lean-brand {
+    display: none !important;
+  }
+
+  .sbb-header-lean-container-end {
+    margin-right: 0 !important;
+  }
 }
 
-/* Hide hamburger menu in mobile view - not needed for this application */
-:host ::ng-deep .sbb-header-lean-open-menu {
-  display: none !important;
-}
-
-/* Completely hide sidebar (even during page loading) */
-:host ::ng-deep .sbb-header-lean-side-menu-container {
-  display: none !important;
-}
-
-/* Hide sidebar backdrop */
-:host ::ng-deep .sbb-header-lean-side-menu-backdrop {
-  display: none !important;
-}
-
-/* Optional: Compensate for the missing logo/menu space */
-:host ::ng-deep .sbb-header-lean-container-end {
-  margin-right: 0 !important;
-}
-
-// Theme toggle button styles
+/* Theme toggle button styles */
 sbb-header-icon-actions {
   button[sbb-frameless-button] {
     display: flex;
@@ -72,13 +63,5 @@ sbb-header-icon-actions {
       width: 30px;
       height: 30px;
     }
-  }
-}
-
-// Existing styles to hide logo and hamburger menu
-:host ::ng-deep {
-  .sbb-header-lean-menu-trigger,
-  .sbb-header-lean-brand {
-    display: none !important;
   }
 }

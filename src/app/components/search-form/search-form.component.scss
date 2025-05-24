@@ -13,8 +13,7 @@
 
 /* Main container with SBB milk background */
 .search-form-container {
-  padding: 24px;
-  padding-bottom: 11px;
+  padding: 24px 24px 11px;
   background-color: var(--sbb-color-milk);
   border-radius: 16px;
 }
@@ -38,7 +37,6 @@
   align-items: flex-start;
   gap: 8px; /* Consistent spacing between elements */
   flex-wrap: wrap;
-  padding-bottom: 0px;
 }
 
 /* Form fields group */
@@ -127,81 +125,35 @@ button {
 
 /* Large screens: Button wraps first */
 @media (max-width: 1200px) {
-  .search-form-container {
-    padding: 24px;
-    padding-bottom: 11px;
-  }
-  
   .button-container {
     width: 100%;
     margin-top: 8px;
-    padding-bottom: 8px;
   }
   
   .form-fields {
     width: 100%;
   }
   
-  button {
-    margin-bottom: 0;
-  }
-}
-
-@media (max-width: 1199px) {
   .form-row {
-    padding-bottom: 8px; 
+    padding-bottom: 8px;
   }
 }
 
 /* Medium screens: Third form field wraps */
 @media (max-width: 992px) {
-  .search-form-container {
-    padding: 24px;
-    padding-bottom: 11px;
-  }
-  
   sbb-form-field:nth-child(3) {
     width: 100%;
-  }
-  
-  .button-container {
-    padding-bottom: 8px;
-  }
-  
-  button {
-    margin-bottom: 0;
-  }
-
-  .form-row {
-    padding-bottom: 8px;
   }
 }
 
 /* Small screens: All fields stack vertically */
 @media (max-width: 768px) {
-  .search-form-container {
-    padding: 24px;
-    padding-bottom: 11px;
-  }
-  
+  sbb-form-field:nth-child(1),
   sbb-form-field:nth-child(2) {
-    width: 100%;
-  }
-  
-  sbb-form-field:nth-child(1) {
     width: 100%;
   }
   
   button {
     width: 100%;
-    margin-bottom: 0;
-  }
-  
-  .button-container {
-    padding-bottom: 8px;
-  }
-
-  .form-row {
-    padding-bottom: 8px;
   }
 }
