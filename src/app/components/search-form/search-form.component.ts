@@ -187,17 +187,17 @@ export class SearchFormComponent implements OnInit, OnDestroy {
   private scrollToTrainFormation() {
     // Wait for DOM and spacing to be ready (300ms proven to be the sweet spot)
     setTimeout(() => {
-      const trainFormation = document.querySelector('app-train-formation');
-      if (!trainFormation) return;
+        const trainFormation = document.querySelector('app-train-formation');
+        if (!trainFormation) return;
 
       const headerHeight = 78;
       const formationTop = trainFormation.getBoundingClientRect().top;
       const scrollPosition = window.scrollY + formationTop - headerHeight;
 
       // Single smooth scroll to the target position
-      window.scrollTo({
+        window.scrollTo({
         top: scrollPosition,
-        behavior: 'smooth'
+          behavior: 'smooth'
       });
     }, 300);
   }

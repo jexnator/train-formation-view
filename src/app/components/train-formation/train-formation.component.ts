@@ -896,4 +896,28 @@ export class TrainFormationComponent implements OnInit, OnDestroy {
     const attribute = wagon.attributes.find(attr => attr.code === attrCode);
     return attribute ? attribute.label : '';
   }
+
+  onStopSelect(index: number) {
+    // Store current position relative to formation
+    const formationElement = document.querySelector('app-train-formation');
+    const formationRect = formationElement?.getBoundingClientRect();
+    const relativePosition = formationRect ? formationRect.top : 0;
+    
+    // Update selected stop
+    this.selectedStopIndex = index;
+    
+    // After view updates, restore relative position
+    requestAnimationFrame(() => {
+      if (formationElement && formationRect) {
+        const newRect = formationElement.getBoundingClientRect();
+        const offset = newRect.top - relativePosition;
+        if (Math.abs(offset) > 1) { // Only adjust if significant change
+          window.scrollBy({
+            top: offset,
+            behavior: 'instant'
+          });
+        }
+      }
+    });
+  }
 }
