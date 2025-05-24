@@ -13,7 +13,16 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams, HttpErrorResponse } from '@angular/common/http';
 import { Observable, BehaviorSubject, throwError, combineLatest } from 'rxjs';
 import { catchError, tap, finalize, map, switchMap } from 'rxjs/operators';
-import { ApiResponse, SearchParams, TrainVisualization, TrainWagon, TrainSection, WagonAttribute } from '../models/formation.model';
+import { 
+  ApiResponse, 
+  SearchParams, 
+  TrainVisualization, 
+  TrainWagon, 
+  TrainSection, 
+  WagonAttribute,
+  FormationVehicleAtScheduledStop,
+  TravelDirection
+} from '../models/formation.model';
 import { formatDate } from '@angular/common';
 import { environment } from '../../environments/environment';
 import { OccupancyService } from './occupancy.service';
@@ -70,7 +79,7 @@ enum WagonStatus {
   providedIn: 'root'
 })
 export class FormationService {
-  private apiUrl = 'https://api.opentransportdata.swiss/formations_full';
+  private apiUrl = 'https://api.opentransportdata.swiss/formation/v1/formations_full';
   private apiKey = environment.apiKey;
   
   // State management via BehaviorSubjects
@@ -198,14 +207,76 @@ export class FormationService {
   }
 
   /**
+   * Determines the travel direction based on the formation string and first vehicle's sectors
+   * 
+   * The direction is determined by comparing:
+   * 1. The visual order of sectors from the formation string (left to right)
+   * 2. The sectors of the first vehicle at the current stop
+   * 
+   * Special cases:
+   * - 'F' markers in formation string are ignored (fictitious wagons)
+   * - Multiple sectors per vehicle are supported
+   * - First vehicle might not be at the edge of formation
+   * 
+   * @param formationString Formation string showing visual wagon order
+   * @param firstVehicle First vehicle data with sector information
+   * @returns Travel direction ('left', 'right', or 'unknown')
+   */
+  private determineTravelDirection(
+    formationString: string, 
+    firstVehicle: FormationVehicleAtScheduledStop
+  ): TravelDirection {
+    if (!formationString?.trim() || !firstVehicle?.sectors) {
+      return 'unknown';
+    }
+
+    try {
+      // Get ordered list of actual sectors (excluding fictitious wagons)
+      const visualSectors = this.parseFormationString(formationString)
+        .map(section => section.sector)
+        .filter(sector => sector?.trim());
+
+      if (!visualSectors.length) {
+        return 'unknown';
+      }
+
+      // Get vehicle's sectors (may have multiple)
+      const vehicleSectors = firstVehicle.sectors
+        .split(',')
+        .map((s: string) => s.trim())
+        .filter((s: string) => s);
+
+      if (!vehicleSectors.length) {
+        return 'unknown';
+      }
+
+      // Check if any of the vehicle's sectors match edge sectors
+      const firstSector = visualSectors[0];
+      const lastSector = visualSectors[visualSectors.length - 1];
+
+      if (vehicleSectors.includes(firstSector)) {
+        return 'left';
+      }
+      
+      if (vehicleSectors.includes(lastSector)) {
+        return 'right';
+      }
+
+      return 'unknown';
+    } catch (error) {
+      console.warn('Failed to determine travel direction:', error);
+      return 'unknown';
+    }
+  }
+
+  /**
    * Processes API response into visualization data structure
    * @param response API response data
    * @param occupancyData Optional occupancy data
    * @param stopIndex Optional index of stop to process (defaults to 0)
    */
   private processFormationData(response: ApiResponse, occupancyData: any = null, stopIndex: number = 0): void {
-    if (!response || !response.formationsAtScheduledStops || 
-        response.formationsAtScheduledStops.length === 0) {
+    if (!response?.formationsAtScheduledStops?.length) {
       this.currentFormationSubject.next(null);
       return;
     }
@@ -215,8 +286,21 @@ export class FormationService {
       const stop = formationStop.scheduledStop;
       const formationString = formationStop.formationShort.formationShortString;
       
-      // Better detection of sectors - check for @ markers or \@X patterns
-      const hasSectors = formationString.includes('@') || /\\@[A-Z]/.test(formationString);
+      // Determine travel direction if we have formation data
+      let travelDirection: TravelDirection = 'unknown';
+      
+      if (response.formations?.[0]?.formationVehicles?.length) {
+        const firstVehicle = response.formations[0].formationVehicles[0];
+        const vehicleDataForThisStop = firstVehicle.formationVehicleAtScheduledStops
+          .find(vs => vs.stopPoint.uic === stop.stopPoint.uic);
+
+        if (vehicleDataForThisStop) {
+          travelDirection = this.determineTravelDirection(
+            formationString,
+            vehicleDataForThisStop
+          );
+        }
+      }
       
       return {
         name: stop.stopPoint.name,
@@ -224,7 +308,8 @@ export class FormationService {
         arrivalTime: stop.stopTime.arrivalTime,
         departureTime: stop.stopTime.departureTime,
         track: stop.track,
-        hasSectors: hasSectors
+        hasSectors: formationString?.includes('@') || /\\@[A-Z]/.test(formationString),
+        travelDirection
       };
     });
 
@@ -1023,13 +1108,13 @@ export class FormationService {
    */
   private determineWagonClasses(token: string): ('1' | '2')[] {
     const classes: ('1' | '2')[] = [];
-    
+
     // Special case for family cars (FA) and family zones (FZ) - always 2nd class
     if (token.includes('FA') || token.includes('FZ')) {
       classes.push('2');
       return classes;
     }
-    
+
     // Remove parentheses at the beginning of token for proper class detection
     let cleanToken = token;
     if (cleanToken.startsWith('(')) {
@@ -1038,25 +1123,32 @@ export class FormationService {
     if (cleanToken.endsWith(')')) {
       cleanToken = cleanToken.substring(0, cleanToken.length - 1);
     }
-    
-    // Handle the format 1:N where N is any number (like 1:2 which is a 1st class car)
-    const firstClassWithNumber = cleanToken.match(/^1:(\d+)/) || cleanToken.match(/\(1:(\d+)/) || cleanToken.match(/@1:(\d+)/);
-    if (firstClassWithNumber) {
+
+    // Handle the format N:M where N is class and M is number
+    // This needs to be checked first to avoid misinterpreting class indicators
+    const classNumberMatch = cleanToken.match(/(?:^|[,@]|\()([12]):(\d+)/);
+    if (classNumberMatch) {
+      classes.push(classNumberMatch[1] as '1' | '2');
+      return classes;
+    }
+
+    // Handle restaurant car types
+    if (cleanToken.includes('WR')) {
+      classes.push('2'); // Standard restaurant car is 2nd class
+      return classes;
+    }
+    if (cleanToken.includes('W1')) {
       classes.push('1');
       return classes;
     }
-    
-    // Handle the format 2:N where N is any number (like 2:8 which is a 2nd class car)
-    const secondClassWithNumber = cleanToken.match(/^2:(\d+)/) || cleanToken.match(/\(2:(\d+)/) || cleanToken.match(/@2:(\d+)/);
-    if (secondClassWithNumber) {
+    if (cleanToken.includes('W2')) {
       classes.push('2');
       return classes;
     }
-    
+
     // First class cases - check for markers after common delimiters
     if (cleanToken.startsWith('1') || 
         cleanToken.startsWith('12') || 
-        cleanToken.startsWith('W1') || 
         /[,:]1[:#,]/.test(cleanToken) ||
         /\(1[:#,]/.test(cleanToken) ||
         /@1[:#,]/.test(cleanToken)) {
@@ -1066,13 +1158,12 @@ export class FormationService {
     // Second class cases - check for markers after common delimiters
     if (cleanToken.startsWith('2') || 
         cleanToken.startsWith('12') || 
-        cleanToken.startsWith('W2') || 
         /[,:]2[:#,]/.test(cleanToken) ||
         /\(2[:#,]/.test(cleanToken) ||
         /@2[:#,]/.test(cleanToken)) {
       classes.push('2');
     }
-    
+
     return classes;
   }
   

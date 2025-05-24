@@ -114,6 +114,62 @@ export interface ScheduledStop {
 }
 
 /**
+ * Travel direction type
+ */
+export type TravelDirection = 'left' | 'right' | 'unknown';
+
+/**
+ * Vehicle data at a scheduled stop
+ */
+export interface FormationVehicleAtScheduledStop {
+  /** Stop point information */
+  stopPoint: StopPoint;
+  
+  /** Stop timing information */
+  stopTime: StopTime;
+  
+  /** Platform/track information */
+  track: string;
+  
+  /** Platform sectors for this vehicle (comma-separated) */
+  sectors: string | null;
+  
+  /** Whether this vehicle can be accessed from the previous one */
+  accessToPreviousVehicle: boolean;
+}
+
+/**
+ * Formation vehicle information
+ */
+export interface FormationVehicle {
+  /** Vehicle identification information */
+  vehicleIdentifier: any; // Type can be expanded if needed
+  
+  /** Position in the formation */
+  position: number;
+  
+  /** Vehicle number */
+  number: number;
+  
+  /** Vehicle data at each scheduled stop */
+  formationVehicleAtScheduledStops: FormationVehicleAtScheduledStop[];
+  
+  /** Vehicle properties */
+  vehicleProperties: any; // Type can be expanded if needed
+}
+
+/**
+ * Formation information
+ */
+export interface Formation {
+  /** Meta information about the formation */
+  metaInformation: any; // Type can be expanded if needed
+  
+  /** List of vehicles in the formation */
+  formationVehicles: FormationVehicle[];
+}
+
+/**
  * Formation information for a specific scheduled stop
  */
 export interface FormationAtScheduledStop {
@@ -170,6 +226,9 @@ export interface ApiResponse {
   
   /** Formation data for each scheduled stop */
   formationsAtScheduledStops: FormationAtScheduledStop[];
+
+  /** Detailed formation information */
+  formations: Formation[];
 }
 
 /**
@@ -286,6 +345,9 @@ export interface TrainVisualization {
     
     /** Whether this stop has sector information */
     hasSectors: boolean;
+
+    /** Travel direction at this stop ('left' | 'right' | 'unknown') */
+    travelDirection?: 'left' | 'right' | 'unknown';
   }[];
   
   /** Train sections with wagons */

@@ -63,6 +63,15 @@
       </div>
       
       <div class="stop-details" *ngIf="trainFormation.stops[selectedStopIndex]">
+        <span *ngIf="trainFormation.stops[selectedStopIndex].track">
+          <sbb-icon svgIcon="platform-small"></sbb-icon> 
+          <strong>Track:</strong> {{ trainFormation.stops[selectedStopIndex].track }}
+        </span>
+        <span *ngIf="trainFormation.stops[selectedStopIndex].travelDirection !== 'unknown'"
+              class="hide-on-small-screen">
+          <sbb-icon [svgIcon]="'arrow-' + trainFormation.stops[selectedStopIndex].travelDirection + '-extra-small'"></sbb-icon>
+          <strong>Travel Direction</strong>
+        </span>
         <span *ngIf="trainFormation.stops[selectedStopIndex].arrivalTime" 
              [class.hide-on-small-screen]="selectedStopIndex !== 0 && selectedStopIndex !== trainFormation.stops.length - 1">
           <sbb-icon svgIcon="clock-extra-small"></sbb-icon> 
@@ -71,10 +80,6 @@
         <span *ngIf="trainFormation.stops[selectedStopIndex].departureTime">
           <sbb-icon svgIcon="clock-extra-small"></sbb-icon> 
           <strong>Departure:</strong> {{ trainFormation.stops[selectedStopIndex].departureTime | date:'HH:mm' }}
-        </span>
-        <span *ngIf="trainFormation.stops[selectedStopIndex].track">
-          <sbb-icon svgIcon="platform-small"></sbb-icon> 
-          <strong>Track:</strong> {{ trainFormation.stops[selectedStopIndex].track }}
         </span>
       </div>
     </div>

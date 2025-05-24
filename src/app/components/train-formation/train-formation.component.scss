@@ -935,3 +935,9 @@
     display: none !important;
   }
 }
+
+@media screen and (max-width: 768px) {
+  .hide-on-small-screen {
+    display: none !important;
+  }
+}
