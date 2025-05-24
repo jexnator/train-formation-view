@@ -4,7 +4,7 @@
  * 
  * Note on SBB Components: This file includes various overrides of SBB Angular components
  * through deep selectors. These modifications are made with permission for the SKI+ project
- * while respecting the SBB license terms indicated in the LICENSE file.
+ * while respecting the SBB license terms.
  */
 
 /* Logo styles removed as requested by SKI+ */
@@ -20,7 +20,7 @@
   color: var(--sbb-color-blue);
   font-family: var(--sbb-font-bold);
   border-right: 1px solid var(--sbb-color-iron);
-  padding-right: 5px;
+  padding-right: 4px;
   margin-right: 10px;
 }
 
@@ -52,8 +52,11 @@ sbb-header-icon-actions {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 8px;
     transition: transform 0.2s ease;
+    position: relative;
+    right: 0;
+    height: auto;
+    min-height: 40px;
 
     &:hover {
       transform: scale(1.1);
@@ -62,6 +65,44 @@ sbb-header-icon-actions {
     sbb-icon {
       width: 30px;
       height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      ::ng-deep svg {
+        width: 100%;
+        height: 100%;
+        max-height: 30px;
+      }
+    }
+
+    /* Responsive adjustments for mobile devices */
+    @media (max-width: 500px) {
+      padding: 4px;
+      min-height: 36px;
+
+      sbb-icon {
+        width: 28px;
+        height: 28px;
+
+        ::ng-deep svg {
+          max-height: 28px;
+        }
+      }
+    }
+  }
+}
+
+/* Ensure header container is properly sized on mobile */
+:host ::ng-deep .sbb-header-lean {
+  @media (max-width: 500px) {
+  
+    .sbb-header-lean-label {
+      font-size: 19px;
+    }
+    
+    .sbb-header-lean-label::before {
+      margin-right: 10px;
     }
   }
 }
