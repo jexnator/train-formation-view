@@ -183,20 +183,22 @@ export class SearchFormComponent implements OnInit, OnDestroy {
    * Uses fixed offset to ensure proper positioning with the header
    */
   private scrollToTrainFormation() {
-    // Use requestAnimationFrame to ensure DOM is ready
-    requestAnimationFrame(() => {
-      const trainFormation = document.querySelector('app-train-formation');
-      if (!trainFormation) return;
+    // Delay the scroll slightly to ensure DOM updates are complete
+    setTimeout(() => {
+      requestAnimationFrame(() => {
+        const trainFormation = document.querySelector('app-train-formation');
+        if (!trainFormation) return;
 
-      // Use fixed offset for reliable positioning with fixed header
-      const offsetFromTop = -78;
-      const elementPosition = trainFormation.getBoundingClientRect().top;
-      const offsetPosition = window.pageYOffset + elementPosition + offsetFromTop;
-      
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: 'smooth'
+        // Use fixed offset for reliable positioning with fixed header
+        const offsetFromTop = -78;
+        const elementPosition = trainFormation.getBoundingClientRect().top;
+        const offsetPosition = window.pageYOffset + elementPosition + offsetFromTop;
+        
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        });
       });
-    });
+    }, 100); // Small delay to ensure DOM is ready
   }
 }

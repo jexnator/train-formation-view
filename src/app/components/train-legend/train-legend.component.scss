@@ -35,6 +35,13 @@
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
     gap: 4px 16px;
+
+    /* Reduce gap between Low Floor Access and Entry with Steps when wrapped because of aligned SVG Viewports in y */
+    @media (max-width: 591px) {
+      .legend-item:has(img[alt="Low Floor Access"]) + .legend-item:has(img[alt="Entry with Steps"]) {
+        margin-top: -7px;
+      }
+    }
   }
 
   /* Individual legend item */
@@ -179,23 +186,21 @@
   border-radius: 0 !important;
   padding: 0 !important;
   box-shadow: none !important;
-  height: auto !important;
-  width: auto !important;
 }
 
 /* Accessibility icon sizing - made more robust with multiple selectors */
 .legend-item img[alt="Low Floor Access"], 
 .legend-item img[alt="Low Floor Entry"],
 .legend-item img[alt="Entry with Steps"] {
-  width: 28px;
-  height: 28px;
+  width: 30px !important;
+  height: 30px !important;
   object-fit: contain; /* Ensure the image maintains its aspect ratio */
 }
 
 /* Special sizing for no-passage icon inside pictogram box */
 .pictogram-box img[alt="No passage between wagons"] {
-  width: 18px;
-  height: 18px;
+  width: 18px !important;
+  height: 18px !important;
 }
 
 /* Pattern styling for closed wagon visualization */
