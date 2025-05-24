@@ -6,16 +6,32 @@
 /* Base body styling with SBB white background */
 body {
   background-color: var(--sbb-color-white);
+  margin: 0;
   min-height: 100vh;
+}
+
+/* Page container with flex layout */
+.page-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Main content area that grows to fill available space */
+.content {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Main container with responsive padding */
 .train-view-container {
   padding: 24px;
   padding-top: calc(var(--sbb-header-lean-height) + 24px); /* Account for fixed header height */
-  padding-bottom: 100px;
   max-width: 1198px;
   margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* Section containing train formation visualization and legend */
@@ -29,6 +45,33 @@ body {
   @media (min-width: 992px) {
     app-train-formation {
       flex: 1;
+    }
+  }
+}
+
+/* Footer styling */
+.footer {
+  flex-shrink: 0;
+  text-align: center;
+  padding: 24px;
+  background-color: var(--sbb-color-white);
+  margin-top: -25px;
+  
+  p {
+    margin: 0;
+    color: var(--sbb-form-label-color);
+    font-family: var(--sbb-font-standard);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  a {
+    color: var(--sbb-color-blue);
+    text-decoration: none;
+    vertical-align: baseline;
+    
+    &:hover {
+      text-decoration: underline;
     }
   }
 }

@@ -1,11 +1,19 @@
 <app-header></app-header>
 
-<div class="train-view-container">
-  <app-search-form></app-search-form>
-  
-  <div class="visualization-section">
-    <app-train-formation></app-train-formation>
-    <app-train-legend *ngIf="showLegend"></app-train-legend>
+<div class="page-container">
+  <div class="content">
+    <div class="train-view-container">
+      <app-search-form></app-search-form>
+      
+      <div class="visualization-section">
+        <app-train-formation></app-train-formation>
+        <app-train-legend *ngIf="showLegend"></app-train-legend>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>This showcase uses the <a href="https://api-manager.opentransportdata.swiss/portal/catalogue-products/tedp_formation_service_api-1" target="_blank">train formation service API</a> published by <a href="https://www.oev-info.ch/de/organisation/ueber-ski" target="_blank">SKI+</a>. Visit the cookbook <a href="https://opentransportdata.swiss/en/cookbook/realtime-prediction-cookbook/formationsdaten/" target="_blank">here</a>.</p>
   </div>
 </div>
 
