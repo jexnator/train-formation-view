@@ -32,11 +32,11 @@ export interface LegendAttribute {
   /** CSS class for custom styling of the item */
   style?: string;
   
-  /** URL for external SVG icon */
-  svgUrl?: string;
+  /** Path to SVG icon */
+  svgPath?: string;
   
-  /** Additional SVG URL for sector range display (end sector) */
-  endSvgUrl?: string;
+  /** Additional SVG path for sector range display (end sector) */
+  endSvgPath?: string;
   
   /** Indicates if item should be rendered as a range (e.g. sector range) */
   isRange?: boolean;
@@ -137,44 +137,39 @@ export class TrainLegendComponent implements OnInit, OnDestroy {
   }
   
   /**
-   * Returns the URL for the no-passage icon from SVG repository
-   * @returns URL to the no-passage SVG
+   * Returns the path for the no-passage SVG icon
+   * @returns Local asset path for no-passage icon
    */
-  getNoPassageSvgUrl(): string {
-    return 'https://raw.githubusercontent.com/jexnator/train-view-svg-library/refs/heads/main/icons/no-passage.svg';
+  private getNoPassageSvgPath(): string {
+    return 'assets/icons/no-passage.svg';
   }
 
   /**
-   * Returns the URL for the low floor entry icon from SVG repository
-   * @returns URL to the low floor entry SVG
+   * Returns the path for the low-floor entry SVG icon
+   * @returns Local asset path for low-floor entry icon
    */
-  getLowFloorEntryUrl(): string {
-    return 'https://raw.githubusercontent.com/jexnator/train-view-svg-library/refs/heads/main/icons/low-floor-entry.svg';
+  private getLowFloorEntryPath(): string {
+    return 'assets/icons/low-floor-entry.svg';
   }
 
   /**
-   * Returns the URL for the entry with steps icon from SVG repository
-   * @returns URL to the entry with steps SVG
+   * Returns the path for the entry-with-steps SVG icon
+   * @returns Local asset path for entry with steps icon
    */
-  getEntryWithStepsUrl(): string {
-    return 'https://raw.githubusercontent.com/jexnator/train-view-svg-library/refs/heads/main/icons/entry-with-steps.svg';
+  private getEntryWithStepsPath(): string {
+    return 'assets/icons/entry-with-steps.svg';
   }
-  
+
   /**
-   * Returns the URL for a specific sector pictogram from SVG repository
-   * @param sector The sector letter (A, B, C, etc.)
-   * @returns URL to the sector-specific SVG
+   * Returns the path for a sector letter SVG icon
+   * @param sectorLetter The sector letter to get the icon for
+   * @returns Local asset path for sector icon
    */
-  getSectorSvgUrl(sector: string): string {
-    // Handle N/A or empty sectors
-    if (!sector || sector === 'N/A') {
+  private getSectorSvgPath(sectorLetter: string): string {
+    if (!sectorLetter || sectorLetter === 'N/A') {
       return '';
     }
-    
-    // Convert to lowercase to match filename convention
-    const sectorLetter = sector.toLowerCase();
-    
-    return `https://raw.githubusercontent.com/jexnator/train-view-svg-library/refs/heads/main/pictos/sector-${sectorLetter}.svg`;
+    return `assets/pictos/sector-${sectorLetter.toLowerCase()}.svg`;
   }
   
   /**
@@ -221,7 +216,7 @@ export class TrainLegendComponent implements OnInit, OnDestroy {
         (wagon.noAccessToPrevious || wagon.noAccessToNext) && wagon.type !== 'locomotive')) {
       this.legendWagonTypes.push({ 
         label: 'No passage between cars', 
-        svgUrl: this.getNoPassageSvgUrl() 
+        svgPath: this.getNoPassageSvgPath() 
       });
     }
   }
@@ -237,7 +232,7 @@ export class TrainLegendComponent implements OnInit, OnDestroy {
     if (allWagons.some(wagon => wagon.attributes.some(attr => ['NF', 'KW'].includes(attr.code)))) {
       this.legendAccessibility.push({ 
         label: 'Low Floor Access', 
-        svgUrl: this.getLowFloorEntryUrl() 
+        svgPath: this.getLowFloorEntryPath() 
       });
     }
     
@@ -248,7 +243,7 @@ export class TrainLegendComponent implements OnInit, OnDestroy {
     )) {
       this.legendAccessibility.push({ 
         label: 'Entry with Steps', 
-        svgUrl: this.getEntryWithStepsUrl() 
+        svgPath: this.getEntryWithStepsPath() 
       });
     }
   }
@@ -263,19 +258,19 @@ export class TrainLegendComponent implements OnInit, OnDestroy {
     // First, add platform sectors if available
     this.addPlatformSectorsToFacilities();
     
-    // Map of attribute codes to their pictogram URLs and labels
-    const facilitiesMap: { [key: string]: { label: string, url: string } } = {
-      'BHP': { label: 'Wheelchair Spaces', url: 'https://raw.githubusercontent.com/jexnator/train-view-svg-library/refs/heads/main/pictos/wheelchair.svg' },
-      'VH': { label: 'Bike Hooks', url: 'https://raw.githubusercontent.com/jexnator/train-view-svg-library/refs/heads/main/pictos/bike-hooks.svg' },
-      'VR': { label: 'Bike Hooks Reservation Required', url: 'https://raw.githubusercontent.com/jexnator/train-view-svg-library/refs/heads/main/pictos/bike-hooks-reservation.svg' },
-      'BZ': { label: 'Business Zone', url: 'https://raw.githubusercontent.com/jexnator/train-view-svg-library/refs/heads/main/pictos/business.svg' },
-      'FZ': { label: 'Family Zone', url: 'https://raw.githubusercontent.com/jexnator/train-view-svg-library/refs/heads/main/pictos/family-zone.svg' },
-      'FA': { label: 'Family Zone', url: 'https://raw.githubusercontent.com/jexnator/train-view-svg-library/refs/heads/main/pictos/family-zone.svg' },
-      'LA': { label: 'Luggage Space', url: 'https://raw.githubusercontent.com/jexnator/train-view-svg-library/refs/heads/main/pictos/lugage.svg' },
-      'WR': { label: 'Restaurant', url: 'https://raw.githubusercontent.com/jexnator/train-view-svg-library/refs/heads/main/pictos/restaurant.svg' },
-      'WL': { label: 'Sleeping compartments', url: 'https://raw.githubusercontent.com/jexnator/train-view-svg-library/refs/heads/main/pictos/sleep.svg' },
-      'CC': { label: 'Couchette Compartments', url: 'https://raw.githubusercontent.com/jexnator/train-view-svg-library/refs/heads/main/pictos/couchette.svg' },
-      'KW': { label: 'Stroller Platform', url: 'https://raw.githubusercontent.com/jexnator/train-view-svg-library/refs/heads/main/pictos/stroller.svg' },
+    // Map of attribute codes to their pictogram paths and labels
+    const facilitiesMap: { [key: string]: { label: string, path: string } } = {
+      'BHP': { label: 'Wheelchair Spaces', path: 'assets/pictos/wheelchair.svg' },
+      'VH': { label: 'Bike Hooks', path: 'assets/pictos/bike-hooks.svg' },
+      'VR': { label: 'Bike Hooks Reservation Required', path: 'assets/pictos/bike-hooks-reservation.svg' },
+      'BZ': { label: 'Business Zone', path: 'assets/pictos/business.svg' },
+      'FZ': { label: 'Family Zone', path: 'assets/pictos/family-zone.svg' },
+      'FA': { label: 'Family Zone', path: 'assets/pictos/family-zone.svg' },
+      'LA': { label: 'Luggage Space', path: 'assets/pictos/lugage.svg' },
+      'WR': { label: 'Restaurant', path: 'assets/pictos/restaurant.svg' },
+      'WL': { label: 'Sleeping compartments', path: 'assets/pictos/sleep.svg' },
+      'CC': { label: 'Couchette Compartments', path: 'assets/pictos/couchette.svg' },
+      'KW': { label: 'Stroller Platform', path: 'assets/pictos/stroller.svg' }
     };
     
     // Collect all unique attribute codes that are in the facilities map
@@ -301,7 +296,7 @@ export class TrainLegendComponent implements OnInit, OnDestroy {
       const facility = facilitiesMap[code];
       this.legendFacilities.push({
         label: facility.label,
-        svgUrl: facility.url
+        svgPath: facility.path
       });
     });
   }
@@ -341,8 +336,8 @@ export class TrainLegendComponent implements OnInit, OnDestroy {
     if (firstSector && lastSector) {
       this.legendFacilities.push({
         label: 'Platform sectors',
-        svgUrl: this.getSectorSvgUrl(firstSector),
-        endSvgUrl: firstSector !== lastSector ? this.getSectorSvgUrl(lastSector) : undefined,
+        svgPath: this.getSectorSvgPath(firstSector),
+        endSvgPath: firstSector !== lastSector ? this.getSectorSvgPath(lastSector) : undefined,
         isRange: true
       });
     }
@@ -376,7 +371,7 @@ export class TrainLegendComponent implements OnInit, OnDestroy {
       if (presentOccupancyLevels.has(occupancy.icon)) {
         this.legendOccupancy.push({
           label: occupancy.label,
-          svgUrl: `https://raw.githubusercontent.com/jexnator/train-view-svg-library/refs/heads/main/icons/${occupancy.icon}.svg`
+          svgPath: `assets/icons/${occupancy.icon}.svg`
         });
       }
     });

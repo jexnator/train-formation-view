@@ -633,68 +633,87 @@ export class TrainFormationComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Get the SVG URL for a sector pictogram from GitHub
-   * @param sector The sector letter (A, B, C, etc.)
-   * @returns URL to the sector SVG on GitHub
+   * Returns the path for a sector letter SVG icon
+   * @param sectorLetter The sector letter to get the icon for
+   * @returns Local asset path for sector icon
    */
-  getSectorSvgUrl(sector: string): string {
-    // Handle N/A or empty sectors
-    if (!sector || sector === 'N/A') {
+  getSectorSvgPath(sectorLetter: string): string {
+    if (!sectorLetter || sectorLetter === 'N/A') {
       return '';
     }
-    
-    // Convert to lowercase to match filenames
-    const sectorLetter = sector.toLowerCase();
-    
-    // Return the raw GitHub URL for the sector SVG
-    return `https://raw.githubusercontent.com/jexnator/train-view-svg-library/main/pictos/sector-${sectorLetter}.svg`;
+    return `assets/pictos/sector-${sectorLetter.toLowerCase()}.svg`;
   }
 
   /**
-   * Get the SVG URL for the no-passage icon from GitHub
-   * @returns URL to the no-passage SVG on GitHub
+   * Returns the path for the no-passage SVG icon
+   * @returns Local asset path for no-passage icon
    */
-  getNoPassageSvgUrl(): string {
-    return 'https://raw.githubusercontent.com/jexnator/train-view-svg-library/main/icons/no-passage.svg';
+  getNoPassageSvgPath(): string {
+    return 'assets/icons/no-passage.svg';
   }
 
   /**
-   * Get the SVG URL for the entry icon based on wagon attributes
+   * Returns the path for the low-floor entry SVG icon
+   * @returns Local asset path for low-floor entry icon
+   */
+  getLowFloorEntryPath(): string {
+    return 'assets/icons/low-floor-entry.svg';
+  }
+
+  /**
+   * Returns the path for the entry-with-steps SVG icon
+   * @returns Local asset path for entry with steps icon
+   */
+  getEntryWithStepsPath(): string {
+    return 'assets/icons/entry-with-steps.svg';
+  }
+
+  /**
+   * Returns the path for a pictogram based on its name
+   * @param pictogram The name of the pictogram
+   * @returns Local asset path for the pictogram
+   */
+  getPictogramPath(pictogram: string): string {
+    return `assets/pictos/${pictogram}`;
+  }
+
+  /**
+   * Returns the path for an icon based on its name
+   * @param iconName The name of the icon
+   * @returns Local asset path for the icon
+   */
+  getIconPath(iconName: string): string {
+    return `assets/icons/${iconName}.svg`;
+  }
+
+  /**
+   * Get the path for an occupancy icon
+   * @param iconName The icon name (e.g. 'low-occupancy')
+   * @returns Path to the appropriate occupancy SVG
+   */
+  getOccupancyIconPath(iconName: string): string {
+    return this.getIconPath(iconName);
+  }
+
+  /**
+   * Get the path for the entry icon based on wagon attributes
    * @param wagon The wagon to check for low floor entry attribute
-   * @returns URL to the appropriate entry SVG on GitHub
+   * @returns Path to the appropriate entry SVG
    */
-  getEntryIconUrl(wagon: TrainWagon): string {
+  getEntryIconPath(wagon: TrainWagon): string {
     if (this.hasLowFloorEntry(wagon)) {
-      return 'https://raw.githubusercontent.com/jexnator/train-view-svg-library/main/icons/low-floor-entry.svg';
+      return this.getLowFloorEntryPath();
     } else {
-      return 'https://raw.githubusercontent.com/jexnator/train-view-svg-library/main/icons/entry-with-steps.svg';
+      return this.getEntryWithStepsPath();
     }
   }
 
   /**
-   * Check if a wagon has the low floor entry attribute
-   * @param wagon The wagon to check
-   * @returns true if the wagon has low floor entry
-   */
-  hasLowFloorEntry(wagon: TrainWagon): boolean {
-    // Check only for NF attribute explicitly - KW (Stroller Platform) isn't a low floor entry
-    const hasAttribute = wagon.attributes.some(attr => attr.code === 'NF');
-    
-    // For sectored and non-sectored stops, if VH+NF is in the properties, ensure we detect it properly
-    const hasNFInGroup = wagon.attributes.some(attr => attr.code === 'VH') &&
-                         (wagon.attributes.some(attr => attr.code === 'NF') || 
-                          wagon.number.includes('#VH;NF') ||
-                          wagon.number.includes('#NF;VH'));
-    
-    return hasAttribute || hasNFInGroup;
-  }
-
-  /**
-   * Get the SVG URL for an attribute pictogram
+   * Get the path for an attribute pictogram
    * @param attributeCode The attribute code to map to a pictogram
-   * @returns URL to the appropriate pictogram SVG on GitHub
+   * @returns Path to the appropriate pictogram SVG
    */
-  getAttributePictogramUrl(attributeCode: string): string {
+  getAttributePictogramPath(attributeCode: string): string {
     const pictogramMap: { [key: string]: string } = {
       'BHP': 'wheelchair.svg',
       'VH': 'bike-hooks.svg',
@@ -712,51 +731,7 @@ export class TrainFormationComponent implements OnInit, OnDestroy {
     const pictogram = pictogramMap[attributeCode] || '';
     if (!pictogram) return '';
     
-    return `https://raw.githubusercontent.com/jexnator/train-view-svg-library/refs/heads/main/pictos/${pictogram}`;
-  }
-
-  /**
-   * Filter which attributes should be displayed as pictograms
-   * @param wagon The wagon to get pictogram attributes for
-   * @returns Array of attribute codes that should be shown as pictograms
-   */
-  getWagonPictogramAttributes(wagon: TrainWagon): string[] {
-    // Get attribute codes that should be shown as pictograms
-    const displayableCodes = [
-      'BHP', 'VH', 'VR', 'BZ', 'FZ', 'FA', 'LA', 'WR', 'WL', 'CC', 'KW'
-    ];
-    
-    // Don't show restaurant pictogram (WR) when wagon is unserviced
-    let filteredCodes = displayableCodes;
-    if (wagon.statusCodes && wagon.statusCodes.includes('Open but unserviced')) {
-      filteredCodes = displayableCodes.filter(code => code !== 'WR');
-    }
-    
-    // Filter the wagon attributes to include only those we want to display as pictograms
-    // This excludes NF (low floor) as it's already shown as an entry icon
-    return wagon.attributes
-      .filter(attr => filteredCodes.includes(attr.code))
-      .map(attr => attr.code);
-  }
-
-  /**
-   * Check if the wagon has any pictogram attributes to display
-   * @param wagon The wagon to check
-   * @returns true if the wagon has pictogram attributes
-   */
-  hasWagonPictograms(wagon: TrainWagon): boolean {
-    return this.getWagonPictogramAttributes(wagon).length > 0;
-  }
-
-  /**
-   * Get attribute label by its code
-   * @param wagon The wagon containing the attributes
-   * @param attrCode The attribute code to look up
-   * @returns The label of the attribute or empty string if not found
-   */
-  getAttributeLabelByCode(wagon: TrainWagon, attrCode: string): string {
-    const attribute = wagon.attributes.find(attr => attr.code === attrCode);
-    return attribute ? attribute.label : '';
+    return this.getPictogramPath(pictogram);
   }
 
   /**
@@ -861,11 +836,64 @@ export class TrainFormationComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Get the SVG URL for an occupancy icon
-   * @param iconName The icon name (e.g. 'low-occupancy')
-   * @returns URL to the appropriate occupancy SVG on GitHub
+   * Check if a wagon has the low floor entry attribute
+   * @param wagon The wagon to check
+   * @returns true if the wagon has low floor entry
    */
-  getOccupancyIconUrl(iconName: string): string {
-    return `https://raw.githubusercontent.com/jexnator/train-view-svg-library/refs/heads/main/icons/${iconName}.svg`;
+  hasLowFloorEntry(wagon: TrainWagon): boolean {
+    // Check only for NF attribute explicitly - KW (Stroller Platform) isn't a low floor entry
+    const hasAttribute = wagon.attributes.some(attr => attr.code === 'NF');
+    
+    // For sectored and non-sectored stops, if VH+NF is in the properties, ensure we detect it properly
+    const hasNFInGroup = wagon.attributes.some(attr => attr.code === 'VH') &&
+                        (wagon.attributes.some(attr => attr.code === 'NF') || 
+                         wagon.number.includes('#VH;NF') ||
+                         wagon.number.includes('#NF;VH'));
+    
+    return hasAttribute || hasNFInGroup;
+  }
+
+  /**
+   * Filter which attributes should be displayed as pictograms
+   * @param wagon The wagon to get pictogram attributes for
+   * @returns Array of attribute codes that should be shown as pictograms
+   */
+  getWagonPictogramAttributes(wagon: TrainWagon): string[] {
+    // Get attribute codes that should be shown as pictograms
+    const displayableCodes = [
+      'BHP', 'VH', 'VR', 'BZ', 'FZ', 'FA', 'LA', 'WR', 'WL', 'CC', 'KW'
+    ];
+    
+    // Don't show restaurant pictogram (WR) when wagon is unserviced
+    let filteredCodes = displayableCodes;
+    if (wagon.statusCodes && wagon.statusCodes.includes('Open but unserviced')) {
+      filteredCodes = displayableCodes.filter(code => code !== 'WR');
+    }
+    
+    // Filter the wagon attributes to include only those we want to display as pictograms
+    // This excludes NF (low floor) as it's already shown as an entry icon
+    return wagon.attributes
+      .filter(attr => filteredCodes.includes(attr.code))
+      .map(attr => attr.code);
+  }
+
+  /**
+   * Check if the wagon has any pictogram attributes to display
+   * @param wagon The wagon to check
+   * @returns true if the wagon has pictogram attributes
+   */
+  hasWagonPictograms(wagon: TrainWagon): boolean {
+    return this.getWagonPictogramAttributes(wagon).length > 0;
+  }
+
+  /**
+   * Get attribute label by its code
+   * @param wagon The wagon containing the attributes
+   * @param attrCode The attribute code to look up
+   * @returns The label of the attribute or empty string if not found
+   */
+  getAttributeLabelByCode(wagon: TrainWagon, attrCode: string): string {
+    const attribute = wagon.attributes.find(attr => attr.code === attrCode);
+    return attribute ? attribute.label : '';
   }
 }

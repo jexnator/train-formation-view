@@ -152,7 +152,7 @@
               <ng-container *ngFor="let section of trainFormation.sections; let i = index">
                 <div class="sector-label" 
                      [style.left.px]="getSectorMidpoint(i)">
-                  <img [src]="getSectorSvgUrl(section.sector)" alt="Sector {{section.sector}}" class="sector-icon">
+                  <img [src]="getSectorSvgPath(section.sector)" alt="Sector {{section.sector}}" class="sector-icon">
                 </div>
               </ng-container>
               
@@ -304,7 +304,7 @@
                   <ng-container *ngIf="wagon.type !== 'locomotive' && !(wagon.statusCodes && wagon.statusCodes.includes('Closed'))">
                     <!-- First class occupancy -->
                     <image *ngIf="wagon.firstClassOccupancy"
-                           [attr.href]="getOccupancyIconUrl(wagon.firstClassOccupancy.icon)" 
+                           [attr.href]="getOccupancyIconPath(wagon.firstClassOccupancy.icon)" 
                            x="36" y="14" 
                            width="20" height="20"
                            preserveAspectRatio="xMidYMid meet"
@@ -312,7 +312,7 @@
                     
                     <!-- Second class occupancy -->
                     <image *ngIf="wagon.secondClassOccupancy"
-                           [attr.href]="getOccupancyIconUrl(wagon.secondClassOccupancy.icon)" 
+                           [attr.href]="getOccupancyIconPath(wagon.secondClassOccupancy.icon)" 
                            x="36" y="14" 
                            width="20" height="20"
                            preserveAspectRatio="xMidYMid meet"
@@ -321,7 +321,7 @@
                   
                   <!-- Entry icon in the right side of the wagon -->
                   <image *ngIf="wagon.type !== 'locomotive' && !(wagon.statusCodes && wagon.statusCodes.includes('Closed'))"
-                         [attr.href]="getEntryIconUrl(wagon)" 
+                         [attr.href]="getEntryIconPath(wagon)" 
                          x="61" y="14" 
                          width="30" height="30"
                          preserveAspectRatio="xMidYMid meet"
@@ -331,7 +331,7 @@
                 <!-- Wagon attribute pictograms badge -->
                 <div class="wagon-attributes-badge" *ngIf="hasWagonPictograms(wagon) && wagon.type !== 'locomotive'">
                   <ng-container *ngFor="let attrCode of getWagonPictogramAttributes(wagon)">
-                    <img [src]="getAttributePictogramUrl(attrCode)" 
+                    <img [src]="getAttributePictogramPath(attrCode)" 
                          [alt]="attrCode" 
                          class="wagon-attribute-pictogram">
                   </ng-container>
@@ -372,11 +372,11 @@
                         <strong>Occupancy:</strong>
                         <ul>
                           <li *ngIf="wagon.firstClassOccupancy">
-                            <img [src]="getOccupancyIconUrl(wagon.firstClassOccupancy.icon)" class="tooltip-icon">
+                            <img [src]="getOccupancyIconPath(wagon.firstClassOccupancy.icon)" class="tooltip-icon">
                             <span>{{ wagon.firstClassOccupancy.label }}</span>
                           </li>
                           <li *ngIf="wagon.secondClassOccupancy">
-                            <img [src]="getOccupancyIconUrl(wagon.secondClassOccupancy.icon)" class="tooltip-icon">
+                            <img [src]="getOccupancyIconPath(wagon.secondClassOccupancy.icon)" class="tooltip-icon">
                             <span>{{ wagon.secondClassOccupancy.label }}</span>
                           </li>
                         </ul>
@@ -387,7 +387,7 @@
                         <strong>Accessibility:</strong>
                         <ul>
                           <li>
-                            <img [src]="getEntryIconUrl(wagon)" class="tooltip-icon">
+                            <img [src]="getEntryIconPath(wagon)" class="tooltip-icon">
                             <span>{{ hasLowFloorEntry(wagon) ? 'Low Floor Entry' : 'Entry with Steps' }}</span>
                           </li>
                         </ul>
@@ -398,7 +398,7 @@
                         <strong>Facilities:</strong>
                         <ul>
                           <li *ngFor="let attrCode of getWagonPictogramAttributes(wagon)">
-                            <img [src]="getAttributePictogramUrl(attrCode)" class="tooltip-icon">
+                            <img [src]="getAttributePictogramPath(attrCode)" class="tooltip-icon">
                             <span>{{ getAttributeLabelByCode(wagon, attrCode) }}</span>
                           </li>
                         </ul>
@@ -421,7 +421,7 @@
                   class="wagon-connector" 
                   [ngClass]="getWagonConnectionClass(wagon, getNextWagon(i))">
                 <img *ngIf="wagon.noAccessToNext || (getNextWagon(i) && getNextWagon(i).noAccessToPrevious)" 
-                     [src]="getNoPassageSvgUrl()" 
+                     [src]="getNoPassageSvgPath()" 
                      alt="No passage" 
                      class="no-passage-icon">
               </div>

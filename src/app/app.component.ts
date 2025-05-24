@@ -6,7 +6,7 @@ import { SearchFormComponent } from './components/search-form/search-form.compon
 import { TrainFormationComponent } from './components/train-formation/train-formation.component';
 import { TrainLegendComponent } from './components/train-legend/train-legend.component';
 import { FormationService } from './services/formation.service';
-import { Subscription } from 'rxjs';
+import { Subscription, BehaviorSubject } from 'rxjs';
 
 /**
  * @fileoverview Root component for the SKI+ Train Formation Visualization application
@@ -45,6 +45,9 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
   /** Dynamic bottom spacing height */
   bottomSpacingHeight = '0px';
   
+  /** Subject to notify when spacing calculation is complete */
+  private spacingReady$ = new BehaviorSubject<boolean>(false);
+  
   /** Collection of subscriptions for cleanup on component destruction */
   private subscriptions: Subscription[] = [];
   
@@ -67,13 +70,21 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
         this.showLegend = !!formation;
         
         if (formation) {
-          // Wait for components to render before calculating spacing
-          setTimeout(() => {
-            this.calculateDynamicSpacing();
-          }, 100);
+          // Wait for next frame to ensure components are rendered
+          requestAnimationFrame(() => {
+            // Double RAF to ensure all layouts are complete
+            requestAnimationFrame(() => {
+              this.calculateDynamicSpacing();
+              // Final check after a very short delay
+              setTimeout(() => {
+                this.calculateDynamicSpacing();
+                this.spacingReady$.next(true);
+              }, 50);
+            });
+          });
         } else {
-          // Reset spacing when no formation is shown
           this.bottomSpacingHeight = '0px';
+          this.spacingReady$.next(false);
         }
       })
     );
@@ -84,9 +95,17 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
         if (error) {
           this.showLegend = false;
           this.bottomSpacingHeight = '0px';
+          this.spacingReady$.next(false);
         }
       })
     );
+  }
+  
+  /**
+   * Returns an observable that emits true when spacing calculation is complete
+   */
+  getSpacingReadyState() {
+    return this.spacingReady$.asObservable();
   }
   
   /**
@@ -94,6 +113,11 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
    * and component heights after search results are displayed
    */
   private calculateDynamicSpacing() {
+    const FIXED_HEADER_HEIGHT = 78;
+    
+    // Get all relevant elements
+    const header = document.querySelector('app-header');
+    const searchForm = document.querySelector('app-search-form');
     const trainFormation = document.querySelector('app-train-formation');
     const trainLegend = document.querySelector('app-train-legend');
     const footer = document.querySelector('.footer');
@@ -101,18 +125,40 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
     if (!trainFormation || !footer) return;
 
     const viewportHeight = window.innerHeight;
-    const formationRect = trainFormation.getBoundingClientRect();
-    const legendRect = trainLegend?.getBoundingClientRect();
-    const footerRect = footer.getBoundingClientRect();
     
-    // Calculate total content height
-    const totalContentHeight = formationRect.height + 
-                             (legendRect ? legendRect.height : 0) +
-                             footerRect.height;
+    // Use performance.now() for precise timing if needed
+    // const start = performance.now();
     
-    // Calculate required spacing
-    const requiredSpace = Math.max(0, viewportHeight - totalContentHeight);
-    this.bottomSpacingHeight = `${requiredSpace}px`;
+    // Calculate heights of all components
+    const headerHeight = header?.getBoundingClientRect().height || 0;
+    const searchFormHeight = searchForm?.getBoundingClientRect().height || 0;
+    const formationHeight = trainFormation.getBoundingClientRect().height;
+    const legendHeight = trainLegend?.getBoundingClientRect().height || 0;
+    const footerHeight = footer.getBoundingClientRect().height;
+
+    // Calculate total content height including margins/padding
+    const totalContentHeight = headerHeight + 
+                             searchFormHeight +
+                             formationHeight +
+                             legendHeight +
+                             footerHeight +
+                             24; // Account for standard gap between components
+
+    // Calculate the optimal spacing, accounting for fixed header
+    let requiredSpace = Math.max(0, viewportHeight - totalContentHeight + FIXED_HEADER_HEIGHT);
+    
+    // Limit the maximum spacing to prevent excessive whitespace
+    const maxSpacing = viewportHeight * 0.3;
+    requiredSpace = Math.min(requiredSpace, maxSpacing);
+
+    // Only add spacing if we're not already filling the viewport
+    if (totalContentHeight < (viewportHeight + FIXED_HEADER_HEIGHT)) {
+      this.bottomSpacingHeight = `${requiredSpace}px`;
+    } else {
+      this.bottomSpacingHeight = '0px';
+    }
+    
+    // console.log('Spacing calculation took:', performance.now() - start, 'ms');
   }
   
   /**
@@ -121,5 +167,6 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
    */
   ngOnDestroy(): void {
     this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.spacingReady$.complete();
   }
 }
