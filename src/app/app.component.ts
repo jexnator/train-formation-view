@@ -139,13 +139,10 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
                              formationHeight +
                              legendHeight +
                              footerHeight +
-                             24; // Account for standard gap between components
+                             20; // Account for standard gap between components
 
     // Calculate the optimal spacing, accounting for fixed header
     let requiredSpace = Math.max(0, viewportHeight - totalContentHeight + FIXED_HEADER_HEIGHT);
-    
-    // Add 10px buffer to prevent scroll issues
-    requiredSpace += 10;
     
     // Limit the maximum spacing to prevent excessive whitespace
     const maxSpacing = viewportHeight * 0.3;
