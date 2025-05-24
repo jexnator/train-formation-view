@@ -185,20 +185,42 @@ export class SearchFormComponent implements OnInit, OnDestroy {
    * Uses viewport-aware offset to ensure precise positioning with the dynamic spacing
    */
   private scrollToTrainFormation() {
-    // Wait for DOM and spacing to be ready (300ms proven to be the sweet spot)
-    setTimeout(() => {
+    // Wait for spacing calculation to complete
+    const spacingCheck = () => {
+      requestAnimationFrame(() => {
         const trainFormation = document.querySelector('app-train-formation');
         if (!trainFormation) return;
 
-      const headerHeight = 78;
-      const formationTop = trainFormation.getBoundingClientRect().top;
-      const scrollPosition = window.scrollY + formationTop - headerHeight;
+        // Get the search form position for reference
+        const searchForm = document.querySelector('app-search-form');
+        const headerHeight = 78; // Fixed header height
 
-      // Single smooth scroll to the target position
-        window.scrollTo({
-        top: scrollPosition,
-          behavior: 'smooth'
+        if (searchForm) {
+          // Calculate exact position where we want to scroll
+          const formationTop = trainFormation.getBoundingClientRect().top;
+          const scrollPosition = window.scrollY + formationTop - headerHeight;
+
+          // Force scroll to exact position
+          window.scrollTo({
+            top: scrollPosition,
+            behavior: 'smooth'
+          });
+
+          // Quick position verification
+          requestAnimationFrame(() => {
+            const finalFormationTop = trainFormation.getBoundingClientRect().top;
+            if (Math.abs(finalFormationTop - headerHeight) > 2) {
+              window.scrollTo({
+                top: window.scrollY + (finalFormationTop - headerHeight),
+                behavior: 'smooth'
+              });
+            }
+          });
+        }
       });
-    }, 300);
+    };
+
+    // Give a small buffer for the spacing calculation
+    setTimeout(spacingCheck, 300);
   }
 }
