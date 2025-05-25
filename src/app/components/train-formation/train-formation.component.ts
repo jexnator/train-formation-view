@@ -897,26 +897,35 @@ export class TrainFormationComponent implements OnInit, OnDestroy {
     return attribute ? attribute.label : '';
   }
 
+  /**
+   * Handles stop selection while maintaining the fixed anchor point at 78px
+   * Prevents any upward scrolling from the anchor point
+   */
   onStopSelect(index: number) {
-    // Store current position relative to formation
+    // Store current viewport state
     const formationElement = document.querySelector('app-train-formation');
-    const formationRect = formationElement?.getBoundingClientRect();
-    const relativePosition = formationRect ? formationRect.top : 0;
+    const ANCHOR_POINT = 78; // Fixed header height as anchor point
+    
+    if (!formationElement) return;
+    
+    // Store the current absolute position of the formation
+    const formationRect = formationElement.getBoundingClientRect();
+    const currentFormationTop = formationRect.top + window.scrollY;
     
     // Update selected stop
     this.selectedStopIndex = index;
     
-    // After view updates, restore relative position
+    // After view updates, ensure formation stays at or below anchor point
     requestAnimationFrame(() => {
-      if (formationElement && formationRect) {
-        const newRect = formationElement.getBoundingClientRect();
-        const offset = newRect.top - relativePosition;
-        if (Math.abs(offset) > 1) { // Only adjust if significant change
-          window.scrollBy({
-            top: offset,
-            behavior: 'instant'
-          });
-        }
+      const newRect = formationElement.getBoundingClientRect();
+      const newFormationTop = newRect.top + window.scrollY;
+      
+      // If formation would move above anchor point, adjust scroll to maintain anchor
+      if (newRect.top < ANCHOR_POINT) {
+        window.scrollTo({
+          top: newFormationTop - ANCHOR_POINT,
+          behavior: 'smooth'
+        });
       }
     });
   }

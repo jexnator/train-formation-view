@@ -70,17 +70,24 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
         this.showLegend = !!formation;
         
         if (formation) {
-          // Wait for next frame to ensure components are rendered
+          // Reset spacing ready state
+          this.spacingReady$.next(false);
+          
+          // Ensure components are rendered before calculating spacing
           requestAnimationFrame(() => {
-            // Double RAF to ensure all layouts are complete
-            requestAnimationFrame(() => {
+            // Initial spacing calculation
+            this.calculateDynamicSpacing();
+            
+            // Double check spacing after a short delay
+            setTimeout(() => {
               this.calculateDynamicSpacing();
-              // Final check after a very short delay
-              setTimeout(() => {
+              
+              // Final verification of spacing
+              requestAnimationFrame(() => {
                 this.calculateDynamicSpacing();
                 this.spacingReady$.next(true);
-              }, 50);
-            });
+              });
+            }, 100);
           });
         } else {
           this.bottomSpacingHeight = '0px';
@@ -110,10 +117,12 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
   
   /**
    * Calculates the required bottom spacing based on viewport height
-   * and component heights after search results are displayed
+   * to ensure the train formation can always reach the 78px anchor point.
+   * Maintains consistent spacing across all viewport sizes.
    */
   private calculateDynamicSpacing() {
-    const FIXED_HEADER_HEIGHT = 78;
+    const ANCHOR_POINT = 78; // Fixed header height as anchor point
+    const MIN_SPACING = 40; // Minimum spacing to maintain
     
     // Get all relevant elements
     const header = document.querySelector('app-header');
@@ -124,6 +133,7 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
     
     if (!trainFormation || !footer) return;
 
+    // Get viewport dimensions
     const viewportHeight = window.innerHeight;
     
     // Calculate heights of all components
@@ -133,26 +143,38 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
     const legendHeight = trainLegend?.getBoundingClientRect().height || 0;
     const footerHeight = footer.getBoundingClientRect().height;
 
-    // Calculate total content height including margins/padding
-    const totalContentHeight = headerHeight + 
-                             searchFormHeight +
-                             formationHeight +
-                             legendHeight +
-                             footerHeight +
-                             20; // Account for standard gap between components
-
-    // Calculate the optimal spacing, accounting for fixed header
-    let requiredSpace = Math.max(0, viewportHeight - totalContentHeight + FIXED_HEADER_HEIGHT);
+    // Calculate minimum required content height for anchor point positioning
+    const minRequiredHeight = ANCHOR_POINT + formationHeight + legendHeight + footerHeight + MIN_SPACING;
     
-    // Limit the maximum spacing to prevent excessive whitespace
-    const maxSpacing = viewportHeight * 0.3;
-    requiredSpace = Math.min(requiredSpace, maxSpacing);
-
-    // Only add spacing if we're not already filling the viewport
-    if (totalContentHeight < (viewportHeight + FIXED_HEADER_HEIGHT)) {
-      this.bottomSpacingHeight = `${requiredSpace}px`;
-    } else {
-      this.bottomSpacingHeight = '0px';
+    // Calculate additional spacing needed
+    let requiredSpace = Math.max(
+      viewportHeight - minRequiredHeight + ANCHOR_POINT,
+      MIN_SPACING
+    );
+    
+    // If viewport is larger than content, ensure enough space to scroll formation to anchor
+    if (viewportHeight > minRequiredHeight) {
+      const extraSpaceNeeded = viewportHeight - minRequiredHeight;
+      requiredSpace = Math.max(requiredSpace, extraSpaceNeeded + MIN_SPACING);
+    }
+    
+    // Apply the calculated spacing
+    this.bottomSpacingHeight = `${requiredSpace}px`;
+    
+    // Notify that spacing calculation is complete
+    this.spacingReady$.next(true);
+    
+    // If this is the first calculation after search, ensure proper scroll position
+    if (trainFormation.getBoundingClientRect().top !== ANCHOR_POINT) {
+      requestAnimationFrame(() => {
+        const formationRect = trainFormation.getBoundingClientRect();
+        const targetScrollPosition = (formationRect.top + window.scrollY) - ANCHOR_POINT;
+        
+        window.scrollTo({
+          top: targetScrollPosition,
+          behavior: 'smooth'
+        });
+      });
     }
   }
   

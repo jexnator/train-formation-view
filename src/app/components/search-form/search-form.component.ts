@@ -181,46 +181,44 @@ export class SearchFormComponent implements OnInit, OnDestroy {
   }
   
   /**
-   * Scrolls to the train formation component after successful search
-   * Uses viewport-aware offset to ensure precise positioning with the dynamic spacing
+   * Scrolls to the train formation component using the fixed anchor point
+   * Ensures proper timing with spacing calculations
    */
   private scrollToTrainFormation() {
+    const ANCHOR_POINT = 78; // Fixed header height as anchor point
+    
     // Wait for spacing calculation to complete
-    const spacingCheck = () => {
+    this.appComponent.getSpacingReadyState().subscribe(isReady => {
+      if (!isReady) return;
+      
+      // Double RAF to ensure all layout calculations are complete
       requestAnimationFrame(() => {
-        const trainFormation = document.querySelector('app-train-formation');
-        if (!trainFormation) return;
-
-        // Get the search form position for reference
-        const searchForm = document.querySelector('app-search-form');
-        const headerHeight = 78; // Fixed header height
-
-        if (searchForm) {
-          // Calculate exact position where we want to scroll
-          const formationTop = trainFormation.getBoundingClientRect().top;
-          const scrollPosition = window.scrollY + formationTop - headerHeight;
-
-          // Force scroll to exact position
+        requestAnimationFrame(() => {
+          const trainFormation = document.querySelector('app-train-formation');
+          if (!trainFormation) return;
+          
+          // Calculate exact position to place formation at anchor point
+          const formationRect = trainFormation.getBoundingClientRect();
+          const targetScrollPosition = (formationRect.top + window.scrollY) - ANCHOR_POINT;
+          
+          // Scroll to position formation exactly at anchor point
           window.scrollTo({
-            top: scrollPosition,
+            top: targetScrollPosition,
             behavior: 'smooth'
           });
-
-          // Quick position verification
-          requestAnimationFrame(() => {
-            const finalFormationTop = trainFormation.getBoundingClientRect().top;
-            if (Math.abs(finalFormationTop - headerHeight) > 2) {
+          
+          // Verify position after scroll animation
+          setTimeout(() => {
+            const finalRect = trainFormation.getBoundingClientRect();
+            if (finalRect.top !== ANCHOR_POINT) {
               window.scrollTo({
-                top: window.scrollY + (finalFormationTop - headerHeight),
+                top: window.scrollY + (finalRect.top - ANCHOR_POINT),
                 behavior: 'smooth'
               });
             }
-          });
-        }
+          }, 500); // Wait for smooth scroll to complete
+        });
       });
-    };
-
-    // Give a small buffer for the spacing calculation
-    setTimeout(spacingCheck, 300);
+    });
   }
 }
