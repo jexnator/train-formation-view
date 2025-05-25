@@ -182,71 +182,48 @@ export class SearchFormComponent implements OnInit, OnDestroy {
   
   /**
    * Scrolls to the train formation component using the fixed anchor point
-   * Implements a professional scroll animation strategy with proper performance optimization
+   * Implements smooth, single-operation scrolling
    */
   private scrollToTrainFormation() {
     const ANCHOR_POINT = 78; // Fixed header height as anchor point
-    const SCROLL_DURATION = 800; // Consistent animation duration
+    let scrollTimeout: number;
     
     // Wait for spacing calculation to complete
     this.appComponent.getSpacingReadyState().subscribe(isReady => {
       if (!isReady) return;
       
-      // Ensure layout is stable before starting animation
+      // Clear any pending scroll operations
+      if (scrollTimeout) {
+        window.clearTimeout(scrollTimeout);
+      }
+      
+      // Ensure DOM is fully updated
       requestAnimationFrame(() => {
         const trainFormation = document.querySelector('app-train-formation');
         if (!trainFormation) return;
         
-        // Calculate target scroll position
-        const formationRect = trainFormation.getBoundingClientRect();
-        const startPosition = window.scrollY;
-        const targetPosition = (formationRect.top + window.scrollY) - ANCHOR_POINT;
-        const distance = targetPosition - startPosition;
+        // Get initial measurements
+        const initialRect = trainFormation.getBoundingClientRect();
+        const initialScroll = window.scrollY;
         
-        // Implement custom easing function for smooth animation
-        const easeInOutQuad = (t: number): number => {
-          return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
-        };
-        
-        // Start time for animation
-        let startTime: number | null = null;
-        
-        // Smooth scroll animation frame
-        const animateScroll = (currentTime: number) => {
-          if (!startTime) startTime = currentTime;
+        // Wait for next frame to ensure all measurements are stable
+        requestAnimationFrame(() => {
+          const finalRect = trainFormation.getBoundingClientRect();
           
-          const elapsed = currentTime - startTime;
-          const progress = Math.min(elapsed / SCROLL_DURATION, 1);
-          
-          // Calculate new position using easing
-          const easedProgress = easeInOutQuad(progress);
-          const newPosition = startPosition + (distance * easedProgress);
-          
-          // Apply scroll position
-          window.scrollTo(0, newPosition);
-          
-          // Continue animation if not complete
-          if (progress < 1) {
-            requestAnimationFrame(animateScroll);
-          } else {
-            // Final position verification after animation
-            requestAnimationFrame(() => {
-              const finalRect = trainFormation.getBoundingClientRect();
-              const finalOffset = finalRect.top - ANCHOR_POINT;
-              
-              // Only adjust if offset is significant
-              if (Math.abs(finalOffset) > 1) {
-                window.scrollTo({
-                  top: window.scrollY + finalOffset,
-                  behavior: 'instant'
-                });
-              }
+          // Only scroll if position has stabilized
+          if (Math.abs(finalRect.top - initialRect.top) < 1) {
+            const targetScrollPosition = (finalRect.top + window.scrollY) - ANCHOR_POINT;
+            
+            // Perform single, smooth scroll operation
+            window.scrollTo({
+              top: targetScrollPosition,
+              behavior: 'smooth'
             });
+          } else {
+            // If position hasn't stabilized, retry after a short delay
+            scrollTimeout = window.setTimeout(() => this.scrollToTrainFormation(), 50);
           }
-        };
-        
-        // Start the animation
-        requestAnimationFrame(animateScroll);
+        });
       });
     });
   }
