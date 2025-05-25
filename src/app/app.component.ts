@@ -7,6 +7,7 @@ import { TrainFormationComponent } from './components/train-formation/train-form
 import { TrainLegendComponent } from './components/train-legend/train-legend.component';
 import { FormationService } from './services/formation.service';
 import { Subscription, BehaviorSubject } from 'rxjs';
+import { ScrollService } from './services/scroll.service';
 
 /**
  * @fileoverview Root component for the SKI+ Train Formation Visualization application
@@ -51,28 +52,21 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
   /** Collection of subscriptions for cleanup on component destruction */
   private subscriptions: Subscription[] = [];
   
-  constructor(private formationService: FormationService) {}
+  constructor(
+    private formationService: FormationService,
+    private scrollService: ScrollService
+  ) {}
   
   ngAfterViewInit() {
     // Force initial position to anchor point
-    requestAnimationFrame(() => {
-      const searchForm = document.querySelector('app-search-form');
-      if (!searchForm) return;
-      
-      const ANCHOR_POINT = 78;
-      
-      // Force scroll to top first
-      window.scrollTo(0, 0);
-      
-      // Then position search form at anchor
-      const searchFormRect = searchForm.getBoundingClientRect();
-      if (searchFormRect.top !== ANCHOR_POINT) {
-        window.scrollTo({
-          top: searchFormRect.top - ANCHOR_POINT,
-          behavior: 'instant'
-        });
-      }
-    });
+    const searchForm = document.querySelector('app-search-form');
+    if (!searchForm) return;
+    
+    // Force initial scroll to top
+    this.scrollService.scrollToTop();
+    
+    // Then position search form at anchor
+    this.scrollService.scrollToAnchor(searchForm, 'instant');
   }
   
   /**
@@ -182,16 +176,8 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
     this.spacingReady$.next(true);
     
     // If this is the first calculation after search, ensure proper scroll position
-    if (trainFormation.getBoundingClientRect().top !== ANCHOR_POINT) {
-      requestAnimationFrame(() => {
-        const formationRect = trainFormation.getBoundingClientRect();
-        const targetScrollPosition = (formationRect.top + window.scrollY) - ANCHOR_POINT;
-        
-        window.scrollTo({
-          top: targetScrollPosition,
-          behavior: 'smooth'
-        });
-      });
+    if (trainFormation && trainFormation.getBoundingClientRect().top !== ANCHOR_POINT) {
+      this.scrollService.scrollToAnchor(trainFormation);
     }
   }
   

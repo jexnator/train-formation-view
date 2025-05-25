@@ -14,6 +14,7 @@ import { SearchParams } from '../../models/formation.model';
 import { Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { AppComponent } from '../../app.component';
+import { ScrollService } from '../../services/scroll.service';
 
 /**
  * @fileoverview Search form component for SKI+ Train Formation Visualization
@@ -81,7 +82,8 @@ export class SearchFormComponent implements OnInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private formationService: FormationService,
-    @Inject(AppComponent) private appComponent: AppComponent
+    @Inject(AppComponent) private appComponent: AppComponent,
+    private scrollService: ScrollService
   ) {}
   
   /** Date limits for the datepicker (today to today+3 days) */
@@ -182,49 +184,17 @@ export class SearchFormComponent implements OnInit, OnDestroy {
   
   /**
    * Scrolls to the train formation component using the fixed anchor point
-   * Implements smooth, single-operation scrolling
    */
   private scrollToTrainFormation() {
-    const ANCHOR_POINT = 78; // Fixed header height as anchor point
-    let scrollTimeout: number;
-    
     // Wait for spacing calculation to complete
     this.appComponent.getSpacingReadyState().subscribe(isReady => {
       if (!isReady) return;
       
-      // Clear any pending scroll operations
-      if (scrollTimeout) {
-        window.clearTimeout(scrollTimeout);
-      }
+      const trainFormation = document.querySelector('app-train-formation');
+      if (!trainFormation) return;
       
-      // Ensure DOM is fully updated
-      requestAnimationFrame(() => {
-        const trainFormation = document.querySelector('app-train-formation');
-        if (!trainFormation) return;
-        
-        // Get initial measurements
-        const initialRect = trainFormation.getBoundingClientRect();
-        const initialScroll = window.scrollY;
-        
-        // Wait for next frame to ensure all measurements are stable
-        requestAnimationFrame(() => {
-          const finalRect = trainFormation.getBoundingClientRect();
-          
-          // Only scroll if position has stabilized
-          if (Math.abs(finalRect.top - initialRect.top) < 1) {
-            const targetScrollPosition = (finalRect.top + window.scrollY) - ANCHOR_POINT;
-            
-            // Perform single, smooth scroll operation
-            window.scrollTo({
-              top: targetScrollPosition,
-              behavior: 'smooth'
-            });
-          } else {
-            // If position hasn't stabilized, retry after a short delay
-            scrollTimeout = window.setTimeout(() => this.scrollToTrainFormation(), 50);
-          }
-        });
-      });
+      // Scroll to formation with smooth behavior
+      this.scrollService.scrollToAnchor(trainFormation);
     });
   }
 }
