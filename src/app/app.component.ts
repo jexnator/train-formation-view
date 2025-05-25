@@ -54,8 +54,25 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
   constructor(private formationService: FormationService) {}
   
   ngAfterViewInit() {
-    // Initial calculation of spacing
-    this.calculateDynamicSpacing();
+    // Force initial position to anchor point
+    requestAnimationFrame(() => {
+      const searchForm = document.querySelector('app-search-form');
+      if (!searchForm) return;
+      
+      const ANCHOR_POINT = 78;
+      
+      // Force scroll to top first
+      window.scrollTo(0, 0);
+      
+      // Then position search form at anchor
+      const searchFormRect = searchForm.getBoundingClientRect();
+      if (searchFormRect.top !== ANCHOR_POINT) {
+        window.scrollTo({
+          top: searchFormRect.top - ANCHOR_POINT,
+          behavior: 'instant'
+        });
+      }
+    });
   }
   
   /**
