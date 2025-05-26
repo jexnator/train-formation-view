@@ -181,25 +181,8 @@ svg, image, path, rect, circle, line, polyline, polygon, ellipse, text, use {
   --os-handle-perpendicular-size-hover: 100%;
 }
 
-/* Horizontal scrollbar for stop tabs */
-.os-theme-ski-tabs {
-  --os-size: 6px;
-  --os-padding-perpendicular: 1px;
-  --os-padding-axis: 1px;
-  --os-track-bg: transparent;
-  --os-track-bg-hover: transparent;
-  --os-track-bg-active: transparent;
-  --os-track-border-radius: 3px;
-  --os-handle-bg: var(--sbb-color-white);
-  --os-handle-bg-hover: var(--sbb-color-blue);
-  --os-handle-bg-active: var(--sbb-color-blue);
-  --os-handle-border-radius: 3px;
-  --os-handle-min-size: 30px;
-  --os-handle-perpendicular-size: 100%;
-  --os-handle-perpendicular-size-hover: 100%;
-}
-
-/* Horizontal scrollbar for train formation */
+/* Horizontal scrollbars for stop tabs and train formation */
+.os-theme-ski-tabs,
 .os-theme-ski-wagons {
   --os-size: 6px;
   --os-padding-perpendicular: 1px;
