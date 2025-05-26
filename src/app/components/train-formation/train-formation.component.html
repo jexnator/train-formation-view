@@ -375,8 +375,8 @@
                         </span>
                       </div>
                       
-                      <!-- Occupancy information -->
-                      <div *ngIf="wagon.firstClassOccupancy || wagon.secondClassOccupancy">
+                      <!-- Occupancy information - hidden for closed wagons -->
+                      <div *ngIf="(wagon.firstClassOccupancy || wagon.secondClassOccupancy) && !(wagon.statusCodes && wagon.statusCodes.includes('Closed'))">
                         <strong>Occupancy:</strong>
                         <ul>
                           <li *ngIf="wagon.firstClassOccupancy">
