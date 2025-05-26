@@ -4,6 +4,7 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 import { provideClientHydration } from '@angular/platform-browser';
 import { HttpClientModule } from '@angular/common/http';
 import { SbbIconModule } from '@sbb-esta/angular/icon';
+import { OverlayscrollbarsModule } from 'overlayscrollbars-ngx';
 
 import { routes } from './app.routes';
 
@@ -21,6 +22,6 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }), 
     provideRouter(routes), 
     provideAnimationsAsync(),
-    importProvidersFrom(SbbIconModule, HttpClientModule)
+    importProvidersFrom(SbbIconModule, HttpClientModule, OverlayscrollbarsModule)
   ]
 };

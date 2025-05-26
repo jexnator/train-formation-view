@@ -1,7 +1,9 @@
 import { Injectable } from '@angular/core';
+import { OverlayScrollbars } from 'overlayscrollbars';
 
 /**
  * Central service for scrolling to the anchor point after search form submission
+ * Now supports both native scrolling and OverlayScrollbars
  */
 @Injectable({
   providedIn: 'root'
@@ -12,11 +14,24 @@ export class ScrollService {
   private scrollQueue: (() => void)[] = [];
   private isUserScrolling = false;
   private userScrollTimeout: any;
+  private bodyOsInstance: OverlayScrollbars | null = null;
   
   constructor() {
     // Listen for user scroll events
     window.addEventListener('wheel', this.handleUserScroll, { passive: true });
     window.addEventListener('touchmove', this.handleUserScroll, { passive: true });
+  }
+
+  /**
+   * Sets the body OverlayScrollbars instance for scroll operations
+   */
+  setBodyOverlayScrollbarsInstance(instance: OverlayScrollbars | null) {
+    try {
+      this.bodyOsInstance = instance;
+    } catch (error) {
+      console.error('Error setting OverlayScrollbars instance:', error);
+      this.bodyOsInstance = null;
+    }
   }
   
   private handleUserScroll = () => {
@@ -83,13 +98,43 @@ export class ScrollService {
   scrollToAnchor(element: Element, behavior: ScrollBehavior = 'smooth', force = false) {
     this.performScroll(() => {
       if (force || !this.isUserScrolling) {
+        try {
         const rect = element.getBoundingClientRect();
+          
+          if (this.bodyOsInstance) {
+            // Use OverlayScrollbars for body scrolling
+            const { viewport } = this.bodyOsInstance.elements();
+            if (viewport && typeof viewport.scrollTo === 'function') {
+              const targetPosition = (rect.top + viewport.scrollTop) - this.ANCHOR_POINT;
+              
+              // Safety check to prevent infinite scrolling
+              if (targetPosition >= 0 && targetPosition < 10000) {
+                viewport.scrollTo({
+                  top: targetPosition,
+                  behavior
+                });
+              }
+            } else {
+              // Fallback to native scrolling
+              const targetPosition = (rect.top + window.scrollY) - this.ANCHOR_POINT;
+              window.scrollTo({
+                top: targetPosition,
+                behavior
+              });
+            }
+          } else {
+            // Fallback to native scrolling
         const targetPosition = (rect.top + window.scrollY) - this.ANCHOR_POINT;
-        
         window.scrollTo({
           top: targetPosition,
           behavior
         });
+          }
+        } catch (error) {
+          console.error('Error in scrollToAnchor:', error);
+          // Emergency fallback - just scroll to top
+          window.scrollTo({ top: 0, behavior: 'instant' });
+        }
       }
     });
   }
@@ -108,7 +153,23 @@ export class ScrollService {
    */
   scrollToTop() {
     this.performScroll(() => {
+      try {
+        if (this.bodyOsInstance) {
+          // Use OverlayScrollbars for body scrolling
+          const { viewport } = this.bodyOsInstance.elements();
+          if (viewport && typeof viewport.scrollTo === 'function') {
+            viewport.scrollTo(0, 0);
+          } else {
+            window.scrollTo(0, 0);
+          }
+        } else {
+          // Fallback to native scrolling
+          window.scrollTo(0, 0);
+        }
+      } catch (error) {
+        console.error('Error in scrollToTop:', error);
       window.scrollTo(0, 0);
+      }
     });
   }
   

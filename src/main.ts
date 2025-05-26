@@ -12,8 +12,12 @@
  */
 
 import { bootstrapApplication } from '@angular/platform-browser';
+import { OverlayScrollbars, ClickScrollPlugin } from 'overlayscrollbars';
 import { appConfig } from './app/app.config';
 import { AppComponent } from './app/app.component';
+
+// Initialize OverlayScrollbars plugins
+OverlayScrollbars.plugin(ClickScrollPlugin);
 
 /**
  * Application entry point

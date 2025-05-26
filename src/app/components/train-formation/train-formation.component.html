@@ -51,6 +51,10 @@
     
     <!-- Custom stop selector tabs -->
     <div class="stop-selector" *ngIf="trainFormation.stops && trainFormation.stops.length > 0">
+      <div overlay-scrollbars 
+           [options]="stopTabsScrollOptions" 
+           [defer]="true"
+           class="stop-selector-tabs-wrapper">
       <div class="stop-selector-tabs">
         <ng-container *ngFor="let stop of trainFormation.stops; let i = index">
           <div class="stop-tab" 
@@ -60,6 +64,7 @@
             {{ stop.name }}
           </div>
         </ng-container>
+        </div>
       </div>
       
       <div class="stop-details" *ngIf="trainFormation.stops[selectedStopIndex]">
@@ -87,7 +92,10 @@
     </div>
     
     <!-- Train visualization -->
-    <div class="formation-display">
+    <div overlay-scrollbars 
+         [options]="wagonScrollOptions" 
+         [defer]="true"
+         class="formation-display">
       <!-- SVG Patterns for reuse -->
       <svg height="0" width="0" style="position: absolute;">
         <defs>
@@ -382,8 +390,8 @@
                         </ul>
                       </div>
                       
-                      <!-- Accessibility section -->
-                      <div>
+                      <!-- Accessibility section - hidden for closed wagons -->
+                      <div *ngIf="!(wagon.statusCodes && wagon.statusCodes.includes('Closed'))">
                         <strong>Accessibility:</strong>
                         <ul>
                           <li>

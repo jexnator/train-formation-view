@@ -1,6 +1,7 @@
-import { Component, ViewEncapsulation, OnInit, OnDestroy, AfterViewInit } from '@angular/core';
+import { Component, ViewEncapsulation, OnInit, OnDestroy, AfterViewInit, NgZone } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { OverlayScrollbars } from 'overlayscrollbars';
 import { HeaderComponent } from './components/header/header.component';
 import { SearchFormComponent } from './components/search-form/search-form.component';
 import { TrainFormationComponent } from './components/train-formation/train-formation.component';
@@ -52,12 +53,19 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
   /** Collection of subscriptions for cleanup on component destruction */
   private subscriptions: Subscription[] = [];
   
+  /** OverlayScrollbars instance for body scrolling */
+  private bodyOsInstance: OverlayScrollbars | null = null;
+  
   constructor(
     private formationService: FormationService,
-    private scrollService: ScrollService
+    private scrollService: ScrollService,
+    private ngZone: NgZone
   ) {}
   
   ngAfterViewInit() {
+    // Initialize OverlayScrollbars for body
+    this.initializeBodyOverlayScrollbars();
+    
     // Force initial position to anchor point
     const searchForm = document.querySelector('app-search-form');
     if (!searchForm) return;
@@ -67,6 +75,33 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
     
     // Then position search form at anchor
     this.scrollService.scrollToAnchor(searchForm, 'instant');
+  }
+
+  /**
+   * Initializes OverlayScrollbars for the body element
+   * CRITICAL: Must run outside Angular zone to prevent infinite loops with MutationObserver
+   */
+  private initializeBodyOverlayScrollbars() {
+    this.ngZone.runOutsideAngular(() => {
+      this.bodyOsInstance = OverlayScrollbars(
+        {
+          target: document.body,
+          cancel: {
+            body: false,
+          },
+        },
+        {
+          scrollbars: {
+            theme: 'os-theme-ski-body',
+            autoHide: 'scroll' as const,
+            autoHideDelay: 1000,
+          },
+        }
+      );
+
+      // Inform ScrollService about the OverlayScrollbars instance
+      this.scrollService.setBodyOverlayScrollbarsInstance(this.bodyOsInstance);
+    });
   }
   
   /**
@@ -144,8 +179,12 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
     
     if (!trainFormation || !footer) return;
 
-    // Get viewport dimensions
-    const viewportHeight = window.innerHeight;
+    // Get viewport dimensions (use OverlayScrollbars viewport if available)
+    let viewportHeight = window.innerHeight;
+    if (this.bodyOsInstance) {
+      const { viewport } = this.bodyOsInstance.elements();
+      viewportHeight = viewport.clientHeight;
+    }
     
     // Calculate heights of all components
     const headerHeight = header?.getBoundingClientRect().height || 0;
@@ -188,5 +227,11 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
   ngOnDestroy(): void {
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.spacingReady$.complete();
+    
+    // Destroy OverlayScrollbars instance
+    if (this.bodyOsInstance) {
+      this.bodyOsInstance.destroy();
+      this.bodyOsInstance = null;
+    }
   }
 }

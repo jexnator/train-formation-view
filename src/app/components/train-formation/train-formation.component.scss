@@ -46,13 +46,13 @@
 
 .train-formation-container {
   padding: 24px;
-  padding-bottom: 11px;
+  padding-bottom: 3px;
   background-color: var(--sbb-color-milk);
   border-radius: 16px;
 
   @media (max-width: 768px) {
     padding: 24px;
-    padding-bottom: 11px;
+    padding-bottom: 1px;
   }
 }
 
@@ -192,37 +192,33 @@
 /* --- STOP SELECTOR --- */
 
 .stop-selector {
-  margin-top: -14px;
+  margin-top: -17px;
 
   @media (max-width: 576px) {
-    margin-top: -30px;
+    margin-top: -33px;
   }
+}
+
+.stop-selector-tabs-wrapper {
+  border-bottom: 1px solid var(--sbb-color-cloud);
+  margin-bottom: 0; /* Ensure consistent spacing to details below */
+  /* overflow handled by OverlayScrollbars directive */
+  max-width: 100%;
+  width: fit-content; /* Line only extends to last tab */
+  padding-top: 3px;
+  padding-bottom: 0;
 }
 
 .stop-selector-tabs {
   display: flex;
-  border-bottom: 1px solid var(--sbb-color-cloud);
-  overflow-x: auto;
-  scrollbar-width: thin;
-  max-width: max-content;
-  margin-bottom: 0; /* Ensure consistent spacing to details below */
-
-  &::-webkit-scrollbar {
-    height: 4px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background-color: transparent;
-    border-radius: 4px;
-  }
+  flex-wrap: nowrap; /* Prevent wrapping to next line */
+  min-width: max-content; /* Allow horizontal scrolling */
+  /* Remove native scrollbar styles - handled by OverlayScrollbars */
 }
 
 .stop-tab {
-  padding: 8px 16px;
+  padding: 8px 16px 4px 16px;
+  margin-bottom: 4px;
   cursor: pointer;
   font-weight: 500;
   border-bottom: 3px solid transparent;
@@ -241,6 +237,7 @@
 
 .stop-details {
   padding: 12px 8px;
+  margin-top: -6px; /* Compensate for tabs wrapper padding-bottom */
   display: flex;
   gap: 8px;
   color: var(--sbb-color-metal);
@@ -279,7 +276,7 @@
 /* --- TRAIN VISUALIZATION CONTAINER --- */
 .formation-display {
   margin-top: -20px;
-  overflow-x: auto;
+  overflow-x: visible;
   overflow-y: visible;
   position: relative;
   transform: translateZ(0);
@@ -371,7 +368,7 @@
 .train-wagons {
   display: flex;
   padding: 0;
-  min-width: min-content;
+  min-width: max-content; /* Allow horizontal scrolling like stop tabs */
   margin-left: 1px; /* Consistent 1px margin for alignment with sector lines */
   /* Ensure consistent spacing between wagons */
   font-size: 0;
@@ -630,35 +627,19 @@
   width: 100%;
   margin-top: 20px; /* Space above wagons */
   z-index: 20;
-  overflow-x: auto;
-  overflow-y: visible; /* Prevent vertical content clipping */
-  scrollbar-width: thin;
-  scrollbar-color: transparent transparent;
+  /* Overflow handled by OverlayScrollbars directive */
+  max-width: 100%;
   padding-left: 0; /* Consistent padding */
-  padding-bottom: 48px; /* Ensures badges remain within scroll area */
+  padding-bottom: 53px;
   /* Ensure consistent left margin regardless of sectors */
   margin-left: 0;
 
   /* Touch scrolling optimizations */
   touch-action: pan-x pan-y !important;
-  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
 
   /* Rendering optimizations */
   transform: translateZ(0);
   -webkit-font-smoothing: antialiased;
-
-  &::-webkit-scrollbar {
-    height: 8px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background-color: transparent;
-    border-radius: 4px;
-  }
 }
 
 /* --- SECTOR HIGHLIGHTS --- */
@@ -847,5 +828,35 @@
     .arrival-time:not(.hide-on-small-screen) {
       display: flex !important;
     }
+  }
+}
+
+/* --- OVERLAY SCROLLBARS --- */
+
+/* Horizontal scrollbar styling */
+::ng-deep .os-scrollbar-horizontal {
+  width: 20% !important;
+  left: 40% !important;
+  right: 40% !important;
+  background-color: white !important;
+  border-radius: 8px !important;
+}
+
+/* Position tabs scrollbar above content */
+::ng-deep .stop-selector-tabs-wrapper .os-scrollbar-horizontal {
+  top: -1px !important;
+  bottom: auto !important;
+}
+
+/* Scrollbar handle styling */
+::ng-deep .os-scrollbar-horizontal .os-scrollbar-handle {
+  min-width: 30px !important;
+  max-width: 60px !important;
+  background-color: var(--sbb-color-blue) !important;
+  border-radius: 6px !important;
+  
+  &:hover,
+  &:active {
+    background-color: var(--sbb-color-blue) !important;
   }
 }

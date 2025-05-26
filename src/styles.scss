@@ -19,6 +19,9 @@
 @use '@sbb-esta/angular/typography';
 @use '@sbb-esta/angular/fullfont';
 
+// Import OverlayScrollbars CSS
+@import 'overlayscrollbars/overlayscrollbars.css';
+
 :root {
   // --- SKI+ Blue Theme Overrides ---
   --sbb-color-call-to-action: #2d327d;
@@ -156,4 +159,71 @@ svg, image, path, rect, circle, line, polyline, polygon, ellipse, text, use {
   shape-rendering: geometricPrecision;
   image-rendering: optimizeQuality;
   text-rendering: optimizeLegibility;
+}
+
+/* OverlayScrollbars Custom Themes */
+
+/* Main vertical scrollbar - positioned below header */
+.os-theme-ski-body {
+  --os-size: 10px;
+  --os-padding-perpendicular: 2px;
+  --os-padding-axis: 2px;
+  --os-track-bg: transparent;
+  --os-track-bg-hover: transparent;
+  --os-track-bg-active: transparent;
+  --os-track-border-radius: 6px;
+  --os-handle-bg: var(--sbb-color-blue);
+  --os-handle-bg-hover: var(--sbb-color-blue);
+  --os-handle-bg-active: var(--sbb-color-blue);
+  --os-handle-border-radius: 6px;
+  --os-handle-min-size: 30px;
+  --os-handle-perpendicular-size: 100%;
+  --os-handle-perpendicular-size-hover: 100%;
+}
+
+/* Horizontal scrollbar for stop tabs */
+.os-theme-ski-tabs {
+  --os-size: 5px;
+  --os-padding-perpendicular: 1px;
+  --os-padding-axis: 1px;
+  --os-track-bg: transparent;
+  --os-track-bg-hover: transparent;
+  --os-track-bg-active: transparent;
+  --os-track-border-radius: 3px;
+  --os-handle-bg: var(--sbb-color-white);
+  --os-handle-bg-hover: var(--sbb-color-blue);
+  --os-handle-bg-active: var(--sbb-color-blue);
+  --os-handle-border-radius: 3px;
+  --os-handle-min-size: 30px;
+  --os-handle-perpendicular-size: 100%;
+  --os-handle-perpendicular-size-hover: 100%;
+}
+
+/* Horizontal scrollbar for train formation */
+.os-theme-ski-wagons {
+  --os-size: 5px;
+  --os-padding-perpendicular: 1px;
+  --os-padding-axis: 1px;
+  --os-track-bg: transparent;
+  --os-track-bg-hover: transparent;
+  --os-track-bg-active: transparent;
+  --os-track-border-radius: 3px;
+  --os-handle-bg: var(--sbb-color-white);
+  --os-handle-bg-hover: var(--sbb-color-blue);
+  --os-handle-bg-active: var(--sbb-color-blue);
+  --os-handle-border-radius: 3px;
+  --os-handle-min-size: 30px;
+  --os-handle-perpendicular-size: 100%;
+  --os-handle-perpendicular-size-hover: 100%;
+}
+
+/* Position vertical scrollbar below header */
+.os-theme-ski-body.os-scrollbar-vertical {
+  top: 78px !important;
+  height: calc(100% - 102px) !important;
+  right: 2.5px !important;
+}
+
+.os-theme-ski-wagons.os-scrollbar-horizontal {
+  bottom: 3px !important;
 }

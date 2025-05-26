@@ -1,5 +1,6 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { OverlayscrollbarsModule } from 'overlayscrollbars-ngx';
 import { SbbIconModule } from '@sbb-esta/angular/icon';
 import { SbbLoadingIndicatorModule } from '@sbb-esta/angular/loading-indicator';
 import { SbbAlertModule } from '@sbb-esta/angular/alert';
@@ -42,7 +43,8 @@ const TOTAL_WAGON_UNIT = WAGON_WIDTH + CONNECTOR_WIDTH; // 110px per wagon+conne
     SbbIconModule, 
     SbbLoadingIndicatorModule, 
     SbbAlertModule, 
-    SbbTooltipModule
+    SbbTooltipModule,
+    OverlayscrollbarsModule
   ],
   templateUrl: './train-formation.component.html',
   styleUrl: './train-formation.component.scss'
@@ -66,6 +68,31 @@ export class TrainFormationComponent implements OnInit, OnDestroy {
   /** Collection of subscriptions for cleanup */
   private subscriptions: Subscription[] = [];
   
+  /** OverlayScrollbars options */
+  stopTabsScrollOptions = {
+    overflow: {
+      x: 'scroll' as const,
+      y: 'hidden' as const,
+    },
+    scrollbars: {
+      theme: 'os-theme-ski-tabs',
+      autoHide: 'move' as const,
+      autoHideDelay: 1000,
+    }
+  };
+  
+  wagonScrollOptions = {
+    overflow: {
+      x: 'scroll' as const,
+      y: 'hidden' as const,
+    },
+    scrollbars: {
+      theme: 'os-theme-ski-wagons', 
+      autoHide: 'move' as const,
+      autoHideDelay: 1000,
+    }
+  };
+  
   constructor(private formationService: FormationService) {}
   
   /**
@@ -87,11 +114,7 @@ export class TrainFormationComponent implements OnInit, OnDestroy {
         } else {
           this.hasSearched = true;
           
-          // Print the current formation string to console for debugging
-          this.printFormationToConsole();
-          
-          // Expose a global function to update the formation for testing
-          this.exposeFormationUpdater();
+          // OverlayScrollbars will be automatically initialized by Angular directive
         }
       })
     );
@@ -123,12 +146,15 @@ export class TrainFormationComponent implements OnInit, OnDestroy {
     );
   }
   
+
+  
   /**
    * Performs cleanup by unsubscribing from all subscriptions
    * to prevent memory leaks when component is destroyed
    */
   ngOnDestroy(): void {
     this.subscriptions.forEach(sub => sub.unsubscribe());
+    // OverlayScrollbars cleanup is handled automatically by Angular directive
   }
   
   /**
@@ -735,71 +761,6 @@ export class TrainFormationComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Print the current formation string to the console for debugging
-   */
-  private printFormationToConsole(): void {
-    if (!this.trainFormation || !this.formationService['lastApiResponse']) {
-      console.warn('No formation data available to print');
-      return;
-    }
-    
-    const currentStopIndex = this.formationService['currentStopIndexSubject'].value;
-    const apiResponse = this.formationService['lastApiResponse'];
-    
-    if (currentStopIndex >= 0 && currentStopIndex < apiResponse.formationsAtScheduledStops.length) {
-      const formationString = apiResponse.formationsAtScheduledStops[currentStopIndex].formationShort.formationShortString;
-      
-      console.log('%c[TRAIN FORMATION STRING]', 'color: #0066CC; font-weight: bold; font-size: 14px;');
-      console.log(formationString);
-      console.log('%cTo update the formation, use: updateFormation("your-modified-string-here")', 'color: #666; font-style: italic;');
-    }
-  }
-  
-  /**
-   * Expose a global function to update the formation string for testing
-   */
-  private exposeFormationUpdater(): void {
-    // Make the function available in the global window object
-    (window as any).updateFormation = (newFormationString: string) => {
-      if (!newFormationString || typeof newFormationString !== 'string') {
-        console.error('Please provide a valid formation string');
-        return;
-      }
-      
-      try {
-        // Get the current API response
-        const apiResponse = this.formationService['lastApiResponse'];
-        if (!apiResponse) {
-          console.error('No API response available to modify');
-          return;
-        }
-        
-        // Get the current stop index
-        const currentStopIndex = this.formationService['currentStopIndexSubject'].value;
-        
-        // Create a deep copy of the API response to avoid modifying the original
-        const modifiedResponse = JSON.parse(JSON.stringify(apiResponse));
-        
-        // Update the formation string in the copied response
-        modifiedResponse.formationsAtScheduledStops[currentStopIndex].formationShort.formationShortString = newFormationString;
-        
-        // Use the service's internal methods to process the updated formation
-        console.log('%cUpdating formation with new string...', 'color: #009900; font-weight: bold;');
-        this.formationService['lastApiResponse'] = modifiedResponse;
-        this.formationService['processFormationData'](modifiedResponse, currentStopIndex);
-        
-        console.log('%cFormation updated successfully!', 'color: #009900; font-weight: bold;');
-        return true;
-      } catch (error) {
-        console.error('Error updating formation:', error);
-        return false;
-      }
-    };
-    
-    console.log('%cFormation updater function is now available. Use: updateFormation("your-modified-string-here")', 'color: #0066CC; font-style: italic;');
-  }
-
-  /**
    * Gets the first valid stop name from the train formation
    * @returns The first valid stop name or empty string if none found
    */
@@ -864,9 +825,9 @@ export class TrainFormationComponent implements OnInit, OnDestroy {
       'BHP', 'VH', 'VR', 'BZ', 'FZ', 'FA', 'LA', 'WR', 'WL', 'CC', 'KW'
     ];
     
-    // Don't show restaurant pictogram (WR) when wagon is unserviced
+    // Don't show restaurant pictogram (WR) when wagon is unserviced or closed
     let filteredCodes = displayableCodes;
-    if (wagon.statusCodes && wagon.statusCodes.includes('Open but unserviced')) {
+    if (wagon.statusCodes && (wagon.statusCodes.includes('Open but unserviced') || wagon.statusCodes.includes('Closed'))) {
       filteredCodes = displayableCodes.filter(code => code !== 'WR');
     }
     
@@ -908,22 +869,24 @@ export class TrainFormationComponent implements OnInit, OnDestroy {
     
     if (!formationElement) return;
     
+    // Get current scroll position (fallback to window scrolling)
+    const currentScrollTop = window.scrollY;
+    
     // Store the current absolute position of the formation
     const formationRect = formationElement.getBoundingClientRect();
-    const currentFormationTop = formationRect.top + window.scrollY;
+    const currentFormationTop = formationRect.top + currentScrollTop;
     
-    // Update selected stop
-    this.selectedStopIndex = index;
+    // Update selected stop using the service method
+    this.selectStop(index);
     
     // After view updates, ensure formation stays at or below anchor point
     requestAnimationFrame(() => {
       const newRect = formationElement.getBoundingClientRect();
-      const newFormationTop = newRect.top + window.scrollY;
       
       // If formation would move above anchor point, adjust scroll to maintain anchor
       if (newRect.top < ANCHOR_POINT) {
         window.scrollTo({
-          top: newFormationTop - ANCHOR_POINT,
+          top: currentFormationTop - ANCHOR_POINT,
           behavior: 'smooth'
         });
       }
