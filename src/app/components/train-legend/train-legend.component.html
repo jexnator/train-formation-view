@@ -91,7 +91,7 @@
 
   <!-- Facilities section - only shown if there are items -->
   <div class="legend-section" *ngIf="legendFacilities.length > 0">
-    <h3 class="sbb-headline3">Sectors and Facilities</h3>
+    <h3 class="sbb-headline3">{{ getFacilitiesTitle() }}</h3>
     <div class="legend-grid">
       <div class="legend-item" *ngFor="let item of legendFacilities">
         <!-- Sector range display with start-end pictograms -->

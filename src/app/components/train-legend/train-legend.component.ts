@@ -376,4 +376,26 @@ export class TrainLegendComponent implements OnInit, OnDestroy {
       }
     });
   }
+
+  /**
+   * Checks if sectors are available for the current stop
+   * @returns true if sectors are available, false otherwise
+   */
+  hasSectors(): boolean {
+    if (!this.trainFormation || 
+        !this.trainFormation.stops || 
+        this.trainFormation.stops.length === 0) {
+      return false;
+    }
+    
+    return this.trainFormation.stops[this.currentStopIndex].hasSectors;
+  }
+
+  /**
+   * Gets the appropriate title for the facilities section
+   * @returns "Sectors and Facilities" if sectors are available, "Facilities" otherwise
+   */
+  getFacilitiesTitle(): string {
+    return this.hasSectors() ? 'Sectors and Facilities' : 'Facilities';
+  }
 } 
