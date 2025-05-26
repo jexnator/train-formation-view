@@ -283,6 +283,8 @@
   -webkit-font-smoothing: antialiased;
   padding: 0;
   font-size: 0;
+  /* Minimal width reduction to prevent partial wagon visibility on Windows */
+  width: calc(100% - 0.5px);
 }
 
 /* Consistent spacing for responsive layouts */
