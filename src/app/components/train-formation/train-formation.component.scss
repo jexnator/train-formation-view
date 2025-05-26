@@ -844,7 +844,6 @@
 
 /* Position tabs scrollbar above content */
 ::ng-deep .stop-selector-tabs-wrapper .os-scrollbar-horizontal {
-  top: -1px !important;
   bottom: auto !important;
 }
 
