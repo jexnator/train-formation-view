@@ -198,14 +198,14 @@ export class TrainLegendComponent implements OnInit, OnDestroy {
       this.legendWagonTypes.push({ label: 'Locomotive', style: 'locomotive' });
     }
     
-    // Add closed wagon if present
-    if (allWagons.some(wagon => wagon.statusCodes && wagon.statusCodes.includes('Closed'))) {
-      this.legendWagonTypes.push({ label: 'Closed Wagon', style: 'closed' });
-    }
-    
     // Add class indicators
     if (allWagons.some(wagon => wagon.classes && wagon.classes.length > 0)) {
       this.legendWagonTypes.push({ label: '1st/2nd Class Coach', style: 'mixed' });
+    }
+    
+    // Add closed coach if present (moved to end, before no-passage)
+    if (allWagons.some(wagon => wagon.statusCodes && wagon.statusCodes.includes('Closed'))) {
+      this.legendWagonTypes.push({ label: 'Closed Coach', style: 'closed' });
     }
     
     // No longer add sector range to wagon types
