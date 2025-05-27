@@ -20,6 +20,22 @@ export class ThemeService {
     sepia: 0
   };
 
+  private readonly DARK_READER_FIXES = {
+    css: `
+      /* Force specific colors for sector elements in dark mode */
+      .boundary-line {
+        background-color: #8faad7 !important;
+      }
+      .sector-horizontal-line {
+        background-color: #373c3e !important;
+      }
+    `,
+    invert: [],
+    ignoreInlineStyle: [],
+    ignoreImageAnalysis: [],
+    disableStyleSheetsProxy: false
+  };
+
   constructor() {
     // Ensure polyfill is available before using Dark Reader
     this.ensureSpreadValuesPolyfill();
@@ -48,7 +64,7 @@ export class ThemeService {
    */
   private setDarkMode(isDark: boolean): void {
     if (isDark) {
-      enableDarkMode(this.DARK_READER_CONFIG);
+      enableDarkMode(this.DARK_READER_CONFIG, this.DARK_READER_FIXES);
     } else {
       disableDarkMode();
     }
@@ -59,7 +75,7 @@ export class ThemeService {
    * Follow system color scheme preference
    */
   private followSystemPreference(): void {
-    followSystemColorScheme(this.DARK_READER_CONFIG);
+    followSystemColorScheme(this.DARK_READER_CONFIG, this.DARK_READER_FIXES);
     this.darkMode.next(isEnabled());
   }
 
