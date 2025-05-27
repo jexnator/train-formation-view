@@ -190,14 +190,20 @@
                   
                   <!-- Occupancy icons in the middle of the wagon -->
                   <div class="wagon-icons" *ngIf="wagon.type !== 'locomotive' && !(wagon.statusCodes && wagon.statusCodes.includes('Closed'))">
-                    <!-- First class occupancy -->
-                    <img *ngIf="wagon.firstClassOccupancy"
+                    <!-- For mixed class wagons (1/2): prefer first class -->
+                    <img *ngIf="wagon.firstClassOccupancy && (wagon.classes.includes('1') && wagon.classes.includes('2'))"
                          [src]="getOccupancyIconPath(wagon.firstClassOccupancy.icon)" 
                          alt="Occupancy"
                            class="occupancy-icon" />
                     
-                    <!-- Second class occupancy -->
-                    <img *ngIf="wagon.secondClassOccupancy"
+                    <!-- For first class only wagons (1) -->
+                    <img *ngIf="wagon.firstClassOccupancy && wagon.classes.includes('1') && !wagon.classes.includes('2')"
+                         [src]="getOccupancyIconPath(wagon.firstClassOccupancy.icon)" 
+                         alt="Occupancy"
+                           class="occupancy-icon" />
+                    
+                    <!-- For second class only wagons (2) -->
+                    <img *ngIf="wagon.secondClassOccupancy && wagon.classes.includes('2') && !wagon.classes.includes('1')"
                          [src]="getOccupancyIconPath(wagon.secondClassOccupancy.icon)" 
                          alt="Occupancy"
                            class="occupancy-icon" />
