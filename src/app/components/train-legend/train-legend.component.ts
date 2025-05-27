@@ -269,7 +269,7 @@ export class TrainLegendComponent implements OnInit, OnDestroy {
     // Add low floor entry if present
     if (allWagons.some(wagon => wagon.attributes.some(attr => ['NF', 'KW'].includes(attr.code)))) {
       this.legendAccessibility.push({ 
-        label: 'Low Floor Access', 
+        label: 'Low Floor Entry', 
         svgPath: this.getLowFloorEntryPath() 
       });
     }

@@ -2,15 +2,15 @@
  * @fileoverview Train formation visualization component styling for SKI+ application
  * 
  * This file contains:
- * - Tooltip customizations for wagon information display
  * - Train formation container with responsive layout
  * - Train visualization with sector lines and boundaries
- * - Wagon and locomotive SVG rendering styles
+ * - External SVG container styling for wagons and locomotives
  * - Status indicators and loading states
  * - Touch interaction optimizations for mobile devices
+ * - Responsive design for various screen sizes
  * 
- * Note: Contains customized SBB Angular components with precise positioning
- * to maintain pixel-perfect alignment in the train visualization.
+ * Note: Uses external SVG files for wagon/locomotive rendering to avoid
+ * Dark Reader interference. Contains customized SBB Angular components.
  */
 
 /* --- SBB TOOLTIP CUSTOMIZATIONS --- */
@@ -495,34 +495,13 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 10px;  /* Size fits between wagons */
+    width: 10px;  /* Sized to fit between wagons */
     height: 10px;
     z-index: 10;
   }
 }
 
-/* --- WAGON CLASS INDICATORS --- */
-.wagon-classes {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  display: flex;
-  gap: 8px;
 
-.class-indicator {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-    font-size: 16px;
-  }
-  
-  sbb-icon {
-    font-size: 24px;
-    color: var(--sbb-color-black);
-  }
-}
 
 /* Direction indicator */
 .direction-indicator {
@@ -605,53 +584,7 @@
   }
 }
 
-/* --- LEGEND STYLES --- */
-.formation-legend {
-  margin-top: 32px;
-  padding-top: 16px;
-  border-top: 1px solid var(--sbb-color-cloud);
 
-  .legend-section {
-    margin-bottom: 16px;
-  }
-
-  .legend-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 8px 12px;
-  }
-
-  .legend-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 14px;
-  }
-}
-
-/* Legend SVG elements */
-.legend-locomotive-svg {
-  width: 60px;
-  height: 30px;
-  overflow: visible;
-}
-
-.legend-wagon-svg {
-  width: 60px;
-  height: 30px;
-  overflow: visible;
-}
-
-.legend-class {
-  font-size: 14px;
-  font-weight: bold;
-  fill: var(--sbb-color-black);
-  font-family: sans-serif;
-}
-
-.legend-label {
-  color: var(--sbb-color-charcoal);
-}
 
 /* --- VISUALIZATION CONTAINER --- */
 .visualization-container {
@@ -756,32 +689,27 @@
 /* --- TEXT ELEMENTS --- */
 .wagon-number {
   font-size: 12px;
-  fill: var(--sbb-color-metal);
+  color: var(--sbb-color-metal);
   font-family: sans-serif;
 }
 
 .wagon-class {
   font-size: 16px;
   font-weight: bold;
-  fill: var(--sbb-color-blue);
+  color: var(--sbb-color-blue);
   font-family: sans-serif;
 }
 
-/* --- SVG ELEMENTS --- */
+/* --- EXTERNAL SVG ELEMENTS --- */
 .locomotive-svg,
 .wagon-svg {
-  width: 100px; /* Exact match with container */
+  width: 100px;
   height: 50px;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  overflow: visible;
   display: block;
-  box-sizing: border-box;
-  shape-rendering: geometricPrecision; /* Maximum SVG quality */
+  shape-rendering: geometricPrecision;
 }
 
-/* --- NEW CONTAINER STYLING --- */
+/* --- EXTERNAL SVG CONTAINER STYLING --- */
 .locomotive-container,
 .wagon-container-inner {
   position: relative;
@@ -858,37 +786,13 @@
   shape-rendering: geometricPrecision;
 }
 
-/* High-quality rendering for all SVG elements */
-.train-visualization svg,
+/* High-quality rendering for external SVG elements */
 .train-visualization image,
-.train-visualization path,
-.train-visualization rect,
-.train-visualization text,
 .wagon-attribute-pictogram,
 .sector-icon,
 .no-passage-icon {
   shape-rendering: geometricPrecision;
   image-rendering: optimizeQuality;
-}
-
-/* Locomotive text styling */
-.locomotive-svg .wagon-class {
-  fill: white; /* White text for better readability on blue background */
-  font-weight: bold;
-}
-
-/* Locomotive styling */
-.locomotive-svg path {
-  fill: var(--ski-color-locomotive); /* SKI+ locomotive color */
-  stroke: black; /* Solid black border */
-  stroke-width: 2px;
-}
-
-/* Legend locomotive styling */
-.legend-locomotive-svg path {
-  fill: var(--ski-color-locomotive); /* SKI+ locomotive color */
-  stroke: black; /* Solid black border */
-  stroke-width: 1.5px;
 }
 
 /* --- ERROR DISPLAY --- */

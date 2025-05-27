@@ -4,8 +4,9 @@
  * This file contains:
  * - Container styling with SBB milk background
  * - Responsive grid layout for legend items
- * - SVG rendering optimizations for train visualization elements
+ * - External SVG container styling for train elements
  * - Consistent typography and spacing
+ * - Theme-aware icon rendering
  */
 
 /* Main legend container */
@@ -36,9 +37,9 @@
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
     gap: 4px 16px;
 
-    /* Reduce gap between Low Floor Access and Entry with Steps when wrapped because of aligned SVG Viewports in y */
+    /* Reduce gap between accessibility icons when wrapped */
     @media (max-width: 591px) {
-      .legend-item:has(img[alt="Low Floor Access"])+.legend-item:has(img[alt="Entry with Steps"]) {
+      .legend-item:has(img[alt="Low Floor Entry"])+.legend-item:has(img[alt="Entry with Steps"]) {
         margin-top: -7px;
       }
     }
@@ -77,16 +78,15 @@
   color: var(--sbb-color-metal);
 }
 
-/* SVG elements for train cars in legend */
+/* External SVG elements for train cars in legend */
 .legend-locomotive-svg,
 .legend-wagon-svg {
   width: 50px;
   height: 25px;
-  overflow: visible;
   shape-rendering: geometricPrecision;
 }
 
-/* Container styling for external SVGs */
+/* Container styling for external SVG files */
 .locomotive-container {
   width: 50px;
   height: 28px;
@@ -136,7 +136,7 @@
   line-height: 1.2;
 }
 
-/* Icon for SVG elements */
+/* Icon styling for external SVG files */
 .legend-svg-icon {
   width: 20px;
   height: 20px;
@@ -216,7 +216,6 @@
 }
 
 /* Exceptions for icons that shouldn't have the white box styling */
-.legend-item img[alt="Low Floor Access"], 
 .legend-item img[alt="Low Floor Entry"],
 .legend-item img[alt="Entry with Steps"],
 .legend-item img[alt="No passage between wagons"] {
@@ -227,7 +226,6 @@
 }
 
 /* Accessibility icon sizing - made more robust with multiple selectors */
-.legend-item img[alt="Low Floor Access"], 
 .legend-item img[alt="Low Floor Entry"],
 .legend-item img[alt="Entry with Steps"] {
   width: 30px !important;
