@@ -26,7 +26,7 @@
     margin-bottom: 10px;
   }
 
-  .legend-section + .legend-section {
+  .legend-section+.legend-section {
     margin-top: 10px;
   }
 
@@ -38,7 +38,7 @@
 
     /* Reduce gap between Low Floor Access and Entry with Steps when wrapped because of aligned SVG Viewports in y */
     @media (max-width: 591px) {
-      .legend-item:has(img[alt="Low Floor Access"]) + .legend-item:has(img[alt="Entry with Steps"]) {
+      .legend-item:has(img[alt="Low Floor Access"])+.legend-item:has(img[alt="Entry with Steps"]) {
         margin-top: -7px;
       }
     }
@@ -86,26 +86,52 @@
   shape-rendering: geometricPrecision;
 }
 
-/* Locomotive styling - matches the SKI+ color scheme */
-.legend-locomotive-svg path {
-  fill: var(--ski-color-locomotive);
-  stroke: black;
-  stroke-width: 2px;
+/* Container styling for external SVGs */
+.locomotive-container {
+  width: 50px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Class indicator text styling */
-.legend-class {
-  font-size: 22px;
-  font-weight: bold;
-  fill: var(--sbb-color-blue);
-  font-family: sans-serif;
-  dominant-baseline: middle;
+.wagon-container-inner {
+  position: relative;
+  width: 50px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+
+.wagon-text {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 50px;
+  height: 25px;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.wagon-text .wagon-class {
+  font-size: 11px;
+  font-weight: bold;
+  color: var(--sbb-color-blue);
+  font-family: sans-serif;
+  position: absolute;
+  top: 5px;
+  left: 8px;
+  text-align: center;
+}
+
+
 
 /* Legend label text */
 .legend-label {
   color: var(--sbb-color-charcoal);
-  white-space: nowrap; /* Keep labels on a single line */
+  white-space: nowrap;
+  /* Keep labels on a single line */
   overflow: visible;
   line-height: 1.2;
 }
@@ -128,6 +154,12 @@
   justify-content: center;
   box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.05);
   height: 28px;
+  /* Dark mode border for better contrast */
+  border: 1px solid transparent;
+  
+  @media (prefers-color-scheme: dark) {
+    border-color: var(--sbb-color-cloud);
+  }
   
   .legend-svg-icon {
     width: 20px;
@@ -158,6 +190,12 @@
   height: 28px;
   margin: 0;
   gap: 4px;
+  /* Dark mode border for better contrast */
+  border: 1px solid transparent;
+  
+  @media (prefers-color-scheme: dark) {
+    border-color: var(--sbb-color-cloud);
+  }
   
   /* Keep the icons size consistent within the box */
   img.legend-svg-icon {
@@ -194,7 +232,8 @@
 .legend-item img[alt="Entry with Steps"] {
   width: 30px !important;
   height: 30px !important;
-  object-fit: contain; /* Ensure the image maintains its aspect ratio */
+  object-fit: contain;
+  /* Ensure the image maintains its aspect ratio */
 }
 
 /* Special sizing for no-passage icon inside pictogram box */
@@ -203,13 +242,7 @@
   height: 18px !important;
 }
 
-/* Pattern styling for closed wagon visualization */
-.closed-pattern {
-  fill: white;
-  stroke: black;
-  stroke-width: 1.5;
-  mask: url(#diagonalHatch);
-}
+
 
 /* Very small screen adjustments */
 @media (max-width: 400px) {

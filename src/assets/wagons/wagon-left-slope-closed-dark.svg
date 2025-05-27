@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 50">
+  <metadata>
+    SKI+ (https://opentransportdata.swiss/de/about-us/)
+    Source: https://github.com/openTdataCH/train-view-svg-library
+  </metadata>
+  <defs>
+    <pattern id="diagonalHatchClosed" patternUnits="userSpaceOnUse" width="10" height="10" patternTransform="rotate(45)">
+      <rect width="5" height="10" fill="#1d2021" />
+      <rect x="5" width="5" height="10" fill="rgba(255, 0, 0, 0.2)" />
+    </pattern>
+    <clipPath id="leftSlopeClip">
+      <path d="M15,3
+               C11,3 9,6 8,10
+               L4,38
+               C3,43 7,47 12,47
+               L92,47
+               C95,47 97,45 97,42
+               L97,8
+               C97,5 95,3 92,3
+               Z" />
+    </clipPath>
+  </defs>
+  <path d="M15,2
+           C10,2 8,5 7,10
+           L3,38
+           C2,44 6,48 12,48
+           L93,48
+           C96,48 98,46 98,43
+           L98,7
+           C98,4 96,2 93,2
+           Z"
+        fill="#1d2021" stroke="#868686" stroke-width="2"/>
+  <path d="M15,2
+           C10,2 8,5 7,10
+           L3,38
+           C2,44 6,48 12,48
+           L93,48
+           C96,48 98,46 98,43
+           L98,7
+           C98,4 96,2 93,2
+           Z"
+        fill="url(#diagonalHatchClosed)" stroke="none" clip-path="url(#leftSlopeClip)"/>
+</svg>

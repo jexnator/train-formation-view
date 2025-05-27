@@ -5,6 +5,7 @@ import { FormationService } from '../../services/formation.service';
 import { TrainWagon, TrainVisualization } from '../../models/formation.model';
 import { Subscription } from 'rxjs';
 import { OCCUPANCY_VISUALIZATION } from '../../models/occupancy.model';
+import { ThemeService } from '../../services/theme.service';
 
 /**
  * @fileoverview Legend component for SKI+ Train Formation Visualization
@@ -77,7 +78,13 @@ export class TrainLegendComponent implements OnInit, OnDestroy {
   /** Collection of subscriptions for cleanup */
   private subscriptions: Subscription[] = [];
   
-  constructor(private formationService: FormationService) {}
+  /** Current theme state */
+  isDarkMode: boolean = false;
+
+  constructor(
+    private formationService: FormationService,
+    private themeService: ThemeService
+  ) { }
   
   /**
    * Initializes component by subscribing to formation data changes
@@ -94,6 +101,14 @@ export class TrainLegendComponent implements OnInit, OnDestroy {
     this.subscriptions.push(
       this.formationService.currentStopIndex$.subscribe(index => {
         this.currentStopIndex = index;
+        this.updateLegend();
+      })
+    );
+
+    this.subscriptions.push(
+      this.themeService.darkMode$.subscribe(isDark => {
+        this.isDarkMode = isDark;
+        // Update legend when theme changes to refresh SVG paths
         this.updateLegend();
       })
     );
@@ -135,29 +150,52 @@ export class TrainLegendComponent implements OnInit, OnDestroy {
     // Update occupancy information based on current formation
     this.updateOccupancy(allWagons);
   }
+
+  /**
+   * Returns the path for the locomotive SVG based on current theme
+   * @returns Local asset path for locomotive SVG
+   */
+  getLocomotiveSvgPath(): string {
+    const theme = this.isDarkMode ? 'dark' : 'light';
+    return `assets/wagons/locomotive-${theme}.svg`;
+  }
+
+  /**
+   * Returns the path for the wagon SVG based on current theme and type
+   * @param isClosed Whether the wagon is closed
+   * @returns Local asset path for wagon SVG
+   */
+  getWagonSvgPath(isClosed: boolean = false): string {
+    const theme = this.isDarkMode ? 'dark' : 'light';
+    const type = isClosed ? 'wagon-regular-closed' : 'wagon-regular';
+    return `assets/wagons/${type}-${theme}.svg`;
+  }
   
   /**
-   * Returns the path for the no-passage SVG icon
+   * Returns the path for the no-passage SVG icon based on current theme
    * @returns Local asset path for no-passage icon
    */
   private getNoPassageSvgPath(): string {
-    return 'assets/icons/no-passage.svg';
+    const theme = this.isDarkMode ? 'dark' : 'light';
+    return `assets/icons/no-passage-${theme}.svg`;
   }
 
   /**
-   * Returns the path for the low-floor entry SVG icon
+   * Returns the path for the low-floor entry SVG icon based on current theme
    * @returns Local asset path for low-floor entry icon
    */
   private getLowFloorEntryPath(): string {
-    return 'assets/icons/low-floor-entry.svg';
+    const theme = this.isDarkMode ? 'dark' : 'light';
+    return `assets/icons/low-floor-entry-${theme}.svg`;
   }
 
   /**
-   * Returns the path for the entry-with-steps SVG icon
+   * Returns the path for the entry-with-steps SVG icon based on current theme
    * @returns Local asset path for entry with steps icon
    */
   private getEntryWithStepsPath(): string {
-    return 'assets/icons/entry-with-steps.svg';
+    const theme = this.isDarkMode ? 'dark' : 'light';
+    return `assets/icons/entry-with-steps-${theme}.svg`;
   }
 
   /**
@@ -369,9 +407,10 @@ export class TrainLegendComponent implements OnInit, OnDestroy {
     // Add only the occupancy levels that are present in the formation
     Object.values(OCCUPANCY_VISUALIZATION).forEach(occupancy => {
       if (presentOccupancyLevels.has(occupancy.icon)) {
+        const theme = this.isDarkMode ? 'dark' : 'light';
         this.legendOccupancy.push({
           label: occupancy.label,
-          svgPath: `assets/icons/${occupancy.icon}.svg`
+          svgPath: `assets/icons/${occupancy.icon}-${theme}.svg`
         });
       }
     });

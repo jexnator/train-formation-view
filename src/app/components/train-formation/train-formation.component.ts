@@ -6,6 +6,7 @@ import { SbbLoadingIndicatorModule } from '@sbb-esta/angular/loading-indicator';
 import { SbbAlertModule } from '@sbb-esta/angular/alert';
 import { SbbTooltipModule } from '@sbb-esta/angular/tooltip';
 import { FormationService, ApiError } from '../../services/formation.service';
+import { ThemeService } from '../../services/theme.service';
 import { TrainVisualization, TrainWagon, TrainSection, WagonAttribute } from '../../models/formation.model';
 import { Subscription } from 'rxjs';
 import { formatDate } from '@angular/common';
@@ -93,7 +94,10 @@ export class TrainFormationComponent implements OnInit, OnDestroy {
     }
   };
   
-  constructor(private formationService: FormationService) {}
+  constructor(
+    private formationService: FormationService,
+    private themeService: ThemeService
+  ) {}
   
   /**
    * Initializes component by subscribing to formation service observables
@@ -142,6 +146,14 @@ export class TrainFormationComponent implements OnInit, OnDestroy {
     this.subscriptions.push(
       this.formationService.loading$.subscribe(isLoading => {
         this.loading = isLoading;
+      })
+    );
+
+    // Subscribe to theme changes to trigger re-rendering of SVGs
+    this.subscriptions.push(
+      this.themeService.darkMode$.subscribe(() => {
+        // Force change detection to update SVG paths when theme changes
+        // This ensures the correct SVG files are loaded immediately
       })
     );
   }
@@ -671,27 +683,30 @@ export class TrainFormationComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Returns the path for the no-passage SVG icon
+   * Returns the path for the no-passage SVG icon based on current theme
    * @returns Local asset path for no-passage icon
    */
   getNoPassageSvgPath(): string {
-    return 'assets/icons/no-passage.svg';
+    const theme = this.themeService.isDarkMode() ? 'dark' : 'light';
+    return `assets/icons/no-passage-${theme}.svg`;
   }
 
   /**
-   * Returns the path for the low-floor entry SVG icon
+   * Returns the path for the low-floor entry SVG icon based on current theme
    * @returns Local asset path for low-floor entry icon
    */
   getLowFloorEntryPath(): string {
-    return 'assets/icons/low-floor-entry.svg';
+    const theme = this.themeService.isDarkMode() ? 'dark' : 'light';
+    return `assets/icons/low-floor-entry-${theme}.svg`;
   }
 
   /**
-   * Returns the path for the entry-with-steps SVG icon
+   * Returns the path for the entry-with-steps SVG icon based on current theme
    * @returns Local asset path for entry with steps icon
    */
   getEntryWithStepsPath(): string {
-    return 'assets/icons/entry-with-steps.svg';
+    const theme = this.themeService.isDarkMode() ? 'dark' : 'light';
+    return `assets/icons/entry-with-steps-${theme}.svg`;
   }
 
   /**
@@ -704,16 +719,17 @@ export class TrainFormationComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Returns the path for an icon based on its name
+   * Returns the path for an icon based on its name and current theme
    * @param iconName The name of the icon
    * @returns Local asset path for the icon
    */
   getIconPath(iconName: string): string {
-    return `assets/icons/${iconName}.svg`;
+    const theme = this.themeService.isDarkMode() ? 'dark' : 'light';
+    return `assets/icons/${iconName}-${theme}.svg`;
   }
 
   /**
-   * Get the path for an occupancy icon
+   * Get the path for an occupancy icon based on current theme
    * @param iconName The icon name (e.g. 'low-occupancy')
    * @returns Path to the appropriate occupancy SVG
    */
@@ -732,6 +748,42 @@ export class TrainFormationComponent implements OnInit, OnDestroy {
     } else {
       return this.getEntryWithStepsPath();
     }
+  }
+
+  /**
+   * Get the path for locomotive SVG based on current theme
+   * @returns Path to the appropriate locomotive SVG
+   */
+  getLocomotiveSvgPath(): string {
+    const theme = this.themeService.isDarkMode() ? 'dark' : 'light';
+    return `assets/wagons/locomotive-${theme}.svg`;
+  }
+
+  /**
+   * Get the path for wagon SVG based on shape, closed state, and current theme
+   * @param wagon The wagon to get SVG for
+   * @param index Wagon index for determining shape
+   * @returns Path to the appropriate wagon SVG
+   */
+  getWagonSvgPath(wagon: TrainWagon, index: number): string {
+    const theme = this.themeService.isDarkMode() ? 'dark' : 'light';
+    const isClosed = wagon.statusCodes && wagon.statusCodes.includes('Closed');
+    const closedSuffix = isClosed ? '-closed' : '';
+    
+    // Determine wagon shape
+    const hasLeftSlope = this.needsSlopedLeftEdge(wagon, index);
+    const hasRightSlope = this.needsSlopedRightEdge(wagon, index);
+    
+    let shape = 'regular';
+    if (hasLeftSlope && hasRightSlope) {
+      shape = 'both-slope';
+    } else if (hasLeftSlope) {
+      shape = 'left-slope';
+    } else if (hasRightSlope) {
+      shape = 'right-slope';
+    }
+    
+    return `assets/wagons/wagon-${shape}${closedSuffix}-${theme}.svg`;
   }
 
   /**

@@ -21,6 +21,9 @@ export class ThemeService {
   };
 
   constructor() {
+    // Ensure polyfill is available before using Dark Reader
+    this.ensureSpreadValuesPolyfill();
+    
     // Initialize theme from localStorage or system preference
     const savedPreference = localStorage.getItem(this.DARK_MODE_KEY);
     if (savedPreference !== null) {
@@ -59,4 +62,34 @@ export class ThemeService {
     followSystemColorScheme(this.DARK_READER_CONFIG);
     this.darkMode.next(isEnabled());
   }
-} 
+
+  /**
+   * Get current dark mode state
+   * @returns true if dark mode is enabled, false otherwise
+   */
+  isDarkMode(): boolean {
+    return this.darkMode.value;
+  }
+
+  /**
+ * Polyfill for __spreadValues to fix Dark Reader compatibility issues
+ */
+  private ensureSpreadValuesPolyfill(): void {
+    if (typeof (window as any).__spreadValues === 'undefined') {
+      (window as any).__spreadValues = function(target: any, source: any) {
+        const result = {};
+        for (const key in target) {
+          if (Object.prototype.hasOwnProperty.call(target, key)) {
+            (result as any)[key] = target[key];
+          }
+        }
+        for (const key in source) {
+          if (Object.prototype.hasOwnProperty.call(source, key)) {
+            (result as any)[key] = source[key];
+          }
+        }
+        return result;
+      };
+    }
+  }
+}
