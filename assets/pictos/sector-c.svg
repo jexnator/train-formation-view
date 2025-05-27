@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80.17 80.05">
   <metadata>
     SKI+ (https://opentransportdata.swiss/de/about-us/)
-    Source: https://github.com/jexnator/train-view-svg-library
+    Source: https://github.com/openTdataCH/train-view-svg-library
   </metadata>
   <rect x=".06" width="80.05" height="80.05" rx="15.14" fill="#2d327d"/>
   <path d="M63.039 46.486q-.682 7.968-5.061 13.388-6.21 7.609-17.659 7.609-12.132 0-18.736-8.578-5.599-7.322-5.599-18.808 0-12.347 7.179-20.244 6.604-7.286 17.695-7.286 10.804 0 17.013 6.676 4.199 4.594 4.738 10.265h-6.963q-1.184-5.204-5.169-8.112-3.948-2.943-9.799-2.943-9.404 0-14.142 7.645-3.589 5.815-3.589 13.927 0 8.614 3.733 14.357 4.738 7.215 13.998 7.215 6.676 0 10.624-3.876 3.984-3.912 4.846-11.235z" fill="#fff" paint-order="fill markers stroke"/>

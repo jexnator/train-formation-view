@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="19" height="16" fill="none" viewBox="0 0 19 16" preserveAspectRatio="xMidYMid meet">
+  <metadata>
+    SKI+ (https://opentransportdata.swiss/de/about-us/)
+    Source: https://github.com/openTdataCH/train-view-svg-library
+  </metadata>
+  <path d="M0 5v4a1 1 45 0 0 1 1v5a1 1 45 0 0 1 1h1a1 1 135 0 0 1-1v-5a1 1 135 0 0 1-1V5a1 1 45 0 0-1-1H1a1 1 135 0 0-1 1zm2.5-2c2 0 2-3 0-3s-2 3 0 3" fill="#8faad7" fill-opacity=".8"/>
+  <path d="M14 5v4a1 1 45 0 0 1 1v5a1 1 45 0 0 1 1h1a1 1 135 0 0 1-1v-5a1 1 135 0 0 1-1V5a1 1 45 0 0-1-1h-3a1 1 135 0 0-1 1zm-5.996 5v5a1 1 45 0 0 1 1h1a1 1 135 0 0 1-1v-5a1 1 135 0 0 1-1V5a1 1 45 0 0-1-1h-3a1 1 135 0 0-1 1v4a1 1 45 0 0 1 1zm8.504-7c1.336 0 2.006-1.616 1.061-2.561S15.008.164 15.008 1.5a1.5 1.5 0 0 0 1.5 1.5M9.504 3a1.5 1.5 0 0 0 1.5-1.5c0-.827-.674-1.5-1.5-1.5s-1.5.673-1.5 1.5a1.5 1.5 0 0 0 1.5 1.5" fill="#d1d1d1"/>
+</svg>
