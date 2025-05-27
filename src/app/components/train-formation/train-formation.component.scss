@@ -267,19 +267,17 @@
 
 .stop-selector-tabs-wrapper {
   border-bottom: 1px solid var(--sbb-color-cloud);
-  margin-bottom: 0; /* Ensure consistent spacing to details below */
-  /* overflow handled by OverlayScrollbars directive */
+  margin-bottom: 0;
   max-width: 100%;
-  width: fit-content; /* Line only extends to last tab */
+  width: fit-content;
   padding-top: 3px;
   padding-bottom: 0;
 }
 
 .stop-selector-tabs {
   display: flex;
-  flex-wrap: nowrap; /* Prevent wrapping to next line */
-  min-width: max-content; /* Allow horizontal scrolling */
-  /* Remove native scrollbar styles - handled by OverlayScrollbars */
+  flex-wrap: nowrap;
+  min-width: max-content;
 }
 
 .stop-tab {
@@ -822,7 +820,8 @@
   font-family: sans-serif;
   position: absolute;
   top: 25px;
-  left: 15px;
+  left: 19.5px;
+  transform: translateX(-50%);
   text-align: center;
 }
 
