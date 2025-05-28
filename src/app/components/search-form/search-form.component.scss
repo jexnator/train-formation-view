@@ -18,24 +18,33 @@
   border-radius: 16px;
 }
 
-/* Headline spacing */
+/* Headline spacing with responsive sizing */
 .search-form-container h2.sbb-headline2 {
   margin-top: 0;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
+  
+  /* More gradual title size reduction on small screens */
+  @media (max-width: 370px) {
+    font-size: 22px;
+  }
+  
+  @media (max-width: 320px) {
+    font-size: 21px;
+  }
 }
 
 /* Parent form layout with vertical organization */
 .form-layout {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 /* Horizontal arrangement of fields and button */
 .form-row {
   display: flex;
   align-items: flex-start;
-  gap: 8px; /* Consistent spacing between elements */
+  gap: 6px; /* Reduced spacing between elements */
   flex-wrap: wrap;
 }
 
@@ -43,7 +52,7 @@
 .form-fields {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
   flex: 1;
   min-width: 0;
 }
@@ -53,7 +62,7 @@
   display: flex;
   align-items: flex-start;
   margin-top: 19px; /* Aligns with form fields in inline view */
-  padding-bottom: 8px;
+  padding-bottom: 6px;
 }
 
 /* Base styling for form fields */
@@ -63,10 +72,27 @@ sbb-form-field {
   position: relative;
 }
 
+/* Reduce internal spacing of SBB form fields */
+::ng-deep sbb-form-field {
+  .sbb-form-field-wrapper {
+    margin-bottom: 0px; /* Minimal spacing */
+  }
+  
+  .sbb-form-field-label {
+    margin-bottom: 1px; /* Almost no label spacing */
+  }
+  
+  /* Reduce padding inside form fields */
+  .sbb-form-field-content {
+    padding-bottom: 0px;
+    margin-bottom: 0px;
+  }
+}
+
 /* Container for info icon in input */
 .input-icon-container {
   position: absolute;
-  left: 145px;
+  left: 150px;
   top: 50%;
   transform: translateY(-45%);
   z-index: 2;
@@ -127,7 +153,7 @@ button {
 @media (max-width: 1200px) {
   .button-container {
     width: 100%;
-    margin-top: 8px;
+    margin-top: 6px;
   }
   
   .form-fields {
@@ -135,7 +161,7 @@ button {
   }
   
   .form-row {
-    padding-bottom: 8px;
+    padding-bottom: 6px;
   }
 }
 
@@ -151,6 +177,42 @@ button {
   sbb-form-field:nth-child(1),
   sbb-form-field:nth-child(2) {
     width: 100%;
+  }
+}
+
+/* Button matches form field width */
+@media (max-width: 657px) {
+  button {
+    width: 100%;
+  }
+}
+
+/* Fix form field spacing issues on very small screens */
+@media (max-width: 370px) {
+  .search-form-container {
+    padding: 20px 20px 11px;
+  }
+  
+  /* Ensure all form fields stack vertically on small screens */
+  sbb-form-field {
+    min-width: 0;
+    width: 100%;
+    flex: none;
+  }
+  
+  .form-fields {
+    gap: 6px;
+    flex-direction: column;
+  }
+  
+  .form-row {
+    gap: 6px;
+    flex-direction: column;
+  }
+  
+  .button-container {
+    width: 100%;
+    margin-top: 6px;
   }
   
   button {

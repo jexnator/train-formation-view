@@ -56,6 +56,15 @@ body, html {
   margin-top: 0px;
   margin-bottom: 16px;
   color: var(--sbb-color-charcoal);
+  
+  /* More gradual responsive sizing for small screens */
+  @media (max-width: 370px) {
+    font-size: 22px;
+  }
+  
+  @media (max-width: 320px) {
+    font-size: 21px;
+  }
 }
 
 .sbb-headline3 {
@@ -64,6 +73,15 @@ body, html {
   margin-top: 0px;
   margin-bottom: 12px;
   color: var(--sbb-color-charcoal);
+  
+  /* More gradual responsive sizing for small screens */
+  @media (max-width: 370px) {
+    font-size: 17px;
+  }
+  
+  @media (max-width: 320px) {
+    font-size: 17px;
+  }
 }
 
 // --- SKI+ Specific Styles ---

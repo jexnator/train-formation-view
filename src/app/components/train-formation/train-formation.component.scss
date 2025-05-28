@@ -54,6 +54,17 @@
     padding: 24px;
     padding-bottom: 1px;
   }
+  
+  /* Responsive padding for small screens to match other components */
+  @media (max-width: 370px) {
+    padding: 20px;
+    padding-bottom: 1px;
+  }
+  
+  @media (max-width: 320px) {
+    padding: 16px;
+    padding-bottom: 1px;
+  }
 }
 
 /* Title container with train number badge */
@@ -65,7 +76,7 @@
 
 /* Train number badge styling */
 .train-number-badge {
-  margin-left: 8px;
+  margin-left: 16px;
   padding: 4px 8px 4px 8px;
   background-color: var(--sbb-color-white);
   box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.05);
@@ -89,21 +100,21 @@
   @media (max-width: 430px) {
     font-size: 22px;
     padding: 4px 8px;
-    margin-left: 6px;
+    margin-left: 12px;
     border-radius: 16px;
   }
   
   @media (max-width: 380px) {
     font-size: 20px;
     padding: 4px 7px;
-    margin-left: 5px;
+    margin-left: 10px;
     border-radius: 15px;
   }
   
   @media (max-width: 320px) {
     font-size: 18px;
     padding: 4px 6px;
-    margin-left: 4px;
+    margin-left: 8px;
     border-radius: 14px;
   }
 }

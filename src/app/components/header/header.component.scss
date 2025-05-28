@@ -12,6 +12,9 @@
 /* Custom header title with SKI+ prefix */
 :host ::ng-deep .sbb-header-lean-label {
   font-size: 20px;
+  /* Remove any right padding/margin to maximize space for button */
+  padding-right: 0;
+  margin-right: 0;
 }
 
 :host ::ng-deep .sbb-header-lean-label::before {
@@ -48,13 +51,31 @@
 
 /* Theme toggle button styles */
 sbb-header-icon-actions {
+  /* Position button with consistent distance from right viewport edge */
+  position: absolute;
+  top: 50%;
+  right: 16px;
+  transform: translateY(-50%);
+  
+  /* Reduce right margin on small screens */
+  @media (max-width: 370px) {
+    right: 10px;
+  }
+
+  @media (max-width: 360px) {
+    right: 7px;
+  }
+  
+  @media (max-width: 321px) {
+    right: 3px;
+  }
+  
   button[sbb-frameless-button] {
     display: flex;
     align-items: center;
     justify-content: center;
     transition: transform 0.2s ease;
     position: relative;
-    right: 0;
     height: auto;
     min-height: 40px;
 
@@ -103,6 +124,17 @@ sbb-header-icon-actions {
     
     .sbb-header-lean-label::before {
       margin-right: 10px;
+    }
+  }
+
+  /* Reduce title size earlier for better button spacing */
+  @media (max-width: 355px) {
+    .sbb-header-lean-label {
+      font-size: 17px;
+    }
+    
+    .sbb-header-lean-label::before {
+      margin-right: 8px;
     }
   }
 }

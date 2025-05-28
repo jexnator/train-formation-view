@@ -486,12 +486,8 @@ export class FormationService {
       return [];
     }
     
-    // Debug logging of input
-    console.debug('[FormationService] Parsing formation string:', formationString);
-    
     // Check for sector markers in the string
     const hasSectors = formationString.includes('@') || /\\@[A-Z]/.test(formationString);
-    console.debug('[FormationService] Formation has sectors:', hasSectors);
     
     // Initialize a map of sectors to wagons for easier management
     const sectorMap: Map<string, TrainWagon[]> = new Map();
@@ -501,20 +497,16 @@ export class FormationService {
     if (hasSectors) {
       // Split the formation string into logical segments based on the @ sector markers
       const sectorSegments = formationString.split(/(?=@[A-Z])/);
-      console.debug(`[FormationService] Found ${sectorSegments.length} sector segments`);
       
       // Process each segment which starts with a sector marker (or might be empty for the first segment)
       for (let i = 0; i < sectorSegments.length; i++) {
         let segment = sectorSegments[i];
         if (!segment.trim()) continue;
         
-        console.debug(`[FormationService] Processing segment ${i+1}/${sectorSegments.length}: ${segment.substring(0, 50)}${segment.length > 50 ? '...' : ''}`);
-        
         // Extract the sector identifier (should be the first @ followed by a letter)
         const sectorMatch = segment.match(/@([A-Z])/);
         if (sectorMatch) {
           currentSector = sectorMatch[1];
-          console.debug(`[FormationService] Found sector: ${currentSector}`);
           
           // If this sector isn't in our map yet, initialize it
           if (!sectorMap.has(currentSector)) {
@@ -543,24 +535,15 @@ export class FormationService {
     
     // Convert the sector map to train sections
     const sections: TrainSection[] = [];
-    console.debug(`[FormationService] Creating sections from ${sectorMap.size} sectors`);
     
     for (const [sector, wagons] of sectorMap.entries()) {
       if (wagons.length > 0) {
-        console.debug(`[FormationService] Creating section for sector ${sector} with ${wagons.length} wagons`);
         sections.push({
           sector,
           wagons: [...wagons]
         });
-      } else {
-        console.debug(`[FormationService] Skipping empty sector ${sector}`);
       }
     }
-    
-    console.debug(`[FormationService] Parsed sections: ${sections.length}`);
-    sections.forEach((section, i) => {
-      console.debug(`[FormationService] Section ${i} (${section.sector}): ${section.wagons.length} wagons`);
-    });
     
     return this.finalizeTrainSections(sections);
   }
@@ -576,18 +559,13 @@ export class FormationService {
   private processSegment(segment: string, currentSector: string, position: number, sectorMap: Map<string, TrainWagon[]>): number {
     // Process brackets first - they contain the actual wagons
     // We might have multiple bracket groups in a sector segment
-    let bracketCount = 0;
     let bracketContent: string | null;
     
     while ((bracketContent = this.extractBracketContent(segment, '[', ']')) !== null) {
-      bracketCount++;
-      console.debug(`[FormationService] Found bracket group ${bracketCount} in sector ${currentSector}`);
-      
       // Parse the wagons from this bracket group
       const wagons = this.parseVehicleGroup(bracketContent, currentSector, position);
       
       if (wagons.length > 0) {
-        console.debug(`[FormationService] Added ${wagons.length} wagons to sector ${currentSector}`);
         // Add wagons to the current sector
         const sectorWagons = sectorMap.get(currentSector) || [];
         sectorWagons.push(...wagons);
@@ -595,8 +573,6 @@ export class FormationService {
         
         // Update position counter for next wagons
         position += wagons.length;
-      } else {
-        console.debug(`[FormationService] No wagons found in bracket group ${bracketCount}`);
       }
       
       // Remove the processed bracket group from the segment
@@ -605,22 +581,14 @@ export class FormationService {
       segment = segment.substring(0, startIdx) + segment.substring(endIdx);
     }
     
-    if (bracketCount === 0) {
-      console.debug(`[FormationService] No bracket groups found in segment`);
-    }
-    
     // Handle any individual tokens outside of brackets
     const tokens = segment.split(/[,\\]/).filter(t => t.trim());
     if (tokens.length > 0) {
-      console.debug(`[FormationService] Processing ${tokens.length} individual tokens in sector ${currentSector}`);
-      
       tokens.forEach(token => {
         const trimmedToken = token.trim();
         if (trimmedToken === 'F') {
-          console.debug(`[FormationService] Skipping fictitious wagon 'F', but incrementing position`);
           position++;
         } else if (this.isPotentialWagonToken(trimmedToken)) {
-          console.debug(`[FormationService] Processing individual wagon token: ${trimmedToken}`);
           const wagon = this.parseVehicleToken(trimmedToken, currentSector, position);
           if (wagon) {
             const sectorWagons = sectorMap.get(currentSector) || [];
@@ -628,8 +596,6 @@ export class FormationService {
             sectorMap.set(currentSector, sectorWagons);
             position++;
           }
-        } else if (trimmedToken) {
-          console.debug(`[FormationService] Ignoring non-wagon token: ${trimmedToken}`);
         }
       });
     }

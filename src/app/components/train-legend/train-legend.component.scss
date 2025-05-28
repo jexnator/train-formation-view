@@ -15,11 +15,20 @@
   background-color: var(--sbb-color-milk);
   border-radius: 16px;
 
+  /* Responsive padding for small screens to match other components */
+  @media (max-width: 370px) {
+    padding: 20px 20px 8px;
+  }
+  
+  @media (max-width: 320px) {
+    padding: 16px 16px 8px;
+  }
+
   /* Title container */
   .title-container {
     display: flex;
     align-items: center;
-    margin-bottom: 0px;
+    margin-bottom: 1px;
   }
 
   /* Legend section spacing */
