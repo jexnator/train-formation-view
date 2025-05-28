@@ -7,6 +7,7 @@ import { SbbAlertModule } from '@sbb-esta/angular/alert';
 import { SbbTooltipModule } from '@sbb-esta/angular/tooltip';
 import { FormationService, ApiError } from '../../services/formation.service';
 import { ThemeService } from '../../services/theme.service';
+import { SvgPreloaderService } from '../../services/svg-preloader.service';
 import { TrainVisualization, TrainWagon, TrainSection, WagonAttribute } from '../../models/formation.model';
 import { Subscription } from 'rxjs';
 import { formatDate } from '@angular/common';
@@ -96,7 +97,8 @@ export class TrainFormationComponent implements OnInit, OnDestroy {
   
   constructor(
     private formationService: FormationService,
-    private themeService: ThemeService
+    private themeService: ThemeService,
+    private svgPreloaderService: SvgPreloaderService
   ) {}
   
   /**
@@ -154,6 +156,7 @@ export class TrainFormationComponent implements OnInit, OnDestroy {
       this.themeService.darkMode$.subscribe(() => {
         // Force change detection to update SVG paths when theme changes
         // This ensures the correct SVG files are loaded immediately
+        // Since SVGs are preloaded, this should be instantaneous
       })
     );
   }

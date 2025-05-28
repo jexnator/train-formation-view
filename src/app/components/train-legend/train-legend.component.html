@@ -10,7 +10,7 @@
     <h3 class="sbb-headline3">Accessibility</h3>
     <div class="legend-grid">
       <div class="legend-item" *ngFor="let item of legendAccessibility">
-        <img *ngIf="item.svgPath" [src]="item.svgPath" alt="{{item.label}}" class="legend-svg-icon">
+        <img *ngIf="item.svgPath" [src]="item.svgPath" alt="{{item.label}}" class="legend-svg-icon" loading="eager">
         <span class="legend-label">{{ item.label }}</span>
       </div>
     </div>
@@ -23,24 +23,24 @@
       <div class="legend-item" *ngFor="let item of legendWagonTypes">
         <!-- External SVG for locomotive -->
         <div *ngIf="item.style === 'locomotive'" class="locomotive-container">
-          <img [src]="getLocomotiveSvgPath()" alt="Locomotive" class="legend-locomotive-svg">
+          <img [src]="getLocomotiveSvgPath()" alt="Locomotive" class="legend-locomotive-svg" loading="eager">
         </div>
         
         <!-- External SVGs for wagon types -->
         <div *ngIf="item.style === 'mixed'" class="wagon-container-inner">
-          <img [src]="getWagonSvgPath(false)" alt="Regular wagon" class="legend-wagon-svg">
+          <img [src]="getWagonSvgPath(false)" alt="Regular wagon" class="legend-wagon-svg" loading="eager">
           <div class="wagon-text">
             <span class="wagon-class">1/2</span>
           </div>
         </div>
         
         <div *ngIf="item.style === 'closed'" class="wagon-container-inner">
-          <img [src]="getWagonSvgPath(true)" alt="Closed wagon" class="legend-wagon-svg">
+          <img [src]="getWagonSvgPath(true)" alt="Closed wagon" class="legend-wagon-svg" loading="eager">
         </div>
         
         <!-- For items with SVG paths like no-passage -->
         <div *ngIf="item.svgPath && !item.isRange" class="pictogram-box">
-          <img [src]="item.svgPath" alt="{{item.label}}" class="legend-svg-icon">
+          <img [src]="item.svgPath" alt="{{item.label}}" class="legend-svg-icon" loading="eager">
         </div>
         
         <span class="legend-label">{{ item.label }}</span>
@@ -54,7 +54,7 @@
     <div class="legend-grid">
       <div class="legend-item" *ngFor="let item of legendOccupancy">
         <div class="pictogram-box">
-          <img *ngIf="item.svgPath" [src]="item.svgPath" alt="{{item.label}}" class="legend-svg-icon">
+          <img *ngIf="item.svgPath" [src]="item.svgPath" alt="{{item.label}}" class="legend-svg-icon" loading="eager">
         </div>
         <span class="legend-label">{{ item.label }}</span>
       </div>
@@ -69,15 +69,15 @@
         <!-- Sector range display with start-end pictograms -->
         <ng-container *ngIf="item.isRange">
           <div class="sector-range">
-            <img *ngIf="item.svgPath" [src]="item.svgPath" alt="Start Sector" class="legend-svg-icon">
+            <img *ngIf="item.svgPath" [src]="item.svgPath" alt="Start Sector" class="legend-svg-icon" loading="eager">
             <span class="range-separator">-</span>
-            <img *ngIf="item.endSvgPath" [src]="item.endSvgPath" alt="End Sector" class="legend-svg-icon">
+            <img *ngIf="item.endSvgPath" [src]="item.endSvgPath" alt="End Sector" class="legend-svg-icon" loading="eager">
           </div>
         </ng-container>
         
         <!-- For items with SVG paths that are not ranges -->
         <div *ngIf="item.svgPath && !item.isRange" class="pictogram-box">
-          <img [src]="item.svgPath" alt="{{item.label}}" class="legend-svg-icon">
+          <img [src]="item.svgPath" alt="{{item.label}}" class="legend-svg-icon" loading="eager">
         </div>
         
         <span class="legend-label">{{ item.label }}</span>

@@ -156,6 +156,8 @@
                   <img [src]="getLocomotiveSvgPath()" 
                        alt="Locomotive" 
                        class="locomotive-svg"
+                       loading="eager"
+                       decoding="sync"
                        preserveAspectRatio="none">
                   <div class="locomotive-text">
                     <span class="wagon-number">{{ wagon.number }}</span>
@@ -169,19 +171,21 @@
                   <img [src]="getWagonSvgPath(wagon, i)" 
                        alt="Wagon" 
                        class="wagon-svg"
+                       loading="eager"
+                       decoding="sync"
                        preserveAspectRatio="none">
 
                   <div class="wagon-text">
                     <span class="wagon-number">{{ wagon.number }}</span>
-                  
+
                   <!-- Show class numbers only for non-closed wagons -->
                   <ng-container *ngIf="!(wagon.statusCodes && wagon.statusCodes.includes('Closed'))">
-                    <!-- Show "1/2" for mixed class wagons, otherwise show each class separately -->
-                    <ng-container *ngIf="wagon.classes.includes('1') && wagon.classes.includes('2')">
+                  <!-- Show "1/2" for mixed class wagons, otherwise show each class separately -->
+                  <ng-container *ngIf="wagon.classes.includes('1') && wagon.classes.includes('2')">
                         <span class="wagon-class">1/2</span>
-                    </ng-container>
-                    <ng-container *ngIf="!(wagon.classes.includes('1') && wagon.classes.includes('2'))">
-                      <ng-container *ngFor="let cls of wagon.classes; let idx = index">
+                  </ng-container>
+                  <ng-container *ngIf="!(wagon.classes.includes('1') && wagon.classes.includes('2'))">
+                    <ng-container *ngFor="let cls of wagon.classes; let idx = index">
                           <span class="wagon-class">{{ cls }}</span>
                         </ng-container>
                       </ng-container>
@@ -194,18 +198,21 @@
                     <img *ngIf="wagon.firstClassOccupancy && (wagon.classes.includes('1') && wagon.classes.includes('2'))"
                          [src]="getOccupancyIconPath(wagon.firstClassOccupancy.icon)" 
                          alt="Occupancy"
+                         loading="eager"
                            class="occupancy-icon" />
                     
                     <!-- For first class only wagons (1) -->
                     <img *ngIf="wagon.firstClassOccupancy && wagon.classes.includes('1') && !wagon.classes.includes('2')"
                          [src]="getOccupancyIconPath(wagon.firstClassOccupancy.icon)" 
                          alt="Occupancy"
+                         loading="eager"
                            class="occupancy-icon" />
                     
                     <!-- For second class only wagons (2) -->
                     <img *ngIf="wagon.secondClassOccupancy && wagon.classes.includes('2') && !wagon.classes.includes('1')"
                          [src]="getOccupancyIconPath(wagon.secondClassOccupancy.icon)" 
                          alt="Occupancy"
+                         loading="eager"
                            class="occupancy-icon" />
                   </div>
                   
@@ -213,6 +220,7 @@
                   <img *ngIf="wagon.type !== 'locomotive' && !(wagon.statusCodes && wagon.statusCodes.includes('Closed'))"
                        [src]="getEntryIconPath(wagon)" 
                        alt="Entry"
+                       loading="eager"
                          class="entry-icon" />
                 </div>
                 
@@ -313,6 +321,7 @@
                 <img *ngIf="wagon.noAccessToNext || (getNextWagon(i) && getNextWagon(i).noAccessToPrevious)" 
                      [src]="getNoPassageSvgPath()" 
                      alt="No passage" 
+                     loading="eager"
                      class="no-passage-icon">
               </div>
             </ng-container>

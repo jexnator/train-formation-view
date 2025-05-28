@@ -7,6 +7,7 @@ import { SearchFormComponent } from './components/search-form/search-form.compon
 import { TrainFormationComponent } from './components/train-formation/train-formation.component';
 import { TrainLegendComponent } from './components/train-legend/train-legend.component';
 import { FormationService } from './services/formation.service';
+import { SvgPreloaderService } from './services/svg-preloader.service';
 import { Subscription, BehaviorSubject } from 'rxjs';
 import { ScrollService } from './services/scroll.service';
 
@@ -59,6 +60,7 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
   constructor(
     private formationService: FormationService,
     private scrollService: ScrollService,
+    private svgPreloaderService: SvgPreloaderService,
     private ngZone: NgZone
   ) {}
   
@@ -109,6 +111,13 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
    * to manage legend visibility and dynamic spacing based on search results
    */
   ngOnInit(): void {
+    // Start preloading SVGs immediately for better theme switching performance
+    this.svgPreloaderService.preloadAllSvgs().then(() => {
+      console.log('SVG preloading completed');
+    }).catch(error => {
+      console.warn('SVG preloading failed:', error);
+    });
+
     // Monitor formation data changes
     this.subscriptions.push(
       this.formationService.currentFormation$.subscribe(formation => {

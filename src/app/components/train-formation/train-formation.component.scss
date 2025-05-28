@@ -440,14 +440,12 @@
 .train-wagons {
   display: flex;
   padding: 0;
-  min-width: max-content; /* Allow horizontal scrolling like stop tabs */
+  min-width: max-content;
   margin-left: 1px; /* Consistent 1px margin for alignment with sector lines */
-  /* Ensure consistent spacing between wagons */
   font-size: 0;
   line-height: 0;
   letter-spacing: 0;
   white-space: nowrap;
-  /* Flat structure for all wagons */
   flex-flow: row nowrap;
   /* Browser consistency safeguards */
   -webkit-font-smoothing: antialiased;

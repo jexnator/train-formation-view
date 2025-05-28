@@ -6,6 +6,7 @@ import { TrainWagon, TrainVisualization } from '../../models/formation.model';
 import { Subscription } from 'rxjs';
 import { OCCUPANCY_VISUALIZATION } from '../../models/occupancy.model';
 import { ThemeService } from '../../services/theme.service';
+import { SvgPreloaderService } from '../../services/svg-preloader.service';
 
 /**
  * @fileoverview Legend component for SKI+ Train Formation Visualization
@@ -83,7 +84,8 @@ export class TrainLegendComponent implements OnInit, OnDestroy {
 
   constructor(
     private formationService: FormationService,
-    private themeService: ThemeService
+    private themeService: ThemeService,
+    private svgPreloaderService: SvgPreloaderService
   ) { }
   
   /**
@@ -150,7 +152,7 @@ export class TrainLegendComponent implements OnInit, OnDestroy {
     // Update occupancy information based on current formation
     this.updateOccupancy(allWagons);
   }
-
+  
   /**
    * Returns the path for the locomotive SVG based on current theme
    * @returns Local asset path for locomotive SVG
