@@ -58,12 +58,16 @@ body, html {
   color: var(--sbb-color-charcoal);
   
   /* More gradual responsive sizing for small screens */
-  @media (max-width: 370px) {
+  @media (max-width: 387px) {
     font-size: 22px;
   }
+
+  @media (max-width: 346px) {
+    font-size: 20px;
+  }
   
-  @media (max-width: 320px) {
-    font-size: 21px;
+  @media (max-width: 342px) {
+    font-size: 19px;
   }
 }
 
