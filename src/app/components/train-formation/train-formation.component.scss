@@ -328,6 +328,36 @@
     padding: 12px 8px;
     row-gap: 4px;
   }
+  
+  /* Fix line breaking on narrow displays */
+  @media (max-width: 345px) {
+    gap: 6px; /* Reduced gap between elements */
+    
+    span {
+      margin-right: 6px; /* Reduced margin between spans */
+      gap: 3px; /* Reduced gap between icon and text */
+    }
+    
+    sbb-icon {
+      width: 18px; /* Slightly smaller icons */
+      height: 18px;
+    }
+  }
+  
+  /* Additional fix for 325px breakpoint */
+  @media (max-width: 325px) {
+    gap: 4px; /* Even smaller gap */
+    
+    span {
+      margin-right: 4px; /* Even smaller margin */
+      gap: 2px; /* Minimal gap between icon and text */
+    }
+    
+    sbb-icon {
+      width: 16px; /* Smaller icons */
+      height: 16px;
+    }
+  }
 }
 
 /* --- GLOBAL RESET FOR CONSISTENT SPACING --- */
@@ -913,5 +943,32 @@
   &:hover,
   &:active {
     background-color: var(--sbb-color-blue) !important;
+  }
+}
+
+/* --- UNIVERSAL iOS TOUCH BEHAVIOR FIX --- */
+/* Prevent iOS context menu and drag behavior for all train formation icons and images */
+.train-formation-container {
+  img,
+  .wagon-icons,
+  .wagon-attributes,
+  .attribute,
+  ::ng-deep .tooltip-icon {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -webkit-user-drag: none;
+    user-select: none;
+  }
+  
+  /* Icons that should not receive any pointer events */
+  .occupancy-icon,
+  .entry-icon,
+  .wagon-attribute-pictogram,
+  .locomotive-svg,
+  .wagon-svg,
+  .sector-icon,
+  .no-passage-icon,
+  ::ng-deep .tooltip-icon {
+    pointer-events: none;
   }
 }

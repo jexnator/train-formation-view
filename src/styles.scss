@@ -12,7 +12,7 @@
  * - SBB Alert component customizations for better integration with SKI+ design
  * 
  * Note: This application customizes SBB Angular components for use in the
- * SKI+ Train Formation Visualization project.
+ * SKI+ Train Formation Visualization.
  */
 
 // Import SBB base typography first
@@ -126,7 +126,7 @@ body, html {
   }
   
   &[type="warning"] {
-    background-color: var(--sbb-color-milk-warning); // Light yellow for warnings
+    background-color: var(--sbb-color-milk-warning);
     color: var(--sbb-color-charcoal);
     
     // Ensure icon uses warning color

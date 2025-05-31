@@ -8,7 +8,7 @@
  * - Responsive breakpoints for various screen sizes
  * 
  * Note: Contains customized SBB Angular components through deep selectors.
- * These modifications are made specifically for the SKI+ project.
+ * These modifications are made specifically for the SKI+ Train Formation Visualization.
  */
 
 /* Main container with SBB milk background */
@@ -92,7 +92,7 @@ sbb-form-field {
 /* Container for info icon in input */
 .input-icon-container {
   position: absolute;
-  left: 150px;
+  left: 146px;
   top: 50%;
   transform: translateY(-45%);
   z-index: 2;

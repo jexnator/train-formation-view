@@ -44,12 +44,12 @@
   .legend-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 4px 16px;
+    gap: 8px 16px;
 
     /* Reduce gap between accessibility icons when wrapped */
     @media (max-width: 591px) {
       .legend-item:has(img[alt="Low Floor Entry"])+.legend-item:has(img[alt="Entry with Steps"]) {
-        margin-top: -7px;
+        margin-top: -5px;
       }
     }
   }
@@ -62,7 +62,7 @@
     font-size: 14px;
     min-width: 0;
     margin-bottom: 0;
-    padding: 2px 6px;
+    padding: 0 6px;
     
     /* Ensure consistent widths on larger screens */
     @media (min-width: 668px) {
@@ -102,6 +102,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  /* Ensure consistent spacing with pictogram boxes */
+  flex-shrink: 0;
 }
 
 .wagon-container-inner {
@@ -111,6 +113,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  /* Ensure consistent spacing with pictogram boxes */
+  flex-shrink: 0;
 }
 
 .wagon-text {
@@ -248,8 +252,6 @@
   width: 18px !important;
   height: 18px !important;
 }
-
-
 
 /* Very small screen adjustments */
 @media (max-width: 400px) {
